@@ -23,6 +23,8 @@ export default tseslint.config(
         'warn',
         { allowConstantExport: true },
       ],
+      '@typescript-eslint/no-namespace': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
     },
   }
 )
