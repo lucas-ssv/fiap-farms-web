@@ -1,9 +1,8 @@
 import { createUserWithEmailAndPassword } from "firebase/auth"
+import { addDoc, collection } from "firebase/firestore"
 
-import { auth, db } from "@/main/config/firebase"
-import type { AddAccountRepository, SaveUserRepository } from "@/data/contracts/account"
-import { addDoc, collection, Timestamp } from "firebase/firestore"
-import { userConverter } from "@/infra/repositories/firebase/converters"
+import { auth } from "@/main/config/firebase"
+import { AccountFirebaseRepository } from "@/infra/repositories/firebase"
 
 jest.mock('firebase/auth', () => ({
   createUserWithEmailAndPassword: jest.fn().mockResolvedValue({
@@ -46,25 +45,6 @@ jest.mock('firebase/app', () => ({
 jest.mock('@/main/config/firebase', () => ({
   auth: 'mocked_auth',
 }))
-
-class AccountFirebaseRepository implements AddAccountRepository, SaveUserRepository {
-  async add(account: AddAccountRepository.Params): Promise<string> {
-    const { email, password } = account
-    const { user } = await createUserWithEmailAndPassword(auth, email, password)
-    return user.uid
-  }
-
-  async save(user: SaveUserRepository.Params): Promise<void> {
-    await addDoc(collection(db, 'users').withConverter(userConverter), {
-      userUID: user.userUID,
-      name: user.name,
-      username: user.username,
-      email: user.email,
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-    })
-  }
-}
 
 const makeSut = (): AccountFirebaseRepository => {
   return new AccountFirebaseRepository()
