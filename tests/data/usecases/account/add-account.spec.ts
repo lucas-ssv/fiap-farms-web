@@ -27,11 +27,24 @@ class AddAccountImpl implements AddAccount {
   }
 }
 
+type SutTypes = {
+  sut: AddAccountImpl
+  addAccountRepositoryMock: AddAccountRepositoryMock
+}
+
+const makeSut = (): SutTypes => {
+  const addAccountRepositoryMock = new AddAccountRepositoryMock()
+  const sut = new AddAccountImpl(addAccountRepositoryMock)
+  return {
+    sut,
+    addAccountRepositoryMock
+  }
+}
+
 describe('AddAccount Use Case', () => {
   it('should call AddAccountRepository with correct values', async () => {
-    const addAccountRepositoryMock = new AddAccountRepositoryMock()
+    const { sut, addAccountRepositoryMock } = makeSut()
     const addSpy = jest.spyOn(addAccountRepositoryMock, 'add')
-    const sut = new AddAccountImpl(addAccountRepositoryMock)
 
     await sut.execute({
       name: 'any_name',
