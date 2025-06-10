@@ -1,57 +1,5 @@
-import type { AddAccount } from "@/domain/usecases/account"
-
-interface AddAccountRepository {
-  add: (account: AddAccountRepository.Params) => Promise<string>
-}
-
-namespace AddAccountRepository {
-  export type Params = {
-    name: string
-    username: string
-    email: string
-    password: string
-  }
-}
-
-class AddAccountRepositoryMock implements AddAccountRepository {
-  async add(account: AddAccountRepository.Params): Promise<string> {
-    return 'any_user_uid'
-  }
-}
-
-interface SaveUserRepository {
-  save: (user: SaveUserRepository.Params) => Promise<void>
-}
-
-namespace SaveUserRepository {
-  export type Params = {
-    userUID: string
-    name: string
-    username: string
-    email: string
-  }
-}
-
-class SaveUserRepositoryMock implements SaveUserRepository {
-  async save(user: SaveUserRepository.Params): Promise<void> {}
-}
-
-class AddAccountImpl implements AddAccount {
-  constructor(
-    private readonly addAccountRepository: AddAccountRepository,
-    private readonly saveUserRepository: SaveUserRepository
-  ) {}
-
-  async execute(account: AddAccount.Params): Promise<void> {
-    const userUID = await this.addAccountRepository.add(account)
-    await this.saveUserRepository.save({
-      userUID,
-      name: account.name,
-      username: account.username,
-      email: account.email,
-    })
-  }
-}
+import { AddAccountImpl } from "@/data/usecases/account"
+import { AddAccountRepositoryMock, SaveUserRepositoryMock } from "@tests/data/mocks/account"
 
 type SutTypes = {
   sut: AddAccountImpl
