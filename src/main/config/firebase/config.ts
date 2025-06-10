@@ -2,6 +2,7 @@ import { initializeApp, type FirebaseOptions } from "firebase/app";
 import { initializeAuth } from "firebase/auth";
 
 import { ENV } from "@/main/config";
+import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig: FirebaseOptions = {
   apiKey: ENV.API_KEY,
@@ -12,3 +13,5 @@ const firebaseConfig: FirebaseOptions = {
 const app = initializeApp(firebaseConfig)
 
 export const auth = initializeAuth(app)
+
+export const db = getFirestore()
