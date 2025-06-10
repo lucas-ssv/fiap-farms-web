@@ -28,10 +28,14 @@ class AccountFirebaseRepository implements AddAccountRepository {
   }
 }
 
+const makeSut = (): AccountFirebaseRepository => {
+  return new AccountFirebaseRepository()
+}
+
 describe('AccountFirebaseRepository', () => {
   describe('add()', () => {
     it('should add an account on success', async () => {
-      const sut = new AccountFirebaseRepository()
+      const sut = makeSut()
 
       await sut.add({
         name: 'any_name',
