@@ -60,4 +60,20 @@ describe('AddAccount Use Case', () => {
       password: 'any_password',
     })
   })
+
+  it('should throw if AddAccountRepository throws', async () => {
+    const { sut, addAccountRepositoryMock } = makeSut()
+    jest.spyOn(addAccountRepositoryMock, 'add').mockImplementationOnce(() => {
+      throw new Error()
+    })
+
+    const promise = sut.execute({
+      name: 'any_name',
+      username: 'any_username',
+      email: 'any_email@mail.com',
+      password: 'any_password',
+    })
+
+    await expect(promise).rejects.toThrow()
+  })
 })
