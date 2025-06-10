@@ -23,8 +23,8 @@ jest.mock('@/main/config/firebase', () => ({
 class AccountFirebaseRepository implements AddAccountRepository {
   async add(account: AddAccountRepository.Params): Promise<string> {
     const { email, password } = account
-    await createUserWithEmailAndPassword(auth, email, password)
-    return ''
+    const { user } = await createUserWithEmailAndPassword(auth, email, password)
+    return user.uid
   }
 }
 
@@ -49,6 +49,19 @@ describe('AccountFirebaseRepository', () => {
         'any_email@mail.com',
         'any_password'
       )
+    })
+
+    it('should return an userUID on success', async () => {
+      const sut = makeSut()
+
+      const userUID = await sut.add({
+        name: 'any_name',
+        username: 'any_username',
+        email: 'any_email@mail.com',
+        password: 'any_password',
+      })
+
+      expect(userUID).toBe('any_user_uid')
     })
   })
 })
