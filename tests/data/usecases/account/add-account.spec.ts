@@ -15,29 +15,58 @@ namespace AddAccountRepository {
 
 class AddAccountRepositoryMock implements AddAccountRepository {
   async add(account: AddAccountRepository.Params): Promise<string> {
-    return 'any_id'
+    return 'any_user_uid'
   }
 }
 
+interface SaveUserRepository {
+  save: (user: SaveUserRepository.Params) => Promise<void>
+}
+
+namespace SaveUserRepository {
+  export type Params = {
+    userUID: string
+    name: string
+    username: string
+    email: string
+  }
+}
+
+class SaveUserRepositoryMock implements SaveUserRepository {
+  async save(user: SaveUserRepository.Params): Promise<void> {}
+}
+
 class AddAccountImpl implements AddAccount {
-  constructor(private readonly addAccountRepository: AddAccountRepository) {}
+  constructor(
+    private readonly addAccountRepository: AddAccountRepository,
+    private readonly saveUserRepository: SaveUserRepository
+  ) {}
 
   async execute(account: AddAccount.Params): Promise<void> {
-    await this.addAccountRepository.add(account)
+    const userUID = await this.addAccountRepository.add(account)
+    await this.saveUserRepository.save({
+      userUID,
+      name: account.name,
+      username: account.username,
+      email: account.email,
+    })
   }
 }
 
 type SutTypes = {
   sut: AddAccountImpl
   addAccountRepositoryMock: AddAccountRepositoryMock
+  saveUserRepositoryMock: SaveUserRepositoryMock
 }
 
 const makeSut = (): SutTypes => {
   const addAccountRepositoryMock = new AddAccountRepositoryMock()
-  const sut = new AddAccountImpl(addAccountRepositoryMock)
+  const saveUserRepositoryMock = new SaveUserRepositoryMock()
+  const sut = new AddAccountImpl(addAccountRepositoryMock, saveUserRepositoryMock)
   return {
     sut,
-    addAccountRepositoryMock
+    addAccountRepositoryMock,
+    saveUserRepositoryMock,
   }
 }
 
@@ -75,5 +104,24 @@ describe('AddAccount Use Case', () => {
     })
 
     await expect(promise).rejects.toThrow()
+  })
+
+  it('should call SaveUserRepository with correct values', async () => {
+    const { sut, saveUserRepositoryMock } = makeSut()
+    const saveSpy = jest.spyOn(saveUserRepositoryMock, 'save')
+
+    await sut.execute({
+      name: 'any_name',
+      username: 'any_username',
+      email: 'any_email@mail.com',
+      password: 'any_password',
+    })
+
+    expect(saveSpy).toHaveBeenCalledWith({
+      userUID: 'any_user_uid',
+      name: 'any_name',
+      username: 'any_username',
+      email: 'any_email@mail.com',
+    })
   })
 })
