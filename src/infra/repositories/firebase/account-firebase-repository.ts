@@ -1,7 +1,7 @@
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, type NextOrObserver, type User as FirebaseUser, onAuthStateChanged } from "firebase/auth"
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, type NextOrObserver, type User as FirebaseUser, onAuthStateChanged, signOut } from "firebase/auth"
 import { addDoc, collection, getDocs, query, Timestamp, where } from "firebase/firestore"
 
-import type { AddAccountRepository, AuthRepository, LoadAccountByEmailRepository, LoadAccountRepository, SaveUserRepository } from "@/data/contracts/account"
+import type { AddAccountRepository, AuthRepository, LoadAccountByEmailRepository, LoadAccountRepository, LogoutAccountRepository, SaveUserRepository } from "@/data/contracts/account"
 import { auth, db } from "@/main/config/firebase"
 import { userConverter, type User } from "./converters"
 
@@ -11,7 +11,8 @@ export class AccountFirebaseRepository
     SaveUserRepository,
     LoadAccountRepository,
     AuthRepository<NextOrObserver<FirebaseUser>>,
-    LoadAccountByEmailRepository
+    LoadAccountByEmailRepository,
+    LogoutAccountRepository
 {
   async auth(params: LoadAccountRepository.Params): Promise<void> {
     const { email, password } = params
@@ -53,5 +54,9 @@ export class AccountFirebaseRepository
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     })
+  }
+
+  async logout(): Promise<void> {
+    await signOut(auth)
   }
 }
