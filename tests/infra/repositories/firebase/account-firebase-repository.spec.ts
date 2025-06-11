@@ -1,4 +1,4 @@
-import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth"
+import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth"
 import { addDoc, collection } from "firebase/firestore"
 
 import { auth } from "@/main/config/firebase"
@@ -164,6 +164,16 @@ describe('AccountFirebaseRepository', () => {
         createdAt: 'any_timestamp',
         updatedAt: 'any_timestamp',
       })
+    })
+  })
+
+  describe('logout', () => {
+    it('should call signOut on success', async () => {
+      const sut = new AccountFirebaseRepository()
+
+      await sut.logout()
+
+      expect(signOut).toHaveBeenCalledWith(auth)
     })
   })
 })
