@@ -1,10 +1,11 @@
-import { createUserWithEmailAndPassword } from "firebase/auth"
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth"
 import { addDoc, collection } from "firebase/firestore"
 
 import { auth } from "@/main/config/firebase"
 import { AccountFirebaseRepository } from "@/infra/repositories/firebase"
 
 jest.mock('firebase/auth', () => ({
+  signInWithEmailAndPassword: jest.fn(),
   createUserWithEmailAndPassword: jest.fn().mockResolvedValue({
     user: {
       uid: 'any_user_uid',
@@ -109,6 +110,23 @@ describe('AccountFirebaseRepository', () => {
         createdAt: 'any_timestamp',
         updatedAt: 'any_timestamp',
       })
+    })
+  })
+
+  describe('auth()', () => {
+    it('should authenticate on success', async () => {
+      const sut = makeSut()
+
+      await sut.auth({
+        email: 'any_email@mail.com',
+        password: 'any_password',
+      })
+
+      expect(signInWithEmailAndPassword).toHaveBeenCalledWith(
+        auth,
+        'any_email@mail.com',
+        'any_password'
+      )
     })
   })
 })
