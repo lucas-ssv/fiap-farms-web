@@ -1,13 +1,18 @@
-import { createUserWithEmailAndPassword } from "firebase/auth"
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth"
 import { addDoc, collection, Timestamp } from "firebase/firestore"
 
-import type { AddAccountRepository, SaveUserRepository } from "@/data/contracts/account"
+import type { AddAccountRepository, LoadAccountRepository, SaveUserRepository } from "@/data/contracts/account"
 import { auth, db } from "@/main/config/firebase"
 import { userConverter } from "./converters"
 
 export class AccountFirebaseRepository
-  implements AddAccountRepository, SaveUserRepository
+  implements AddAccountRepository, SaveUserRepository, LoadAccountRepository
 {
+  async auth(params: LoadAccountRepository.Params): Promise<void> {
+    const { email, password } = params
+    await signInWithEmailAndPassword(auth, email, password)
+  }
+
   async add(account: AddAccountRepository.Params): Promise<string> {
     const { email, password } = account
     const { user } = await createUserWithEmailAndPassword(auth, email, password)
