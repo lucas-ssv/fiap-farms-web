@@ -1,16 +1,41 @@
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth"
-import { addDoc, collection, Timestamp } from "firebase/firestore"
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, type NextOrObserver, type User as FirebaseUser, onAuthStateChanged } from "firebase/auth"
+import { addDoc, collection, getDocs, query, Timestamp, where } from "firebase/firestore"
 
-import type { AddAccountRepository, LoadAccountRepository, SaveUserRepository } from "@/data/contracts/account"
+import type { AddAccountRepository, AuthRepository, LoadAccountByEmailRepository, LoadAccountRepository, SaveUserRepository } from "@/data/contracts/account"
 import { auth, db } from "@/main/config/firebase"
-import { userConverter } from "./converters"
+import { userConverter, type User } from "./converters"
 
 export class AccountFirebaseRepository
-  implements AddAccountRepository, SaveUserRepository, LoadAccountRepository
+  implements 
+    AddAccountRepository,
+    SaveUserRepository,
+    LoadAccountRepository,
+    AuthRepository<NextOrObserver<FirebaseUser>>,
+    LoadAccountByEmailRepository
 {
   async auth(params: LoadAccountRepository.Params): Promise<void> {
     const { email, password } = params
     await signInWithEmailAndPassword(auth, email, password)
+  }
+
+  onAuthStateChanged(callback: NextOrObserver<FirebaseUser>): () => void {
+    const unsubscribe = onAuthStateChanged(auth, callback)
+    return unsubscribe
+  }
+
+  async loadByEmail(
+    email: string,
+  ): Promise<LoadAccountByEmailRepository.Result | null> {
+    const q = query(
+      collection(db, 'users').withConverter(userConverter),
+      where('email', '==', email),
+    )
+    const querySnapshot = await getDocs(q)
+    let user: User | null = null
+    querySnapshot.forEach((doc) => {
+      user = doc.data()
+    })
+    return user
   }
 
   async add(account: AddAccountRepository.Params): Promise<string> {

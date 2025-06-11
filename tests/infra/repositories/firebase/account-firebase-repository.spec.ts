@@ -1,4 +1,4 @@
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth"
+import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth"
 import { addDoc, collection } from "firebase/firestore"
 
 import { auth } from "@/main/config/firebase"
@@ -11,6 +11,8 @@ jest.mock('firebase/auth', () => ({
       uid: 'any_user_uid',
     },
   }),
+  onAuthStateChanged: jest.fn().mockReturnValue(() => {}),
+  signOut: jest.fn(),
   initializeAuth: jest.fn(),
 }))
 
@@ -127,6 +129,41 @@ describe('AccountFirebaseRepository', () => {
         'any_email@mail.com',
         'any_password'
       )
+    })
+  })
+
+  describe('onAuthStateChange', () => {
+    it('should call onAuthStateChange', () => {
+      const sut = new AccountFirebaseRepository()
+
+      sut.onAuthStateChanged(() => {})
+
+      expect(onAuthStateChanged).toHaveBeenCalled()
+    })
+
+    it('should return an unsubscribe on success', () => {
+      const sut = new AccountFirebaseRepository()
+
+      const unsubscribe = sut.onAuthStateChanged(() => {})
+
+      expect(typeof unsubscribe).toBe('function')
+    })
+  })
+
+  describe('loadByEmail', () => {
+    it('should load an account by email on success', async () => {
+      const sut = new AccountFirebaseRepository()
+
+      const account = await sut.loadByEmail('any_email@mail.com')
+
+      expect(account).toEqual({
+        name: 'any_name',
+        username: 'any_username',
+        email: 'any_email@mail.com',
+        userUID: 'any_user_uid',
+        createdAt: 'any_timestamp',
+        updatedAt: 'any_timestamp',
+      })
     })
   })
 })
