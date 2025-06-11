@@ -42,4 +42,19 @@ describe('Authentication Use Case', () => {
       password: 'any_password',
     })
   })
+
+  it('should throw if LoadAccountRepository throws', async () => {
+    const loadAccountRepositoryMock = new LoadAccountRepositoryMock()
+    jest.spyOn(loadAccountRepositoryMock, 'auth').mockImplementationOnce(() => {
+      throw new Error()
+    })
+    const sut = new AuthenticationImpl(loadAccountRepositoryMock)
+
+    const promise = sut.execute({
+      email: 'any_email@mail.com',
+      password: 'any_password',
+    })
+
+    expect(promise).rejects.toThrow()
+  })
 })
