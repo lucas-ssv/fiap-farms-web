@@ -1,7 +1,7 @@
-import { SignUp } from '@/presentation/pages'
+import { Login, SignUp } from '@/presentation/pages/auth'
 
 function App() {
-  return <SignUp />
+  return <Login />
 }
 
 export default App

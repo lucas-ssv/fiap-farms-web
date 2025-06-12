@@ -5,7 +5,7 @@ export function SignUp() {
   return (
     <main className="h-screen">
       <head>
-        <title>Login | FIAP Farms</title>
+        <title>Criar Conta | FIAP Farms</title>
       </head>
       <div className="flex h-screen">
         <div className="h-screen bg-[url(/src/presentation/assets/signup-bg.jpg)] bg-cover w-1/2 h-full p-10 hidden md:block">
