@@ -12,7 +12,25 @@ const config: Config = {
         medium: 'var(--font-weight-medium)',
         semibold: 'var(--font-weight-semibold)',
         bold: 'var(--font-weight-bold)',
-      }
+      },
+      colors: {
+        'custom-black': 'var(--color-custom-black)',
+        'custom-gray': 'var(--color-custom-gray)',
+        'custom-lightgray': 'var(--color-custom-lightgray)',
+      },
+      container: {
+        screens: {
+          sm: '360px',
+          md: '720px',
+          lg: '1200px',
+        },
+      },
+    },
+    screens: {
+      sm: '360px',
+      md: '720px',
+      lg: '1200px',
+      xl: '1920px',
     },
   },
   plugins: [],

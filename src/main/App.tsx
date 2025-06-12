@@ -1,11 +1,7 @@
-import { Button } from '@/presentation/components/ui'
+import { SignUp } from '@/presentation/pages'
 
 function App() {
-  return (
-    <div className="flex min-h-svh flex-col items-center justify-center">
-      <Button>Click me</Button>
-    </div>
-  )
+  return <SignUp />
 }
 
 export default App
