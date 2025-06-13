@@ -1,7 +1,7 @@
 import { Login, SignUp } from '@/presentation/pages/auth'
 import { createBrowserRouter } from 'react-router'
 
-export const router = createBrowserRouter([
+export const authRoutes = createBrowserRouter([
   {
     path: '/login',
     Component: Login,
