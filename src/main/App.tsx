@@ -1,7 +1,8 @@
-import { Login, SignUp } from '@/presentation/pages/auth'
+import { RouterProvider } from 'react-router'
+import { router } from './routes'
 
 function App() {
-  return <Login />
+  return <RouterProvider router={router} />
 }
 
 export default App

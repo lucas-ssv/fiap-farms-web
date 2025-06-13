@@ -1,7 +1,10 @@
 import { Button, Input } from '@/presentation/components/ui'
 import logo from '@/presentation/assets/logo.svg'
+import { useNavigate } from 'react-router'
 
 export function SignUp() {
+  const navigate = useNavigate()
+
   return (
     <main className="h-screen">
       <head>
@@ -13,7 +16,11 @@ export function SignUp() {
         </div>
         <section className="flex-1 flex flex-col p-10">
           <div className="flex justify-end">
-            <Button className="cursor-pointer" variant="ghost">
+            <Button
+              className="cursor-pointer"
+              variant="ghost"
+              onClick={() => navigate('/login')}
+            >
               Login
             </Button>
           </div>
