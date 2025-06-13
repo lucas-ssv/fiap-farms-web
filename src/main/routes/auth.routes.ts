@@ -1,5 +1,6 @@
-import { Login, SignUp } from '@/presentation/pages/auth'
+import { Login } from '@/presentation/pages/auth'
 import { createBrowserRouter } from 'react-router'
+import { MakeSignUp } from '@/main/factories/pages'
 
 export const authRoutes = createBrowserRouter([
   {
@@ -8,6 +9,6 @@ export const authRoutes = createBrowserRouter([
   },
   {
     path: '/signup',
-    Component: SignUp,
+    Component: MakeSignUp,
   }
 ])
