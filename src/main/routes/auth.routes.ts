@@ -1,11 +1,10 @@
-import { Login } from '@/presentation/pages/auth'
 import { createBrowserRouter } from 'react-router'
-import { MakeSignUp } from '@/main/factories/pages'
+import { MakeLogin, MakeSignUp } from '@/main/factories/pages'
 
 export const authRoutes = createBrowserRouter([
   {
     path: '/login',
-    Component: Login,
+    Component: MakeLogin,
   },
   {
     path: '/signup',
