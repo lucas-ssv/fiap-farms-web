@@ -1,2 +1,3 @@
-export * from './auth.routes'
 export * from './routes'
+export * from './ProtectedRoute'
+export * from './GuestRoute'

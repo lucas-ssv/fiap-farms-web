@@ -1,9 +1,10 @@
 import { Toaster } from '@/presentation/components/ui'
 import { Routes } from './routes'
+import { MakeAuthProvider } from './factories/providers'
 
 function App() {
   return (
-    <>
+    <MakeAuthProvider>
       <Routes />
       <Toaster
         toastOptions={{
@@ -13,7 +14,7 @@ function App() {
         theme="system"
         duration={3000}
       />
-    </>
+    </MakeAuthProvider>
   )
 }
 

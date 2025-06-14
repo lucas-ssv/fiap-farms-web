@@ -64,7 +64,7 @@ export function Login({ authentication }: Props) {
   return (
     <main className="h-screen">
       <div className="flex h-screen">
-        <div className="h-screen bg-[url(/src/presentation/assets/login-bg.jpg)] bg-cover w-1/2 h-full p-10 hidden md:block">
+        <div className="h-screen bg-[url(/src/presentation/assets/login-bg.jpg)] bg-cover w-1/2 p-10 hidden md:block">
           <img src={logo} alt="Logo FIAP Farms" />
         </div>
         <section className="flex-1 flex flex-col p-10">
