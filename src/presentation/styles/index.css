@@ -2,6 +2,11 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
+@config "../../../tailwind.config.ts";
+
+body {
+  @apply font-body;
+}
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
@@ -42,6 +47,14 @@
 }
 
 :root {
+  --font-family-body: "Geist", sans-serif;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --color-custom-black: #0A0A0A;
+  --color-custom-gray: #737373;
+  --color-custom-lightgray: #E5E5E5;
   --radius: 0.65rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);

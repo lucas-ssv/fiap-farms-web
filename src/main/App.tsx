@@ -1,10 +1,20 @@
-import { Button } from '@/presentation/components/ui'
+import { Toaster } from '@/presentation/components/ui'
+import { Routes } from './routes'
+import { MakeAuthProvider } from './factories/providers'
 
 function App() {
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center">
-      <Button>Click me</Button>
-    </div>
+    <MakeAuthProvider>
+      <Routes />
+      <Toaster
+        toastOptions={{
+          closeButton: true,
+        }}
+        richColors={true}
+        theme="system"
+        duration={3000}
+      />
+    </MakeAuthProvider>
   )
 }
 
