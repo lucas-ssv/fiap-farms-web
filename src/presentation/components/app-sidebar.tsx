@@ -4,16 +4,16 @@ import {
   BanknoteArrowDown,
   ChartArea,
   ChartLine,
+  CircleAlert,
   CircleDollarSign,
   CircleGauge,
   Command,
-  Frame,
+  Eye,
   GalleryVerticalEnd,
   Layers,
   LayoutList,
-  Map,
-  PieChart,
-  SquareTerminal,
+  List,
+  Plus,
 } from 'lucide-react'
 
 import { NavMain } from '@/presentation/components/nav-main'
@@ -64,18 +64,22 @@ const data = {
         {
           title: 'Listar produtos',
           url: '#',
+          icon: List,
         },
         {
-          title: 'Adicionar produto',
+          title: 'Novo produto',
           url: '#',
+          icon: Plus,
         },
         {
-          title: 'Categorias',
+          title: 'Listar categorias',
           url: '#',
+          icon: List,
         },
         {
           title: 'Nova categoria',
           url: '#',
+          icon: Plus,
         },
       ],
     },
@@ -87,18 +91,22 @@ const data = {
         {
           title: 'Listar vendas',
           url: '#',
+          icon: List,
         },
         {
           title: 'Nova venda',
           url: '#',
+          icon: Plus,
         },
         {
-          title: 'Clientes',
+          title: 'Listar clientes',
           url: '#',
+          icon: List,
         },
         {
-          title: 'Cadastrar cliente',
+          title: 'Novo cliente',
           url: '#',
+          icon: Plus,
         },
       ],
     },
@@ -110,10 +118,12 @@ const data = {
         {
           title: 'Ver metas',
           url: '#',
+          icon: Eye,
         },
         {
           title: 'Nova meta de produto',
           url: '#',
+          icon: Plus,
         },
       ],
     },
@@ -125,10 +135,12 @@ const data = {
         {
           title: 'Lotes em produção',
           url: '#',
+          icon: Eye,
         },
         {
           title: 'Nova produção',
           url: '#',
+          icon: Plus,
         },
       ],
     },
@@ -140,14 +152,17 @@ const data = {
         {
           title: 'Movimentações de estoque',
           url: '#',
+          icon: Eye,
         },
         {
           title: 'Nova entrada/saída de estoque',
           url: '#',
+          icon: Plus,
         },
         {
           title: 'Alertas de estoque',
           url: '#',
+          icon: CircleAlert,
         },
       ],
     },
@@ -159,34 +174,14 @@ const data = {
         {
           title: 'Ver despesas',
           url: '#',
+          icon: Eye,
         },
         {
           title: 'Nova despesa',
           url: '#',
+          icon: Plus,
         },
       ],
-    },
-  ],
-  projects: [
-    {
-      name: 'Design Engineering',
-      url: '#',
-      icon: Frame,
-    },
-    {
-      name: 'Sales & Marketing',
-      url: '#',
-      icon: PieChart,
-    },
-    {
-      name: 'Travel',
-      url: '#',
-      icon: Map,
-    },
-    {
-      name: 'Support',
-      url: '#',
-      icon: SquareTerminal,
     },
   ],
 }
