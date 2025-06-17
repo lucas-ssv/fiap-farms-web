@@ -5,6 +5,7 @@ import {
   ProductProfitChart,
   SectionCards,
   SellEvolutionChart,
+  StockDistribuitionCategoryChart,
 } from '@/presentation/components'
 
 export function Dashboard() {
@@ -19,6 +20,9 @@ export function Dashboard() {
       <div className="grid lg:grid-cols-2 gap-4 px-4 lg:px-6 mt-4">
         <SellEvolutionChart />
         <GoalsChart />
+      </div>
+      <div className="grid lg:grid-cols-[2fr_1fr] gap-4 px-4 lg:px-6 mt-4">
+        <StockDistribuitionCategoryChart />
       </div>
     </main>
   )
