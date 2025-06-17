@@ -1,5 +1,6 @@
 import {
   DataProductsTable,
+  ExpensesTypeChart,
   GoalsChart,
   PopularProductsChart,
   ProductProfitChart,
@@ -21,7 +22,8 @@ export function Dashboard() {
         <SellEvolutionChart />
         <GoalsChart />
       </div>
-      <div className="grid lg:grid-cols-[2fr_1fr] gap-4 px-4 lg:px-6 mt-4">
+      <div className="grid lg:grid-cols-[1fr_2fr] gap-4 px-4 lg:px-6 mt-4">
+        <ExpensesTypeChart />
         <StockDistribuitionCategoryChart />
       </div>
     </main>

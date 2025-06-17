@@ -125,6 +125,11 @@ const data = {
           url: '#',
           icon: Plus,
         },
+        {
+          title: 'Nova meta de venda',
+          url: '#',
+          icon: Plus,
+        },
       ],
     },
     {
