@@ -37,7 +37,19 @@ import {
   TableHeader,
   TableRow,
 } from '@/presentation/components/ui/table'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui'
 import { TableCellViewer } from './table-cell-viewer'
 
 const data: Payment[] = [
@@ -308,8 +320,36 @@ export function DataProductsTable() {
               </TableBody>
             </Table>
           </div>
-          <div className="flex items-center justify-end space-x-2 pt-4">
-            <div className="space-x-2">
+          <div className="flex items-center justify-between space-x-2 pt-4">
+            <div className="hidden items-center gap-2 lg:flex">
+              <Label htmlFor="rows-per-page" className="text-sm font-medium">
+                Linhas por página
+              </Label>
+              <Select
+                value={`${table.getState().pagination.pageSize}`}
+                onValueChange={(value) => {
+                  table.setPageSize(Number(value))
+                }}
+              >
+                <SelectTrigger size="sm" className="w-20" id="rows-per-page">
+                  <SelectValue
+                    placeholder={table.getState().pagination.pageSize}
+                  />
+                </SelectTrigger>
+                <SelectContent side="top">
+                  {[10, 20, 30, 40, 50].map((pageSize) => (
+                    <SelectItem key={pageSize} value={`${pageSize}`}>
+                      {pageSize}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="flex w-fit items-center justify-center text-sm font-medium">
+                Página {table.getState().pagination.pageIndex + 1} de{' '}
+                {table.getPageCount()}
+              </div>
               <Button
                 variant="outline"
                 size="sm"
