@@ -46,7 +46,7 @@ export function AppLayout() {
             <Bell />
           </Button>
         </header>
-        <div className="flex flex-1 flex-col gap-4 pt-0">
+        <div className="flex flex-1 flex-col gap-4 pt-0 mb-20">
           <Outlet />
         </div>
       </SidebarInset>
