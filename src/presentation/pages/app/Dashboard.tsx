@@ -1,4 +1,5 @@
 import {
+  DataProductsTable,
   PopularProductsChart,
   ProductProfitChart,
   SectionCards,
@@ -12,6 +13,7 @@ export function Dashboard() {
         <ProductProfitChart />
         <PopularProductsChart />
       </div>
+      <DataProductsTable />
     </main>
   )
 }
