@@ -31,6 +31,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from '@/presentation/components/ui/sidebar'
+import { Link } from 'react-router'
 
 const data = {
   user: {
@@ -63,7 +64,7 @@ const data = {
       items: [
         {
           title: 'Listar produtos',
-          url: '#',
+          url: '/products',
           icon: List,
         },
         {
@@ -203,10 +204,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenu>
               <SidebarMenuItem key="Dashboard">
                 <SidebarMenuButton asChild isActive>
-                  <a href="#">
+                  <Link to="/">
                     <CircleGauge />
                     <span>Dashboard</span>
-                  </a>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
