@@ -61,11 +61,13 @@ const data = {
       title: 'Produtos',
       url: '#',
       icon: LayoutList,
+      isActive: true,
       items: [
         {
           title: 'Listar produtos',
           url: '/products',
           icon: List,
+          isActive: true,
         },
         {
           title: 'Novo produto',
@@ -203,7 +205,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem key="Dashboard">
-                <SidebarMenuButton asChild isActive>
+                <SidebarMenuButton asChild>
                   <Link to="/">
                     <CircleGauge />
                     <span>Dashboard</span>
