@@ -71,7 +71,7 @@ const data = {
         },
         {
           title: 'Novo produto',
-          url: '#',
+          url: '/products/new',
           icon: Plus,
         },
         {
