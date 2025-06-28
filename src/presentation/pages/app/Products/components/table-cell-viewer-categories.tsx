@@ -15,11 +15,6 @@ import {
   DrawerTrigger,
   Input,
   Label,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
   Separator,
   type ChartConfig,
 } from '@/presentation/components/ui'
@@ -29,11 +24,8 @@ import { TrendingUp } from 'lucide-react'
 const schema = z.object({
   id: z.string(),
   name: z.string(),
-  category: z.string(),
-  currentStock: z.number(),
-  price: z.string(),
-  cost: z.string(),
-  unitProfit: z.string(),
+  description: z.string().optional(),
+  image: z.string().optional(),
 })
 
 const chartData = [
@@ -55,7 +47,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function TableCellViewerProducts({
+export function TableCellViewerCategories({
   item,
 }: {
   item: z.infer<typeof schema>
@@ -135,61 +127,25 @@ export function TableCellViewerProducts({
           )}
           <form className="flex flex-col gap-4">
             <div className="flex flex-col gap-3">
-              <Label htmlFor="name">Nome</Label>
+              <Label htmlFor="name">Categoria</Label>
               <Input id="name" defaultValue={item.name} />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="category">Categoria</Label>
-                <Select defaultValue={item.category}>
-                  <SelectTrigger id="category" className="w-full">
-                    <SelectValue placeholder="Selecione a categoria" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Category A">Categoria A</SelectItem>
-                    <SelectItem value="Executive Summary">
-                      Executive Summary
-                    </SelectItem>
-                    <SelectItem value="Technical Approach">
-                      Technical Approach
-                    </SelectItem>
-                    <SelectItem value="Design">Design</SelectItem>
-                    <SelectItem value="Capabilities">Capabilities</SelectItem>
-                    <SelectItem value="Focus Documents">
-                      Focus Documents
-                    </SelectItem>
-                    <SelectItem value="Narrative">Narrative</SelectItem>
-                    <SelectItem value="Cover Page">Cover Page</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="currentStock">Estoque atual</Label>
-                <Input
-                  type="number"
-                  id="currentStock"
-                  defaultValue={item.currentStock}
-                />
-              </div>
+            <div className="flex flex-col gap-3">
+              <Label htmlFor="description">Descrição</Label>
+              <Input id="description" defaultValue={item.description} />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="price">Preço</Label>
-                <Input id="price" defaultValue={item.price} />
-              </div>
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="cost">Custo</Label>
-                <Input id="cost" defaultValue={item.cost} />
-              </div>
+            <div className="flex flex-col gap-3">
+              <Label htmlFor="image">Imagem da categoria</Label>
+              <Input type="file" id="image" />
             </div>
           </form>
         </div>
         <DrawerFooter>
           <DrawerClose asChild>
-            <Button>Atualizar produto</Button>
+            <Button>Atualizar categoria</Button>
           </DrawerClose>
           <DrawerClose asChild>
-            <Button variant="destructive">Excluir produto</Button>
+            <Button variant="destructive">Excluir categoria</Button>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>

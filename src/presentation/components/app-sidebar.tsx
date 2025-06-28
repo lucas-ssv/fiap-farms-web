@@ -76,7 +76,7 @@ const data = {
         },
         {
           title: 'Listar categorias',
-          url: '#',
+          url: '/categories',
           icon: List,
         },
         {

@@ -43,49 +43,37 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/presentation/components/ui'
-import { TableCellViewerProducts } from './components'
+import { TableCellViewerCategories } from './components'
 
-const data: Product[] = [
+const data: Category[] = [
   {
     id: '1',
-    name: 'Product 1',
-    category: 'Category A',
-    currentStock: 100,
-    price: '20.00',
-    cost: '15.00',
-    unitProfit: '5.00',
+    name: 'Frutas',
+    description: 'Categoria de frutas frescas',
+    image: '/images/fruits.jpg',
   },
   {
     id: '2',
-    name: 'Product 2',
-    category: 'Category B',
-    currentStock: 50,
-    price: '30.00',
-    cost: '20.00',
-    unitProfit: '10.00',
+    name: 'Verduras',
+    description: 'Categoria de verduras orgânicas',
+    image: '/images/vegetables.jpg',
   },
   {
     id: '3',
-    name: 'Product 3',
-    category: 'Category A',
-    currentStock: 75,
-    price: '25.00',
-    cost: '18.00',
-    unitProfit: '7.00',
+    name: 'Laticínios',
+    description: 'Categoria de laticínios variados',
+    image: '/images/dairy.jpg',
   },
 ]
 
-type Product = {
+type Category = {
   id: string
   name: string
-  category: string
-  currentStock: number
-  price: string
-  cost: string
-  unitProfit: string
+  description?: string
+  image?: string
 }
 
-const columns: ColumnDef<Product>[] = [
+const columns: ColumnDef<Category>[] = [
   {
     accessorKey: 'id',
     header: () => {
@@ -100,34 +88,18 @@ const columns: ColumnDef<Product>[] = [
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         >
-          Nome
+          Categoria
           <ArrowUpDown />
         </Button>
       )
     },
     cell: ({ row }) => {
-      return <TableCellViewerProducts item={row.original} />
+      return <TableCellViewerCategories item={row.original} />
     },
   },
   {
-    accessorKey: 'category',
-    header: () => <p>Categoria</p>,
-  },
-  {
-    accessorKey: 'currentStock',
-    header: () => <p>Estoque Atual</p>,
-  },
-  {
-    accessorKey: 'price',
-    header: () => <p>Preço</p>,
-  },
-  {
-    accessorKey: 'cost',
-    header: () => <p>Custo</p>,
-  },
-  {
-    accessorKey: 'unitProfit',
-    header: () => <p>Lucro Unitário</p>,
+    accessorKey: 'description',
+    header: () => <p>Descrição</p>,
   },
   {
     id: 'actions',
@@ -154,7 +126,7 @@ const columns: ColumnDef<Product>[] = [
   },
 ]
 
-export function Products() {
+export function Categories() {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -184,36 +156,17 @@ export function Products() {
 
   return (
     <div className="@container/card mx-4 mt-4 lg:mx-6">
-      <div className="grid grid-cols-[1fr_2fr] gap-4">
-        <div>
-          <Label htmlFor="rows-per-page" className="text-sm font-medium">
-            Filtrar categoria
-          </Label>
-          <Select>
-            <SelectTrigger className="w-full mt-2">
-              <SelectValue placeholder="Categoria" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="light">Light</SelectItem>
-              <SelectItem value="dark">Dark</SelectItem>
-              <SelectItem value="system">System</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label htmlFor="rows-per-page" className="text-sm font-medium">
-            Filtrar produtos
-          </Label>
-          <Input
-            placeholder="Filtrar produtos..."
-            value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
-            onChange={(event) =>
-              table.getColumn('name')?.setFilterValue(event.target.value)
-            }
-            className="max-w mt-2"
-          />
-        </div>
-      </div>
+      <Label htmlFor="rows-per-page" className="text-sm font-medium">
+        Filtrar categorias
+      </Label>
+      <Input
+        placeholder="Filtrar categorias..."
+        value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
+        onChange={(event) =>
+          table.getColumn('name')?.setFilterValue(event.target.value)
+        }
+        className="max-w mt-2"
+      />
       <div className="rounded-md border mt-4">
         <Table>
           <TableHeader>
@@ -257,7 +210,7 @@ export function Products() {
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  Nenhum produto encontrado.
+                  Nenhuma categoria encontrada.
                 </TableCell>
               </TableRow>
             )}
