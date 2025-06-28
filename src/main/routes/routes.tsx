@@ -4,6 +4,7 @@ import { MakeLogin, MakeSignUp } from '@/main/factories/pages'
 import { Dashboard } from '@/presentation/pages/app'
 import {
   Categories,
+  NewCategory,
   NewProduct,
   Products,
 } from '@/presentation/pages/app/Products'
@@ -36,6 +37,10 @@ export function Routes() {
             {
               path: 'categories',
               element: <Categories />,
+            },
+            {
+              path: 'categories/new',
+              element: <NewCategory />,
             },
           ],
         },

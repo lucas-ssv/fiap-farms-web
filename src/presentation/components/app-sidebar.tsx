@@ -81,7 +81,7 @@ const data = {
         },
         {
           title: 'Nova categoria',
-          url: '#',
+          url: '/categories/new',
           icon: Plus,
         },
       ],
