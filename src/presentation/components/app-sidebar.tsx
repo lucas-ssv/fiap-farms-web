@@ -98,7 +98,7 @@ const data = {
         },
         {
           title: 'Nova venda',
-          url: '#',
+          url: '/sales/new',
           icon: Plus,
         },
         {
