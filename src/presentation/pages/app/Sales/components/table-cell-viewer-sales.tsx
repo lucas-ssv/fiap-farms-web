@@ -17,6 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/presentation/components/ui'
+import { InputDatetime } from '@/presentation/components'
+import React from 'react'
 
 const schema = z.object({
   id: z.string(),
@@ -44,6 +46,8 @@ export function TableCellViewerSales({
   item: z.infer<typeof schema>
 }) {
   const isMobile = useIsMobile()
+  const [date, setDate] = React.useState<Date | undefined>(undefined)
+
   return (
     <Drawer direction={isMobile ? 'bottom' : 'right'}>
       <DrawerTrigger asChild>
@@ -146,8 +150,7 @@ export function TableCellViewerSales({
               </div>
             </div>
             <div className="flex flex-col gap-3">
-              <Label htmlFor="date">Data e hora</Label>
-              <Input type="datetime-local" id="date" defaultValue={item.date} />
+              <InputDatetime date={date} setDate={setDate} />
             </div>
           </form>
         </div>

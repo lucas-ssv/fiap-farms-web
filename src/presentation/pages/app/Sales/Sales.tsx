@@ -26,7 +26,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/presentation/components/ui/dropdown-menu'
-import { Input } from '@/presentation/components/ui/input'
 import {
   Table,
   TableBody,
@@ -44,6 +43,7 @@ import {
   SelectValue,
 } from '@/presentation/components/ui'
 import { TableCellViewerSales } from './components'
+import { InputDate } from '@/presentation/components'
 
 const data: Sale[] = [
   {
@@ -177,6 +177,7 @@ export function Sales() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
+  const [date, setDate] = React.useState<Date | undefined>(undefined)
 
   const table = useReactTable({
     data,
@@ -216,18 +217,7 @@ export function Sales() {
           </Select>
         </div>
         <div>
-          <Label htmlFor="rows-per-page" className="text-sm font-medium">
-            Filtrar período
-          </Label>
-          <Input
-            type="date"
-            placeholder="Filtrar por data..."
-            value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
-            onChange={(event) =>
-              table.getColumn('name')?.setFilterValue(event.target.value)
-            }
-            className="max-w mt-2"
-          />
+          <InputDate label="Filtrar período" date={date} setDate={setDate} />
         </div>
       </div>
       <div className="rounded-md border mt-4">
