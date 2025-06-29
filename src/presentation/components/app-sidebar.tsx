@@ -59,7 +59,7 @@ const data = {
   navMain: [
     {
       title: 'Produtos',
-      url: '#',
+      url: '/products',
       icon: LayoutList,
       isActive: true,
       items: [
@@ -93,7 +93,7 @@ const data = {
       items: [
         {
           title: 'Listar vendas',
-          url: '#',
+          url: '/sales',
           icon: List,
         },
         {
