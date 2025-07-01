@@ -167,7 +167,7 @@ export function NewSale() {
             control={form.control}
             name="paymentMethod"
             render={({ field }) => (
-              <FormItem className="col-span-12 md:col-span-4">
+              <FormItem className="col-span-12 md:col-span-6 lg:col-span-4">
                 <FormLabel>Forma de pagamento</FormLabel>
                 <Select
                   onValueChange={field.onChange}
@@ -191,7 +191,7 @@ export function NewSale() {
             control={form.control}
             name="status"
             render={({ field }) => (
-              <FormItem className="col-span-12 md:col-span-4">
+              <FormItem className="col-span-12 md:col-span-6 lg:col-span-4">
                 <FormLabel>Status da venda</FormLabel>
                 <Select
                   onValueChange={field.onChange}
@@ -215,7 +215,7 @@ export function NewSale() {
             control={form.control}
             name="saleDate"
             render={({ field }) => (
-              <FormItem className="col-span-12 md:col-span-4">
+              <FormItem className="col-span-12 lg:col-span-4">
                 <FormControl>
                   <InputDate
                     label="Data da venda"
@@ -231,7 +231,7 @@ export function NewSale() {
             control={form.control}
             name="observations"
             render={({ field }) => (
-              <FormItem className="col-span-12 md:col-span-6 lg:col-span-12">
+              <FormItem className="col-span-12">
                 <FormLabel>Observações</FormLabel>
                 <FormControl>
                   <Textarea
@@ -246,7 +246,7 @@ export function NewSale() {
             control={form.control}
             name="totalValue"
             render={({ field }) => (
-              <FormItem className="col-span-12 md:col-span-6 lg:col-span-12">
+              <FormItem className="col-span-12">
                 <FormLabel>Valor total</FormLabel>
                 <FormControl>
                   <Input placeholder="Valor total" disabled {...field} />
