@@ -108,7 +108,7 @@ const data = {
         },
         {
           title: 'Novo cliente',
-          url: '#',
+          url: '/customers/new',
           icon: Plus,
         },
       ],

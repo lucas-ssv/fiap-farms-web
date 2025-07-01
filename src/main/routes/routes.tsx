@@ -11,7 +11,12 @@ import {
 import { AppLayout, AuthLayout } from '@/presentation/pages/_layouts'
 import { ProtectedRoute } from './ProtectedRoute'
 import { GuestRoute } from './GuestRoute'
-import { Customers, NewSale, Sales } from '@/presentation/pages/app/Sales'
+import {
+  Customers,
+  NewCustomer,
+  NewSale,
+  Sales,
+} from '@/presentation/pages/app/Sales'
 
 export function Routes() {
   const router = createBrowserRouter([
@@ -54,6 +59,10 @@ export function Routes() {
             {
               path: '/customers',
               element: <Customers />,
+            },
+            {
+              path: '/customers/new',
+              element: <NewCustomer />,
             },
           ],
         },

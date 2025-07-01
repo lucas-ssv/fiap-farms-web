@@ -18,7 +18,13 @@ const schema = z.object({
   name: z.string(),
   email: z.email(),
   phone: z.string(),
-  address: z.string(),
+  postalCode: z.string(),
+  city: z.string(),
+  state: z.string(),
+  neighborhood: z.string(),
+  street: z.string(),
+  number: z.number(),
+  complement: z.string().optional(),
   loyaltyPoints: z.number(),
 })
 
@@ -55,8 +61,32 @@ export function TableCellViewerCustomers({
               <Input id="phone" defaultValue={item.phone} />
             </div>
             <div className="flex flex-col gap-3">
-              <Label htmlFor="address">Endereço</Label>
-              <Input id="address" defaultValue={item.address} />
+              <Label htmlFor="postalCode">CEP</Label>
+              <Input id="postalCode" defaultValue={item.postalCode} />
+            </div>
+            <div className="flex flex-col gap-3">
+              <Label htmlFor="city">Cidade</Label>
+              <Input id="city" defaultValue={item.city} />
+            </div>
+            <div className="flex flex-col gap-3">
+              <Label htmlFor="state">Estado</Label>
+              <Input id="state" defaultValue={item.state} />
+            </div>
+            <div className="flex flex-col gap-3">
+              <Label htmlFor="neighborhood">Bairro</Label>
+              <Input id="neighborhood" defaultValue={item.neighborhood} />
+            </div>
+            <div className="flex flex-col gap-3">
+              <Label htmlFor="street">Rua</Label>
+              <Input id="street" defaultValue={item.street} />
+            </div>
+            <div className="flex flex-col gap-3">
+              <Label htmlFor="number">Número</Label>
+              <Input id="number" defaultValue={item.number} />
+            </div>
+            <div className="flex flex-col gap-3">
+              <Label htmlFor="complement">Complemento</Label>
+              <Input id="complement" defaultValue={item.complement} />
             </div>
             <div className="flex flex-col gap-3">
               <Label htmlFor="loyaltyPoints">Pontos de lealdade</Label>

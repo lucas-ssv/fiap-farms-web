@@ -51,7 +51,13 @@ const data: Customer[] = [
     name: 'João Silva',
     email: 'joao@mail.com',
     phone: '1234-5678',
-    address: 'Rua A, 123',
+    postalCode: '12345-678',
+    city: 'São Paulo',
+    state: 'SP',
+    neighborhood: 'Centro',
+    street: 'Rua A',
+    number: 123,
+    complement: 'Apto 45',
     loyaltyPoints: 150,
   },
   {
@@ -59,7 +65,13 @@ const data: Customer[] = [
     name: 'Maria Oliveira',
     email: 'maria@mail.com',
     phone: '9876-5432',
-    address: 'Avenida B, 456',
+    postalCode: '87654-321',
+    city: 'Rio de Janeiro',
+    state: 'RJ',
+    neighborhood: 'Copacabana',
+    street: 'Avenida B',
+    number: 456,
+    complement: 'Casa 12',
     loyaltyPoints: 200,
   },
 ]
@@ -69,7 +81,13 @@ type Customer = {
   name: string
   email: string
   phone: string
-  address: string
+  postalCode: string
+  city: string
+  state: string
+  neighborhood: string
+  street: string
+  number: number
+  complement?: string
   loyaltyPoints: number
 }
 
@@ -106,8 +124,32 @@ const columns: ColumnDef<Customer>[] = [
     header: () => <p>Telefone</p>,
   },
   {
-    accessorKey: 'address',
-    header: () => <p>Endereço</p>,
+    accessorKey: 'postalCode',
+    header: () => <p>CEP</p>,
+  },
+  {
+    accessorKey: 'city',
+    header: () => <p>Cidade</p>,
+  },
+  {
+    accessorKey: 'state',
+    header: () => <p>Estado</p>,
+  },
+  {
+    accessorKey: 'neighborhood',
+    header: () => <p>Bairro</p>,
+  },
+  {
+    accessorKey: 'street',
+    header: () => <p>Rua</p>,
+  },
+  {
+    accessorKey: 'number',
+    header: () => <p>Número</p>,
+  },
+  {
+    accessorKey: 'complement',
+    header: () => <p>Complemento</p>,
   },
   {
     accessorKey: 'loyaltyPoints',
