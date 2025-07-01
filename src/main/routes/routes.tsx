@@ -17,6 +17,7 @@ import {
   NewSale,
   Sales,
 } from '@/presentation/pages/app/Sales'
+import { Goals } from '@/presentation/pages/app/Goals'
 
 export function Routes() {
   const router = createBrowserRouter([
@@ -63,6 +64,10 @@ export function Routes() {
             {
               path: '/customers/new',
               element: <NewCustomer />,
+            },
+            {
+              path: '/goals',
+              element: <Goals />,
             },
           ],
         },

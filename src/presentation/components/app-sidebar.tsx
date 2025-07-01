@@ -88,7 +88,7 @@ const data = {
     },
     {
       title: 'Vendas',
-      url: '#',
+      url: '/sales',
       icon: CircleDollarSign,
       items: [
         {
@@ -115,12 +115,12 @@ const data = {
     },
     {
       title: 'Metas',
-      url: '#',
+      url: '/goals',
       icon: ChartLine,
       items: [
         {
           title: 'Ver metas',
-          url: '#',
+          url: '/goals',
           icon: Eye,
         },
         {
