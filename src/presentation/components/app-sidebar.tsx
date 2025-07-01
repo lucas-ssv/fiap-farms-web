@@ -103,7 +103,7 @@ const data = {
         },
         {
           title: 'Listar clientes',
-          url: '#',
+          url: '/customers',
           icon: List,
         },
         {
