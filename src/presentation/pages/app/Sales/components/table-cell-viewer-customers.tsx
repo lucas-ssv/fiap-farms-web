@@ -64,25 +64,29 @@ export function TableCellViewerCustomers({
               <Label htmlFor="postalCode">CEP</Label>
               <Input id="postalCode" defaultValue={item.postalCode} />
             </div>
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="city">Cidade</Label>
-              <Input id="city" defaultValue={item.city} />
-            </div>
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="state">Estado</Label>
-              <Input id="state" defaultValue={item.state} />
+            <div className="flex items-center gap-4">
+              <div className="flex flex-col gap-3">
+                <Label htmlFor="city">Cidade</Label>
+                <Input id="city" defaultValue={item.city} />
+              </div>
+              <div className="flex flex-col gap-3">
+                <Label htmlFor="state">Estado</Label>
+                <Input id="state" defaultValue={item.state} />
+              </div>
             </div>
             <div className="flex flex-col gap-3">
               <Label htmlFor="neighborhood">Bairro</Label>
               <Input id="neighborhood" defaultValue={item.neighborhood} />
             </div>
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="street">Rua</Label>
-              <Input id="street" defaultValue={item.street} />
-            </div>
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="number">Número</Label>
-              <Input id="number" defaultValue={item.number} />
+            <div className="grid grid-cols-12 gap-4">
+              <div className="flex flex-col gap-3 col-span-8">
+                <Label htmlFor="street">Rua</Label>
+                <Input id="street" defaultValue={item.street} />
+              </div>
+              <div className="flex flex-col gap-3 col-span-4">
+                <Label htmlFor="number">Número</Label>
+                <Input id="number" defaultValue={item.number} />
+              </div>
             </div>
             <div className="flex flex-col gap-3">
               <Label htmlFor="complement">Complemento</Label>
