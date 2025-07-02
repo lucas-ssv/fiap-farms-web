@@ -1,8 +1,13 @@
-import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth"
-import { addDoc, collection } from "firebase/firestore"
+import {
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+} from 'firebase/auth'
+import { addDoc, collection } from 'firebase/firestore'
 
-import { auth } from "@/main/config/firebase"
-import { AccountFirebaseRepository } from "@/infra/repositories/firebase"
+import { auth } from '@/main/config/firebase'
+import { AccountFirebaseRepository } from '@/infra/repositories/firebase/account'
 
 jest.mock('firebase/auth', () => ({
   signInWithEmailAndPassword: jest.fn(),
