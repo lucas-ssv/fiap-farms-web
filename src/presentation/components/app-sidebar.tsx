@@ -132,12 +132,12 @@ const data = {
     },
     {
       title: 'Produção',
-      url: '#',
+      url: '/productions',
       icon: ChartArea,
       items: [
         {
           title: 'Lotes em produção',
-          url: '#',
+          url: '/productions',
           icon: Eye,
         },
         {

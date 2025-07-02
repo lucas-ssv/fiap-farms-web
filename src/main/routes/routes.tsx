@@ -18,6 +18,7 @@ import {
   Sales,
 } from '@/presentation/pages/app/Sales'
 import { Goals, NewGoal } from '@/presentation/pages/app/Goals'
+import { Productions } from '@/presentation/pages/app/Productions'
 
 export function Routes() {
   const router = createBrowserRouter([
@@ -72,6 +73,10 @@ export function Routes() {
             {
               path: '/goals/new',
               element: <NewGoal />,
+            },
+            {
+              path: '/productions',
+              element: <Productions />,
             },
           ],
         },
