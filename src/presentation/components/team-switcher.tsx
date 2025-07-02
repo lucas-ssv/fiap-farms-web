@@ -48,7 +48,7 @@ export function TeamSwitcher({
                 <img src={logoIcon} alt="Logo FIAP Farms" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium text-lg text-green-900">
+                <span className="truncate font-medium text-lg dark:text-white text-green-900">
                   fiap farms
                 </span>
                 {/* <span className="truncate text-xs">{activeTeam.plan}</span> */}

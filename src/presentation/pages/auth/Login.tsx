@@ -82,7 +82,7 @@ export function Login({ authentication }: Props) {
           </div>
           <div className="flex-1 flex items-center justify-center">
             <div className="w-[350px]">
-              <h1 className="text-center text-2xl font-bold text-custom-black">
+              <h1 className="text-center text-2xl font-bold dark:text-white text-custom-black">
                 Faça seu login
               </h1>
               <p className="text-center text-sm text-custom-gray mt-2">

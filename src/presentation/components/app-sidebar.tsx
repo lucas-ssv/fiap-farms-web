@@ -31,6 +31,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from '@/presentation/components/ui/sidebar'
+import { Link } from 'react-router'
 
 const data = {
   user: {
@@ -58,88 +59,85 @@ const data = {
   navMain: [
     {
       title: 'Produtos',
-      url: '#',
+      url: '/products',
       icon: LayoutList,
+      isActive: true,
       items: [
         {
           title: 'Listar produtos',
-          url: '#',
+          url: '/products',
           icon: List,
+          isActive: true,
         },
         {
           title: 'Novo produto',
-          url: '#',
+          url: '/products/new',
           icon: Plus,
         },
         {
           title: 'Listar categorias',
-          url: '#',
+          url: '/categories',
           icon: List,
         },
         {
           title: 'Nova categoria',
-          url: '#',
+          url: '/categories/new',
           icon: Plus,
         },
       ],
     },
     {
       title: 'Vendas',
-      url: '#',
+      url: '/sales',
       icon: CircleDollarSign,
       items: [
         {
           title: 'Listar vendas',
-          url: '#',
+          url: '/sales',
           icon: List,
         },
         {
           title: 'Nova venda',
-          url: '#',
+          url: '/sales/new',
           icon: Plus,
         },
         {
           title: 'Listar clientes',
-          url: '#',
+          url: '/customers',
           icon: List,
         },
         {
           title: 'Novo cliente',
-          url: '#',
+          url: '/customers/new',
           icon: Plus,
         },
       ],
     },
     {
       title: 'Metas',
-      url: '#',
+      url: '/goals',
       icon: ChartLine,
       items: [
         {
           title: 'Ver metas',
-          url: '#',
+          url: '/goals',
           icon: Eye,
         },
         {
-          title: 'Nova meta de produto',
-          url: '#',
-          icon: Plus,
-        },
-        {
-          title: 'Nova meta de venda',
-          url: '#',
+          title: 'Nova meta',
+          url: '/goals/new',
           icon: Plus,
         },
       ],
     },
     {
       title: 'Produção',
-      url: '#',
+      url: '/productions',
       icon: ChartArea,
       items: [
         {
           title: 'Lotes em produção',
-          url: '#',
+          url: '/productions',
           icon: Eye,
         },
         {
@@ -202,11 +200,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem key="Dashboard">
-                <SidebarMenuButton asChild isActive>
-                  <a href="#">
+                <SidebarMenuButton asChild>
+                  <Link to="/">
                     <CircleGauge />
                     <span>Dashboard</span>
-                  </a>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
