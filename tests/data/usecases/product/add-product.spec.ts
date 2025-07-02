@@ -1,4 +1,6 @@
+import { AddProductImpl } from '@/data/usecases/product'
 import type { AddProduct } from '@/domain/usecases/product'
+import { AddProductRepositoryMock } from '@tests/data/mocks/product'
 
 const mockAddProductParams: AddProduct.Params = {
   id: 'any_id',
@@ -12,30 +14,6 @@ const mockAddProductParams: AddProduct.Params = {
   unit: 'kg',
   description: 'any_description',
   image: 'any_image_url',
-}
-
-interface AddProductRepository {
-  add: (data: AddProductRepository.Params) => Promise<void>
-}
-
-namespace AddProductRepository {
-  export type Params = AddProduct.Params
-}
-
-class AddProductRepositoryMock implements AddProductRepository {
-  async add(data: AddProductRepository.Params): Promise<void> {}
-}
-
-class AddProductImpl implements AddProduct {
-  private readonly addProductRepository: AddProductRepository
-
-  constructor(addProductRepository: AddProductRepository) {
-    this.addProductRepository = addProductRepository
-  }
-
-  async execute(data: AddProduct.Params): Promise<void> {
-    await this.addProductRepository.add(data)
-  }
 }
 
 type SutTypes = {
