@@ -38,11 +38,24 @@ class AddProductImpl implements AddProduct {
   }
 }
 
+type SutTypes = {
+  sut: AddProduct
+  addProductRepositoryMock: AddProductRepositoryMock
+}
+
+const makeSut = (): SutTypes => {
+  const addProductRepositoryMock = new AddProductRepositoryMock()
+  const sut = new AddProductImpl(addProductRepositoryMock)
+  return {
+    sut,
+    addProductRepositoryMock,
+  }
+}
+
 describe('AddProduct usecase', () => {
   it('should call AddProductRepository with correct values', async () => {
-    const addProductRepositoryMock = new AddProductRepositoryMock()
+    const { sut, addProductRepositoryMock } = makeSut()
     const addSpy = jest.spyOn(addProductRepositoryMock, 'add')
-    const sut = new AddProductImpl(addProductRepositoryMock)
 
     await sut.execute(mockAddProductParams)
 
