@@ -1,23 +1,31 @@
 import * as React from 'react'
+import { Calendar } from '@/presentation/components/ui/calendar'
+import {
+  Label,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  Button,
+} from '@/presentation/components/ui'
 import { ChevronDownIcon } from 'lucide-react'
 
-import { Button } from '@/presentation/components/ui'
-import { Calendar } from '@/presentation/components/ui'
-import { Label } from '@/presentation/components/ui'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/presentation/components/ui'
-
 type Props = {
-  date: Date | undefined
-  setDate: React.Dispatch<React.SetStateAction<Date | undefined>>
-  label?: string
+  label: string
+  value?: Date | null // usado com react-hook-form
+  onChange?: (date: Date | undefined) => void // usado com react-hook-form
+  date?: Date | null // uso normal (fora do form)
+  setDate?: (date: Date | undefined) => void // uso normal
 }
 
-export function InputDate({ label, date, setDate }: Props) {
+export function InputDate({ label, value, onChange, date, setDate }: Props) {
   const [open, setOpen] = React.useState(false)
+
+  const selected = value ?? date
+  const handleSelect = (date: Date | undefined) => {
+    if (onChange) onChange(date)
+    if (setDate) setDate(date)
+    setOpen(false)
+  }
 
   return (
     <div className="flex flex-col gap-3">
@@ -31,19 +39,16 @@ export function InputDate({ label, date, setDate }: Props) {
             id="date"
             className="w-full justify-between font-normal"
           >
-            {date ? date.toLocaleDateString() : 'Selecione a data'}
+            {selected ? selected.toLocaleDateString() : 'Selecione a data'}
             <ChevronDownIcon />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto overflow-hidden p-0" align="start">
           <Calendar
             mode="single"
-            selected={date}
+            selected={selected || undefined}
             captionLayout="dropdown"
-            onSelect={(date) => {
-              setDate(date)
-              setOpen(false)
-            }}
+            onSelect={handleSelect}
           />
         </PopoverContent>
       </Popover>

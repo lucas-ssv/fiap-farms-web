@@ -19,7 +19,6 @@ import {
   Textarea,
 } from '@/presentation/components/ui'
 import { InputDate } from '@/presentation/components'
-import { useState } from 'react'
 
 type NewProductFormData = z.infer<typeof schema>
 
@@ -31,7 +30,7 @@ const schema = z.object({
   discount: z.string().optional(),
   paymentMethod: z.string().min(1, 'O método de pagamento é obrigatório'),
   status: z.string().min(1, 'O status é obrigatório'),
-  saleDate: z.string().optional(),
+  saleDate: z.date('A data da venda é obrigatória'),
   observations: z.string().optional(),
   totalValue: z.string().min(1, 'O valor total é obrigatório').optional(),
 })
@@ -47,12 +46,11 @@ export function NewSale() {
       discount: '',
       paymentMethod: '',
       status: '',
-      saleDate: '',
+      saleDate: undefined,
       observations: '',
       totalValue: '',
     },
   })
-  const [date, setDate] = useState<Date | undefined>(undefined)
 
   const onSubmit = (data: NewProductFormData) => {
     console.log('Form submitted:', data)
@@ -219,9 +217,8 @@ export function NewSale() {
                 <FormControl>
                   <InputDate
                     label="Data da venda"
-                    date={date}
-                    setDate={setDate}
-                    {...field}
+                    onChange={field.onChange}
+                    value={field.value}
                   />
                 </FormControl>
               </FormItem>

@@ -124,13 +124,8 @@ const data = {
           icon: Eye,
         },
         {
-          title: 'Nova meta de produto',
-          url: '#',
-          icon: Plus,
-        },
-        {
-          title: 'Nova meta de venda',
-          url: '#',
+          title: 'Nova meta',
+          url: '/goals/new',
           icon: Plus,
         },
       ],
