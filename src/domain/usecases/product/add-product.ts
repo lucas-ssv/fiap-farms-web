@@ -15,7 +15,5 @@ export namespace AddProduct {
     unit: string
     description: string
     image: string
-    createdAt: Date
-    updatedAt: Date
   }
 }
