@@ -1,8 +1,33 @@
 import { UploadFirebaseService } from '@/infra/services/firebase'
+import { storage } from '@/main/config/firebase'
+import { ref } from 'firebase/storage'
 import { v4 as uuidv4 } from 'uuid'
 
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'any_uuid'),
+}))
+
+jest.mock('firebase/storage', () => {
+  const onMock = jest.fn((_event, _progress, _error, success) => {
+    success()
+  })
+  const mockUploadTask = {
+    on: onMock,
+    snapshot: {
+      ref: 'mocked_ref',
+    },
+  }
+
+  return {
+    getStorage: jest.fn(),
+    ref: jest.fn().mockReturnValue('mocked_storage_ref'),
+    uploadBytesResumable: jest.fn().mockReturnValue(mockUploadTask),
+    getDownloadURL: jest.fn().mockResolvedValue('any_download_url'),
+  }
+})
+
+jest.mock('@/main/config/firebase', () => ({
+  storage: 'mocked_storage',
 }))
 
 describe('UploadFirebaseService', () => {
@@ -12,5 +37,13 @@ describe('UploadFirebaseService', () => {
     await sut.upload('any_uri')
 
     expect(uuidv4).toHaveBeenCalled()
+  })
+
+  it('should call ref with correct values', async () => {
+    const sut = new UploadFirebaseService()
+
+    await sut.upload('any_document_uri')
+
+    expect(ref).toHaveBeenCalledWith(storage, 'products/any_uuid')
   })
 })
