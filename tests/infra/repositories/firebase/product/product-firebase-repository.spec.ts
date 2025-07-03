@@ -22,31 +22,33 @@ jest.mock('firebase/firestore', () => ({
 }))
 
 describe('ProductFirebaseRepository', () => {
-  it('should add a product on success', async () => {
-    const mockedCollectionWithConverter = 'mockedCollectionWithConverter'
-    const withConverterMock = jest
-      .fn()
-      .mockReturnValue(mockedCollectionWithConverter)
-    ;(collection as jest.Mock).mockReturnValue({
-      withConverter: withConverterMock,
+  describe('add()', () => {
+    it('should add a product on success', async () => {
+      const mockedCollectionWithConverter = 'mockedCollectionWithConverter'
+      const withConverterMock = jest
+        .fn()
+        .mockReturnValue(mockedCollectionWithConverter)
+      ;(collection as jest.Mock).mockReturnValue({
+        withConverter: withConverterMock,
+      })
+      const params = mockAddProductParams()
+      const sut = new ProductFirebaseRepository()
+
+      await sut.add(params)
+
+      expect(addDoc).toHaveBeenCalledWith(mockedCollectionWithConverter, {
+        ...params,
+        createdAt: 'any_timestamp',
+        updatedAt: 'any_timestamp',
+      })
     })
-    const params = mockAddProductParams()
-    const sut = new ProductFirebaseRepository()
 
-    await sut.add(params)
+    it('should return a product id on success', async () => {
+      const sut = new ProductFirebaseRepository()
 
-    expect(addDoc).toHaveBeenCalledWith(mockedCollectionWithConverter, {
-      ...params,
-      createdAt: 'any_timestamp',
-      updatedAt: 'any_timestamp',
+      const productId = await sut.add(mockAddProductParams())
+
+      expect(productId).toBe('any_product_id')
     })
-  })
-
-  it('should return a product id on success', async () => {
-    const sut = new ProductFirebaseRepository()
-
-    const productId = await sut.add(mockAddProductParams())
-
-    expect(productId).toBe('any_product_id')
   })
 })
