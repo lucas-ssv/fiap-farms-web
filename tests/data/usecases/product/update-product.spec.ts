@@ -1,34 +1,6 @@
+import { UpdateProductImpl } from '@/data/usecases/product'
 import type { UpdateProduct } from '@/domain/usecases/product'
-
-interface UpdateProductRepository {
-  update: (
-    productId: string,
-    data: UpdateProductRepository.Params
-  ) => Promise<void>
-}
-
-namespace UpdateProductRepository {
-  export type Params = UpdateProduct.Params
-}
-
-class UpdateProductRepositoryMock implements UpdateProductRepository {
-  async update(
-    productId: string,
-    data: UpdateProductRepository.Params
-  ): Promise<void> {}
-}
-
-class UpdateProductImpl implements UpdateProduct {
-  private updateProductRepository: UpdateProductRepository
-
-  constructor(updateProductRepository: UpdateProductRepository) {
-    this.updateProductRepository = updateProductRepository
-  }
-
-  async execute(productId: string, data: UpdateProduct.Params): Promise<void> {
-    await this.updateProductRepository.update(productId, data)
-  }
-}
+import { UpdateProductRepositoryMock } from '@tests/data/mocks/product'
 
 type SutTypes = {
   sut: UpdateProduct
