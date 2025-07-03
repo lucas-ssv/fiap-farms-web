@@ -13,7 +13,6 @@ export type Product = AddProductRepository.Params & {
 export const productConverter: FirestoreDataConverter<Product> = {
   toFirestore: (product: Product): DocumentData => {
     return {
-      id: product.id,
       name: product.name,
       price: product.price,
       cost: product.cost,

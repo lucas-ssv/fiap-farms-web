@@ -4,7 +4,6 @@ export interface AddProduct {
 
 export namespace AddProduct {
   export type Params = {
-    id: string
     name: string
     price: number
     cost: number

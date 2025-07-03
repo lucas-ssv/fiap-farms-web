@@ -2,7 +2,6 @@ import type { AddProduct } from '@/domain/usecases/product'
 
 export const mockAddProductParams = (): AddProduct.Params => {
   return {
-    id: 'any_id',
     name: 'any_name',
     price: 100,
     cost: 50,
