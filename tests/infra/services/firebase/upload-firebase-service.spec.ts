@@ -1,4 +1,5 @@
 import { UploadFirebaseService } from '@/infra/services/firebase'
+import { uriToBlob } from '@/infra/utils'
 import { storage } from '@/main/config/firebase'
 import { ref } from 'firebase/storage'
 import { v4 as uuidv4 } from 'uuid'
@@ -30,6 +31,10 @@ jest.mock('@/main/config/firebase', () => ({
   storage: 'mocked_storage',
 }))
 
+jest.mock('@/infra/utils', () => ({
+  uriToBlob: jest.fn().mockResolvedValue('mocked_blob'),
+}))
+
 describe('UploadFirebaseService', () => {
   it('should call uuid', async () => {
     const sut = new UploadFirebaseService()
@@ -45,5 +50,13 @@ describe('UploadFirebaseService', () => {
     await sut.upload('any_document_uri')
 
     expect(ref).toHaveBeenCalledWith(storage, 'products/any_uuid')
+  })
+
+  it('should call uriToBlob with correct uri', async () => {
+    const sut = new UploadFirebaseService()
+
+    await sut.upload('any_uri')
+
+    expect(uriToBlob).toHaveBeenCalledWith('any_uri')
   })
 })
