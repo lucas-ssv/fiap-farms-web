@@ -1,6 +1,9 @@
 import { AddProductImpl } from '@/data/usecases/product'
 import type { AddProduct } from '@/domain/usecases/product'
-import { AddProductRepositoryMock } from '@tests/data/mocks/product'
+import {
+  AddProductRepositoryMock,
+  UpdateProductRepositoryMock,
+} from '@tests/data/mocks/product'
 import { mockAddProductParams } from './mocks'
 import type { UploadService } from '@/data/contracts/services'
 
@@ -17,16 +20,23 @@ type SutTypes = {
   sut: AddProduct
   addProductRepositoryMock: AddProductRepositoryMock
   uploadServiceMock: UploadServiceMock
+  updateProductRepositoryMock: UpdateProductRepositoryMock
 }
 
 const makeSut = (): SutTypes => {
   const addProductRepositoryMock = new AddProductRepositoryMock()
   const uploadServiceMock = new UploadServiceMock()
-  const sut = new AddProductImpl(addProductRepositoryMock, uploadServiceMock)
+  const updateProductRepositoryMock = new UpdateProductRepositoryMock()
+  const sut = new AddProductImpl(
+    addProductRepositoryMock,
+    uploadServiceMock,
+    updateProductRepositoryMock
+  )
   return {
     sut,
     addProductRepositoryMock,
     uploadServiceMock,
+    updateProductRepositoryMock,
   }
 }
 
@@ -49,6 +59,18 @@ describe('AddProduct usecase', () => {
     await sut.execute(params)
 
     expect(uploadSpy).toHaveBeenCalledWith(params.image)
+  })
+
+  it('should call UpdateProductRepository with correct values', async () => {
+    const { sut, updateProductRepositoryMock } = makeSut()
+    const updateSpy = jest.spyOn(updateProductRepositoryMock, 'update')
+    const params = mockAddProductParams()
+
+    await sut.execute(params)
+
+    expect(updateSpy).toHaveBeenCalledWith('any_product_id', {
+      image: 'any_url',
+    })
   })
 
   it('should throw if AddProductRepository throws', async () => {
