@@ -5,16 +5,7 @@ import {
   UpdateProductRepositoryMock,
 } from '@tests/data/mocks/product'
 import { mockAddProductParams } from './mocks'
-import type { UploadService } from '@/data/contracts/services'
-
-class UploadServiceMock implements UploadService {
-  async upload(uri: string): Promise<UploadService.Result> {
-    return {
-      name: 'any_name',
-      url: 'any_url',
-    }
-  }
-}
+import { UploadServiceMock } from '@tests/data/mocks/services'
 
 type SutTypes = {
   sut: AddProduct
