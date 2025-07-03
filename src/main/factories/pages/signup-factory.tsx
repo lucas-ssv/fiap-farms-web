@@ -1,5 +1,5 @@
 import { AddAccountImpl } from '@/data/usecases/account'
-import { AccountFirebaseRepository } from '@/infra/repositories/firebase'
+import { AccountFirebaseRepository } from '@/infra/repositories/firebase/account'
 import { SignUp } from '@/presentation/pages/auth'
 
 export function MakeSignUp() {
