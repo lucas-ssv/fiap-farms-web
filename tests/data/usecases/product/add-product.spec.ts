@@ -83,4 +83,15 @@ describe('AddProduct usecase', () => {
 
     await expect(promise).rejects.toThrow()
   })
+
+  it('should throw if UploadService throws', async () => {
+    const { sut, uploadServiceMock } = makeSut()
+    jest.spyOn(uploadServiceMock, 'upload').mockImplementationOnce(() => {
+      throw new Error()
+    })
+
+    const promise = sut.execute(mockAddProductParams())
+
+    await expect(promise).rejects.toThrow()
+  })
 })
