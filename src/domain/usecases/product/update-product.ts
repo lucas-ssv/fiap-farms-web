@@ -1,5 +1,5 @@
 export interface UpdateProduct {
-  execute: (data: UpdateProduct.Params) => Promise<void>
+  execute: (productId: string, data: UpdateProduct.Params) => Promise<void>
 }
 
 export namespace UpdateProduct {
