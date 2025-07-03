@@ -13,7 +13,7 @@ jest.mock('@/main/config/env', () => ({
 }))
 
 jest.mock('firebase/firestore', () => ({
-  addDoc: jest.fn(),
+  addDoc: jest.fn().mockResolvedValue({ id: 'any_product_id' }),
   collection: jest.fn(),
   getFirestore: jest.fn(),
   Timestamp: {
@@ -40,5 +40,13 @@ describe('ProductFirebaseRepository', () => {
       createdAt: 'any_timestamp',
       updatedAt: 'any_timestamp',
     })
+  })
+
+  it('should return a product id on success', async () => {
+    const sut = new ProductFirebaseRepository()
+
+    const productId = await sut.add(mockAddProductParams())
+
+    expect(productId).toBe('any_product_id')
   })
 })
