@@ -94,4 +94,17 @@ describe('AddProduct usecase', () => {
 
     await expect(promise).rejects.toThrow()
   })
+
+  it('should throw if UpdateProductRepository throws', async () => {
+    const { sut, updateProductRepositoryMock } = makeSut()
+    jest
+      .spyOn(updateProductRepositoryMock, 'update')
+      .mockImplementationOnce(() => {
+        throw new Error()
+      })
+
+    const promise = sut.execute(mockAddProductParams())
+
+    await expect(promise).rejects.toThrow()
+  })
 })
