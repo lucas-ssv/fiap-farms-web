@@ -1,10 +1,21 @@
-import { addDoc, collection, Timestamp } from 'firebase/firestore'
+import {
+  addDoc,
+  collection,
+  doc,
+  Timestamp,
+  updateDoc,
+} from 'firebase/firestore'
 
-import type { AddProductRepository } from '@/data/contracts/product'
+import type {
+  AddProductRepository,
+  UpdateProductRepository,
+} from '@/data/contracts/product'
 import { productConverter } from './converters'
 import { db } from '@/main/config/firebase'
 
-export class ProductFirebaseRepository implements AddProductRepository {
+export class ProductFirebaseRepository
+  implements AddProductRepository, UpdateProductRepository
+{
   async add(
     data: AddProductRepository.Params
   ): Promise<AddProductRepository.ProductId> {
@@ -17,5 +28,15 @@ export class ProductFirebaseRepository implements AddProductRepository {
       }
     )
     return product.id
+  }
+
+  async update(
+    productId: string,
+    data: UpdateProductRepository.Params
+  ): Promise<void> {
+    await updateDoc(
+      doc(db, 'products', productId).withConverter(productConverter),
+      data
+    )
   }
 }
