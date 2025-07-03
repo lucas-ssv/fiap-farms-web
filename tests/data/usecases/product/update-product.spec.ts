@@ -56,4 +56,19 @@ describe('UpdateProduct usecase', () => {
 
     expect(updateSpy).toHaveBeenCalledWith('any_product_id', params)
   })
+
+  it('should throw if UpdateProductRepository throws', async () => {
+    const { sut, updateProductRepositoryMock } = makeSut()
+    jest
+      .spyOn(updateProductRepositoryMock, 'update')
+      .mockImplementationOnce(() => {
+        throw new Error()
+      })
+
+    const promise = sut.execute('any_product_id', {
+      image: 'any_image',
+    })
+
+    await expect(promise).rejects.toThrow()
+  })
 })
