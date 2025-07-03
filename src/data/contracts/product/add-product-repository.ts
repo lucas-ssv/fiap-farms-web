@@ -9,5 +9,5 @@ export interface AddProductRepository {
 export namespace AddProductRepository {
   export type Params = AddProduct.Params
 
-  export type ProductId = AddProduct.ProductId
+  export type ProductId = string
 }

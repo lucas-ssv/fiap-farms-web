@@ -28,14 +28,6 @@ describe('AddProduct usecase', () => {
     expect(addSpy).toHaveBeenCalledWith(params)
   })
 
-  it('should return product id on success', async () => {
-    const { sut } = makeSut()
-
-    const productId = await sut.execute(mockAddProductParams())
-
-    expect(productId).toBe('any_product_id')
-  })
-
   it('should throw if AddProductRepository throws', async () => {
     const { sut, addProductRepositoryMock } = makeSut()
     jest.spyOn(addProductRepositoryMock, 'add').mockImplementationOnce(() => {

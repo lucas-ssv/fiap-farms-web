@@ -8,8 +8,7 @@ export class AddProductImpl implements AddProduct {
     this.addProductRepository = addProductRepository
   }
 
-  async execute(data: AddProduct.Params): Promise<AddProduct.ProductId> {
-    const productId = await this.addProductRepository.add(data)
-    return productId
+  async execute(data: AddProduct.Params): Promise<void> {
+    await this.addProductRepository.add(data)
   }
 }
