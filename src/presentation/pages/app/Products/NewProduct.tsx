@@ -9,6 +9,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
   Input,
   Select,
   SelectContent,
@@ -17,6 +18,7 @@ import {
   SelectValue,
   Separator,
 } from '@/presentation/components/ui'
+import MoneyInput from '@/presentation/components/money-input'
 
 type NewProductFormData = z.infer<typeof schema>
 
@@ -29,8 +31,8 @@ const schema = z.object({
   maxStock: z.number().min(0, 'O estoque máximo não pode ser negativo'),
   description: z.string().optional(),
   image: z.string().optional(),
-  price: z.string().min(0, 'O preço não pode ser negativo'),
-  cost: z.string().min(0, 'O custo não pode ser negativo'),
+  price: z.number().min(0, 'O preço não pode ser negativo'),
+  cost: z.number().min(0, 'O custo não pode ser negativo'),
 })
 
 export function NewProduct() {
@@ -45,8 +47,8 @@ export function NewProduct() {
       maxStock: 0,
       description: '',
       image: '',
-      price: '',
-      cost: '',
+      price: 0,
+      cost: 0,
     },
   })
 
@@ -78,6 +80,7 @@ export function NewProduct() {
                 <FormControl>
                   <Input placeholder="Digite o nome do produto" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -96,10 +99,10 @@ export function NewProduct() {
                       <SelectValue placeholder="Selecione a unidade de medida" />
                     </SelectTrigger>
                   </FormControl>
+                  <FormMessage />
                   <SelectContent>
-                    <SelectItem value="light">Light</SelectItem>
-                    <SelectItem value="dark">Dark</SelectItem>
-                    <SelectItem value="system">System</SelectItem>
+                    <SelectItem value="kg">KG</SelectItem>
+                    <SelectItem value="unit">Unidade</SelectItem>
                   </SelectContent>
                 </Select>
               </FormItem>
@@ -120,6 +123,7 @@ export function NewProduct() {
                       <SelectValue placeholder="Selecione a categoria" />
                     </SelectTrigger>
                   </FormControl>
+                  <FormMessage />
                   <SelectContent>
                     <SelectItem value="light">Light</SelectItem>
                     <SelectItem value="dark">Dark</SelectItem>
@@ -129,29 +133,19 @@ export function NewProduct() {
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
+          <MoneyInput
+            form={form}
+            formItemClassName="col-span-12 md:col-span-6"
+            label="Preço de venda"
             name="price"
-            render={({ field }) => (
-              <FormItem className="col-span-12 md:col-span-6">
-                <FormLabel>Preço de venda</FormLabel>
-                <FormControl>
-                  <Input placeholder="R$ 500,00" {...field} />
-                </FormControl>
-              </FormItem>
-            )}
+            placeholder="R$ 500,00"
           />
-          <FormField
-            control={form.control}
+          <MoneyInput
+            form={form}
+            formItemClassName="col-span-12 md:col-span-6"
+            label="Custo de produção"
             name="cost"
-            render={({ field }) => (
-              <FormItem className="col-span-12 md:col-span-6">
-                <FormLabel>Custo de produção</FormLabel>
-                <FormControl>
-                  <Input placeholder="R$ 100,00" {...field} />
-                </FormControl>
-              </FormItem>
-            )}
+            placeholder="R$ 100,00"
           />
           <FormField
             control={form.control}
@@ -162,6 +156,7 @@ export function NewProduct() {
                 <FormControl>
                   <Input type="number" placeholder="500" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -174,6 +169,7 @@ export function NewProduct() {
                 <FormControl>
                   <Input type="number" placeholder="100" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -186,6 +182,7 @@ export function NewProduct() {
                 <FormControl>
                   <Input type="number" placeholder="1000" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -198,6 +195,7 @@ export function NewProduct() {
                 <FormControl>
                   <Input placeholder="Detalhes sobre o produto" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -210,6 +208,7 @@ export function NewProduct() {
                 <FormControl>
                   <Input type="file" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />

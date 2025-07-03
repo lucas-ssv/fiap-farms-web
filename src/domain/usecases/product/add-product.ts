@@ -12,7 +12,7 @@ export namespace AddProduct {
     minStock: number
     maxStock: number
     unit: string
-    description: string
-    image: string
+    description?: string
+    image?: string
   }
 }
