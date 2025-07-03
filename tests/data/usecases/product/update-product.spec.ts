@@ -30,11 +30,24 @@ class UpdateProductImpl implements UpdateProduct {
   }
 }
 
+type SutTypes = {
+  sut: UpdateProduct
+  updateProductRepositoryMock: UpdateProductRepositoryMock
+}
+
+const makeSut = (): SutTypes => {
+  const updateProductRepositoryMock = new UpdateProductRepositoryMock()
+  const sut = new UpdateProductImpl(updateProductRepositoryMock)
+  return {
+    sut,
+    updateProductRepositoryMock,
+  }
+}
+
 describe('UpdateProduct usecase', () => {
   it('should call UpdateProductRepository with correct values', async () => {
-    const updateProductRepositoryMock = new UpdateProductRepositoryMock()
+    const { sut, updateProductRepositoryMock } = makeSut()
     const updateSpy = jest.spyOn(updateProductRepositoryMock, 'update')
-    const sut = new UpdateProductImpl(updateProductRepositoryMock)
     const params = {
       image: 'any_image',
     }
