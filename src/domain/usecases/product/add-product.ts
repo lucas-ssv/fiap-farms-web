@@ -1,5 +1,5 @@
 export interface AddProduct {
-  execute: (data: AddProduct.Params) => Promise<void>
+  execute: (data: AddProduct.Params) => Promise<AddProduct.ProductId>
 }
 
 export namespace AddProduct {
@@ -15,4 +15,6 @@ export namespace AddProduct {
     description: string
     image: string
   }
+
+  export type ProductId = string
 }
