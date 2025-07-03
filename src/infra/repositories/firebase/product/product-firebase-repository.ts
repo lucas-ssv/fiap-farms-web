@@ -5,11 +5,17 @@ import { productConverter } from './converters'
 import { db } from '@/main/config/firebase'
 
 export class ProductFirebaseRepository implements AddProductRepository {
-  async add(data: AddProductRepository.Params): Promise<void> {
-    await addDoc(collection(db, 'products').withConverter(productConverter), {
-      ...data,
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-    })
+  async add(
+    data: AddProductRepository.Params
+  ): Promise<AddProductRepository.ProductId> {
+    const product = await addDoc(
+      collection(db, 'products').withConverter(productConverter),
+      {
+        ...data,
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+      }
+    )
+    return product.id
   }
 }
