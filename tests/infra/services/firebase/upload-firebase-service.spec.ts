@@ -1,7 +1,7 @@
 import { UploadFirebaseService } from '@/infra/services/firebase'
 import { uriToBlob } from '@/infra/utils'
 import { storage } from '@/main/config/firebase'
-import { ref } from 'firebase/storage'
+import { ref, uploadBytesResumable } from 'firebase/storage'
 import { v4 as uuidv4 } from 'uuid'
 
 jest.mock('uuid', () => ({
@@ -58,5 +58,16 @@ describe('UploadFirebaseService', () => {
     await sut.upload('any_uri')
 
     expect(uriToBlob).toHaveBeenCalledWith('any_uri')
+  })
+
+  it('should call uploadBytesResumable with correct values', async () => {
+    const sut = new UploadFirebaseService()
+
+    await sut.upload('any_document_uri')
+
+    expect(uploadBytesResumable).toHaveBeenCalledWith(
+      'mocked_storage_ref',
+      'mocked_blob'
+    )
   })
 })
