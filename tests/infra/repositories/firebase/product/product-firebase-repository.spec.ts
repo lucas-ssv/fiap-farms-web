@@ -1,8 +1,7 @@
-import type { AddProductRepository } from '@/data/contracts/product'
-import { productConverter } from '@/infra/repositories/firebase/product/converters'
-import { db } from '@/main/config/firebase'
+import { addDoc, collection } from 'firebase/firestore'
+
+import { ProductFirebaseRepository } from '@/infra/repositories/firebase/product'
 import { mockAddProductParams } from '@tests/data/usecases/product/mocks'
-import { addDoc, collection, Timestamp } from 'firebase/firestore'
 
 jest.mock('@/main/config/env', () => ({
   ENV: {
@@ -21,16 +20,6 @@ jest.mock('firebase/firestore', () => ({
     now: jest.fn(() => 'any_timestamp'),
   },
 }))
-
-class ProductFirebaseRepository implements AddProductRepository {
-  async add(data: AddProductRepository.Params): Promise<void> {
-    await addDoc(collection(db, 'products').withConverter(productConverter), {
-      ...data,
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-    })
-  }
-}
 
 describe('ProductFirebaseRepository', () => {
   it('should add a product on success', async () => {
