@@ -1,20 +1,7 @@
 import { AddProductImpl } from '@/data/usecases/product'
 import type { AddProduct } from '@/domain/usecases/product'
 import { AddProductRepositoryMock } from '@tests/data/mocks/product'
-
-const mockAddProductParams: AddProduct.Params = {
-  id: 'any_id',
-  name: 'any_name',
-  price: 100,
-  cost: 50,
-  categoryId: 'any_category_id',
-  stock: 10,
-  minStock: 5,
-  maxStock: 20,
-  unit: 'kg',
-  description: 'any_description',
-  image: 'any_image_url',
-}
+import { mockAddProductParams } from './mocks'
 
 type SutTypes = {
   sut: AddProduct
@@ -34,10 +21,11 @@ describe('AddProduct usecase', () => {
   it('should call AddProductRepository with correct values', async () => {
     const { sut, addProductRepositoryMock } = makeSut()
     const addSpy = jest.spyOn(addProductRepositoryMock, 'add')
+    const params = mockAddProductParams()
 
-    await sut.execute(mockAddProductParams)
+    await sut.execute(params)
 
-    expect(addSpy).toHaveBeenCalledWith(mockAddProductParams)
+    expect(addSpy).toHaveBeenCalledWith(params)
   })
 
   it('should throw if AddProductRepository throws', async () => {
@@ -46,7 +34,7 @@ describe('AddProduct usecase', () => {
       throw new Error()
     })
 
-    const promise = sut.execute(mockAddProductParams)
+    const promise = sut.execute(mockAddProductParams())
 
     await expect(promise).rejects.toThrow()
   })
