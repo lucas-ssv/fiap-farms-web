@@ -9,12 +9,14 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
   Input,
   Separator,
 } from '@/presentation/components/ui'
 import type { AddCategory } from '@/domain/usecases/category'
 import { toast } from 'sonner'
 import { Loader2Icon } from 'lucide-react'
+import { useRef } from 'react'
 
 type NewCategoryFormData = z.infer<typeof schema>
 
@@ -37,12 +39,16 @@ export function NewCategory({ addCategory }: Props) {
       image: undefined,
     },
   })
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const onSubmit = async (data: NewCategoryFormData) => {
     try {
       await addCategory.execute(data)
       toast.success('Categoria adicionada com sucesso!')
       form.reset()
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
     } catch (error) {
       toast.error('Erro ao adicionar categoria. Tente novamente.')
     }
@@ -72,6 +78,7 @@ export function NewCategory({ addCategory }: Props) {
                 <FormControl>
                   <Input placeholder="Digite o nome da categoria" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -84,6 +91,7 @@ export function NewCategory({ addCategory }: Props) {
                 <FormControl>
                   <Input placeholder="Detalhes sobre a categoria" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -100,14 +108,16 @@ export function NewCategory({ addCategory }: Props) {
                       const file = e.target.files?.[0]
                       field.onChange(file)
                     }}
+                    ref={fileInputRef}
                   />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
           <div className="col-span-12">
             <Button
-              className="w-full md:w-auto"
+              className="w-full cursor-pointer md:w-auto"
               form="new-product-form"
               disabled={form.formState.isSubmitting}
             >
