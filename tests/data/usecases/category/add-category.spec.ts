@@ -54,4 +54,26 @@ describe('AddCategory', () => {
 
     expect(uploadSpy).not.toHaveBeenCalled()
   })
+
+  it('should throw if AddCategoryRepository throws', async () => {
+    const { sut, addCategoryRepositoryMock } = makeSut()
+    jest.spyOn(addCategoryRepositoryMock, 'add').mockImplementationOnce(() => {
+      throw new Error()
+    })
+
+    const promise = sut.execute(mockAddCategoryParams())
+
+    await expect(promise).rejects.toThrow()
+  })
+
+  it('should throw if UploadService throws', async () => {
+    const { sut, uploadServiceMock } = makeSut()
+    jest.spyOn(uploadServiceMock, 'upload').mockImplementationOnce(() => {
+      throw new Error()
+    })
+
+    const promise = sut.execute(mockAddCategoryParams())
+
+    await expect(promise).rejects.toThrow()
+  })
 })
