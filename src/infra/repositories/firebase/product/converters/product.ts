@@ -22,7 +22,7 @@ export const productConverter: FirestoreDataConverter<Product> = {
       maxStock: product.maxStock,
       unit: product.unit,
       description: product.description,
-      image: product.image,
+      image: product.image ?? null,
       createdAt: product.createdAt,
       updatedAt: product.updatedAt,
     }

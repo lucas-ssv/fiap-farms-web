@@ -9,10 +9,10 @@ export namespace AddProduct {
     cost: number
     categoryId: string
     stock: number
-    minStock: number
-    maxStock: number
+    minStock?: number
+    maxStock?: number
     unit: string
     description?: string
-    image?: string
+    image?: File
   }
 }

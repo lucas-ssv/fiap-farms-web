@@ -35,14 +35,27 @@ describe('AddProduct usecase', () => {
   it('should call AddProductRepository with correct values', async () => {
     const { sut, addProductRepositoryMock } = makeSut()
     const addSpy = jest.spyOn(addProductRepositoryMock, 'add')
+    const { image, ...dataWithoutImage } = mockAddProductParams()
+
+    await sut.execute(dataWithoutImage)
+
+    expect(addSpy).toHaveBeenCalledWith(dataWithoutImage)
+  })
+
+  it('should not call UploadService and UpdateProductRepository if there is no image to save', async () => {
+    const { sut, uploadServiceMock, updateProductRepositoryMock } = makeSut()
+    const uploadSpy = jest.spyOn(uploadServiceMock, 'upload')
+    const updateSpy = jest.spyOn(updateProductRepositoryMock, 'update')
     const params = mockAddProductParams()
+    params.image = undefined
 
     await sut.execute(params)
 
-    expect(addSpy).toHaveBeenCalledWith(params)
+    expect(uploadSpy).not.toHaveBeenCalled()
+    expect(updateSpy).not.toHaveBeenCalled()
   })
 
-  it('should call UploadService with correct values', async () => {
+  it('should call UploadService if there is an image to save', async () => {
     const { sut, uploadServiceMock } = makeSut()
     const uploadSpy = jest.spyOn(uploadServiceMock, 'upload')
     const params = mockAddProductParams()
@@ -52,7 +65,7 @@ describe('AddProduct usecase', () => {
     expect(uploadSpy).toHaveBeenCalledWith(params.image)
   })
 
-  it('should call UpdateProductRepository with correct values', async () => {
+  it('should call UpdateProductRepository if there is an image to save', async () => {
     const { sut, updateProductRepositoryMock } = makeSut()
     const updateSpy = jest.spyOn(updateProductRepositoryMock, 'update')
     const params = mockAddProductParams()

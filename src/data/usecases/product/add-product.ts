@@ -21,10 +21,13 @@ export class AddProductImpl implements AddProduct {
   }
 
   async execute(data: AddProduct.Params): Promise<void> {
-    const productId = await this.addProductRepository.add(data)
-    const { url } = await this.uploadService.upload(data.image)
-    await this.updateProductRepository.update(productId, {
-      image: url,
-    })
+    const { image, ...dataWithoutImage } = data
+    const productId = await this.addProductRepository.add(dataWithoutImage)
+    if (image) {
+      const { url } = await this.uploadService.upload(image)
+      await this.updateProductRepository.update(productId, {
+        image: url,
+      })
+    }
   }
 }

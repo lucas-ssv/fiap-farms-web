@@ -1,5 +1,5 @@
 export interface UploadService {
-  upload: (uri: string) => Promise<UploadService.Result>
+  upload: (file: File) => Promise<UploadService.Result>
 }
 
 export namespace UploadService {

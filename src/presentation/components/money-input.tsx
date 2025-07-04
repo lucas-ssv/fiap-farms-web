@@ -1,5 +1,4 @@
-'use client'
-import { useReducer } from 'react'
+import { useEffect, useReducer } from 'react'
 import {
   FormControl,
   FormField,
@@ -29,14 +28,23 @@ const moneyFormatter = Intl.NumberFormat('pt-BR', {
 })
 
 export default function MoneyInput(props: TextInputProps) {
-  const initialValue = props.form.getValues()[props.name]
-    ? moneyFormatter.format(props.form.getValues()[props.name])
-    : ''
+  const { form, name } = props
 
   const [value, setValue] = useReducer((_: any, next: string) => {
     const digits = next.replace(/\D/g, '')
     return moneyFormatter.format(Number(digits) / 100)
-  }, initialValue)
+  }, '')
+
+  useEffect(() => {
+    const subscription = form.watch((values) => {
+      if (!values[name]) {
+        setValue('')
+      } else {
+        setValue(moneyFormatter.format(values[name]))
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [form, name])
 
   function handleChange(
     realChangeFn: (value: number) => void,
@@ -49,10 +57,9 @@ export default function MoneyInput(props: TextInputProps) {
 
   return (
     <FormField
-      control={props.form.control}
-      name={props.name}
+      control={form.control}
+      name={name}
       render={({ field }) => {
-        field.value = value
         const _change = field.onChange
 
         return (
@@ -62,7 +69,6 @@ export default function MoneyInput(props: TextInputProps) {
               <Input
                 placeholder={props.placeholder}
                 type="text"
-                {...field}
                 onChange={(ev) => {
                   setValue(ev.target.value)
                   handleChange(_change, ev.target.value)
