@@ -1,11 +1,24 @@
 import { AddCategoryImpl } from '@/data/usecases/category'
 import { AddCategoryRepositoryMock } from '@tests/data/mocks/category'
 
+type SutTypes = {
+  sut: AddCategoryImpl
+  addCategoryRepositoryMock: AddCategoryRepositoryMock
+}
+
+const makeSut = (): SutTypes => {
+  const addCategoryRepositoryMock = new AddCategoryRepositoryMock()
+  const sut = new AddCategoryImpl(addCategoryRepositoryMock)
+  return {
+    sut,
+    addCategoryRepositoryMock,
+  }
+}
+
 describe('AddCategory', () => {
   it('should call AddCategoryRepository with correct values', async () => {
-    const addCategoryRepositoryMock = new AddCategoryRepositoryMock()
+    const { sut, addCategoryRepositoryMock } = makeSut()
     const addSpy = jest.spyOn(addCategoryRepositoryMock, 'add')
-    const sut = new AddCategoryImpl(addCategoryRepositoryMock)
     const data = {
       name: 'any_name',
       description: 'any_description',
