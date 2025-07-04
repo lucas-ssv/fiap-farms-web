@@ -22,7 +22,8 @@ import MoneyInput from '@/presentation/components/money-input'
 import type { AddProduct } from '@/domain/usecases/product'
 import { toast } from 'sonner'
 import { Loader2Icon } from 'lucide-react'
-import { useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import type { LoadCategories } from '@/domain/usecases/category'
 
 type NewProductFormData = z.infer<typeof schema>
 
@@ -47,9 +48,10 @@ const schema = z.object({
 
 type Props = {
   addProduct: AddProduct
+  loadCategories: LoadCategories
 }
 
-export function NewProduct({ addProduct }: Props) {
+export function NewProduct({ addProduct, loadCategories }: Props) {
   const form = useForm<NewProductFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -61,6 +63,7 @@ export function NewProduct({ addProduct }: Props) {
     },
   })
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [categories, setCategories] = useState<LoadCategories.Result>([])
 
   const onSubmit = async (data: NewProductFormData) => {
     try {
@@ -74,6 +77,19 @@ export function NewProduct({ addProduct }: Props) {
       toast.error('Erro ao adicionar produto. Tente novamente mais tarde.')
     }
   }
+
+  const fetchCategories = useCallback(async () => {
+    try {
+      const categories = await loadCategories.execute()
+      setCategories(categories)
+    } catch (error) {
+      toast.error('Erro ao carregar categorias. Tente novamente mais tarde.')
+    }
+  }, [loadCategories])
+
+  useEffect(() => {
+    fetchCategories()
+  }, [fetchCategories])
 
   return (
     <main>
@@ -138,9 +154,11 @@ export function NewProduct({ addProduct }: Props) {
                   </FormControl>
                   <FormMessage />
                   <SelectContent>
-                    <SelectItem value="light">Light</SelectItem>
-                    <SelectItem value="dark">Dark</SelectItem>
-                    <SelectItem value="system">System</SelectItem>
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </FormItem>

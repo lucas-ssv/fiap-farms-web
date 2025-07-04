@@ -1,13 +1,9 @@
 import type { AddCategoryRepository } from '@/data/contracts/category'
-import type {
-  DocumentData,
-  FirestoreDataConverter,
-  Timestamp,
-} from 'firebase/firestore'
+import type { DocumentData, FirestoreDataConverter } from 'firebase/firestore'
 
 export type Category = AddCategoryRepository.Params & {
-  createdAt: Timestamp
-  updatedAt: Timestamp
+  createdAt: Date
+  updatedAt: Date
 }
 
 export const categoryConverter: FirestoreDataConverter<Category> = {
