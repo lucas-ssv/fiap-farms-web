@@ -33,4 +33,17 @@ describe('LoadCategories usecase', () => {
 
     expect(categories).toEqual(mockCategoriesResult())
   })
+
+  it('should throw if LoadCategoriesRepository throws', async () => {
+    const { sut, loadCategoriesRepositoryStub } = makeSut()
+    jest
+      .spyOn(loadCategoriesRepositoryStub, 'loadAll')
+      .mockImplementationOnce(() => {
+        throw new Error()
+      })
+
+    const promise = sut.execute()
+
+    await expect(promise).rejects.toThrow()
+  })
 })
