@@ -1,6 +1,7 @@
 import { AddCategoryImpl } from '@/data/usecases/category'
 import { AddCategoryRepositoryMock } from '@tests/data/mocks/category'
 import { UploadServiceMock } from '@tests/data/mocks/services'
+import { mockAddCategoryParams } from './mocks'
 
 type SutTypes = {
   sut: AddCategoryImpl
@@ -23,11 +24,7 @@ describe('AddCategory', () => {
   it('should call AddCategoryRepository with correct values', async () => {
     const { sut, addCategoryRepositoryMock } = makeSut()
     const addSpy = jest.spyOn(addCategoryRepositoryMock, 'add')
-    const data = {
-      name: 'any_name',
-      description: 'any_description',
-      image: new File([''], 'any_image.png', { type: 'image/png' }),
-    }
+    const data = mockAddCategoryParams()
 
     await sut.execute(data)
 
@@ -40,14 +37,21 @@ describe('AddCategory', () => {
   it('should call UploadService with correct values', async () => {
     const { sut, uploadServiceMock } = makeSut()
     const uploadSpy = jest.spyOn(uploadServiceMock, 'upload')
-    const data = {
-      name: 'any_name',
-      description: 'any_description',
-      image: new File([''], 'any_image.png', { type: 'image/png' }),
-    }
+    const data = mockAddCategoryParams()
 
     await sut.execute(data)
 
     expect(uploadSpy).toHaveBeenCalledWith(data.image)
+  })
+
+  it('should not call UploadService if image is not provided', async () => {
+    const { sut, uploadServiceMock } = makeSut()
+    const uploadSpy = jest.spyOn(uploadServiceMock, 'upload')
+    const data = mockAddCategoryParams()
+    data.image = undefined
+
+    await sut.execute(data)
+
+    expect(uploadSpy).not.toHaveBeenCalled()
   })
 })
