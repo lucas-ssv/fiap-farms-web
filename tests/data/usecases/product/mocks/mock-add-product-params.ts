@@ -11,6 +11,6 @@ export const mockAddProductParams = (): AddProduct.Params => {
     maxStock: 20,
     unit: 'kg',
     description: 'any_description',
-    image: 'any_image_url',
+    image: new File([''], 'any_image.png', { type: 'image/png' }),
   }
 }

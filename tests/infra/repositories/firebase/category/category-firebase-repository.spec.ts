@@ -15,6 +15,30 @@ jest.mock('@/main/config/env', () => ({
 jest.mock('firebase/firestore', () => ({
   addDoc: jest.fn().mockResolvedValue({ id: 'any_category_id' }),
   collection: jest.fn(),
+  query: jest.fn(),
+  getDocs: jest.fn().mockResolvedValue({
+    empty: false,
+    forEach: (callback: any) => {
+      callback({
+        id: 'any_category_id',
+        data: () => ({
+          id: '1',
+          name: 'Fruits',
+          description: 'Fresh fruits',
+          image: 'fruit.jpg',
+        }),
+      })
+      callback({
+        id: 'any_category_id',
+        data: () => ({
+          id: '2',
+          name: 'Vegetables',
+          description: 'Organic vegetables',
+          image: 'vegetable.jpg',
+        }),
+      })
+    },
+  }),
   getFirestore: jest.fn(),
   updateDoc: jest.fn(),
   doc: jest.fn(),
@@ -74,6 +98,29 @@ describe('CategoryFirebaseRepository', () => {
         mockedCollectionWithConverter,
         data
       )
+    })
+  })
+
+  describe('loadAll()', () => {
+    it('should load all categories on success', async () => {
+      const sut = new CategoryFirebaseRepository()
+
+      const categories = await sut.loadAll()
+
+      expect(categories).toEqual([
+        {
+          id: 'any_category_id',
+          name: 'Fruits',
+          description: 'Fresh fruits',
+          image: 'fruit.jpg',
+        },
+        {
+          id: 'any_category_id',
+          name: 'Vegetables',
+          description: 'Organic vegetables',
+          image: 'vegetable.jpg',
+        },
+      ])
     })
   })
 })
