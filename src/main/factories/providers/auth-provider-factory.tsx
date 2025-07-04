@@ -2,7 +2,7 @@ import type { PropsWithChildren } from 'react'
 
 import { AuthProvider } from '@/presentation/contexts'
 import { ObserveAndLoadAccountByEmailImpl } from '@/data/usecases/account'
-import { AccountFirebaseRepository } from '@/infra/repositories/firebase'
+import { AccountFirebaseRepository } from '@/infra/repositories/firebase/account'
 
 export function MakeAuthProvider({ children }: PropsWithChildren) {
   const accountFirebaseRepository = new AccountFirebaseRepository()

@@ -1,12 +1,33 @@
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, type NextOrObserver, type User as FirebaseUser, onAuthStateChanged, signOut } from "firebase/auth"
-import { addDoc, collection, getDocs, query, Timestamp, where } from "firebase/firestore"
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  type NextOrObserver,
+  type User as FirebaseUser,
+  onAuthStateChanged,
+  signOut,
+} from 'firebase/auth'
+import {
+  addDoc,
+  collection,
+  getDocs,
+  query,
+  Timestamp,
+  where,
+} from 'firebase/firestore'
 
-import type { AddAccountRepository, AuthRepository, LoadAccountByEmailRepository, LoadAccountRepository, LogoutAccountRepository, SaveUserRepository } from "@/data/contracts/account"
-import { auth, db } from "@/main/config/firebase"
-import { userConverter, type User } from "./converters"
+import type {
+  AddAccountRepository,
+  AuthRepository,
+  LoadAccountByEmailRepository,
+  LoadAccountRepository,
+  LogoutAccountRepository,
+  SaveUserRepository,
+} from '@/data/contracts/account'
+import { auth, db } from '@/main/config/firebase'
+import { userConverter, type User } from './converters'
 
 export class AccountFirebaseRepository
-  implements 
+  implements
     AddAccountRepository,
     SaveUserRepository,
     LoadAccountRepository,
@@ -25,11 +46,11 @@ export class AccountFirebaseRepository
   }
 
   async loadByEmail(
-    email: string,
+    email: string
   ): Promise<LoadAccountByEmailRepository.Result | null> {
     const q = query(
       collection(db, 'users').withConverter(userConverter),
-      where('email', '==', email),
+      where('email', '==', email)
     )
     const querySnapshot = await getDocs(q)
     let user: User | null = null

@@ -9,6 +9,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
   Input,
   Select,
   SelectContent,
@@ -17,41 +18,56 @@ import {
   SelectValue,
   Separator,
 } from '@/presentation/components/ui'
+import MoneyInput from '@/presentation/components/money-input'
+import type { AddProduct } from '@/domain/usecases/product'
+import { toast } from 'sonner'
+import { Loader2Icon } from 'lucide-react'
 
 type NewProductFormData = z.infer<typeof schema>
 
 const schema = z.object({
   name: z.string().min(1, 'O nome é obrigatório'),
-  unitMeasure: z.string().min(1, 'A unidade de medida é obrigatória'),
-  category: z.string().min(1, 'A categoria é obrigatória'),
-  currentStock: z.number().min(0, 'O estoque atual não pode ser negativo'),
-  minStock: z.number().min(0, 'O estoque mínimo não pode ser negativo'),
-  maxStock: z.number().min(0, 'O estoque máximo não pode ser negativo'),
+  unit: z.string().min(1, 'A unidade de medida é obrigatória'),
+  categoryId: z.string().min(1, 'A categoria é obrigatória'),
+  stock: z
+    .number('Campo obrigatório')
+    .min(0, 'O estoque não pode ser negativo'),
+  minStock: z
+    .number('Campo obrigatório')
+    .min(0, 'O estoque mínimo não pode ser negativo'),
+  maxStock: z
+    .number('Campo obrigatório')
+    .min(0, 'O estoque máximo não pode ser negativo'),
   description: z.string().optional(),
-  image: z.string().optional(),
-  price: z.string().min(0, 'O preço não pode ser negativo'),
-  cost: z.string().min(0, 'O custo não pode ser negativo'),
+  image: z.file().optional(),
+  price: z.number('Campo obrigatório').min(0, 'O preço não pode ser negativo'),
+  cost: z.number('Campo obrigatório').min(0, 'O custo não pode ser negativo'),
 })
 
-export function NewProduct() {
+type Props = {
+  addProduct: AddProduct
+}
+
+export function NewProduct({ addProduct }: Props) {
   const form = useForm<NewProductFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: '',
-      unitMeasure: '',
-      category: '',
-      currentStock: 0,
-      minStock: 0,
-      maxStock: 0,
+      unit: '',
+      categoryId: '',
       description: '',
-      image: '',
-      price: '',
-      cost: '',
+      image: undefined,
     },
   })
 
-  const onSubmit = (data: NewProductFormData) => {
-    console.log('Form submitted:', data)
+  const onSubmit = async (data: NewProductFormData) => {
+    try {
+      await addProduct.execute(data)
+      toast.success('Produto adicionado com sucesso!')
+      form.reset()
+    } catch (error) {
+      toast.error('Erro ao adicionar produto. Tente novamente mais tarde.')
+    }
   }
 
   return (
@@ -78,28 +94,26 @@ export function NewProduct() {
                 <FormControl>
                   <Input placeholder="Digite o nome do produto" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
           <FormField
             control={form.control}
-            name="unitMeasure"
+            name="unit"
             render={({ field }) => (
               <FormItem className="col-span-12 md:col-span-6 xl:col-span-3">
                 <FormLabel>Unidade de medida</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Selecione a unidade de medida" />
                     </SelectTrigger>
                   </FormControl>
+                  <FormMessage />
                   <SelectContent>
-                    <SelectItem value="light">Light</SelectItem>
-                    <SelectItem value="dark">Dark</SelectItem>
-                    <SelectItem value="system">System</SelectItem>
+                    <SelectItem value="kg">KG</SelectItem>
+                    <SelectItem value="unit">Unidade</SelectItem>
                   </SelectContent>
                 </Select>
               </FormItem>
@@ -107,19 +121,17 @@ export function NewProduct() {
           />
           <FormField
             control={form.control}
-            name="category"
+            name="categoryId"
             render={({ field }) => (
               <FormItem className="col-span-12 md:col-span-6 xl:col-span-3">
                 <FormLabel>Categoria</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Selecione a categoria" />
                     </SelectTrigger>
                   </FormControl>
+                  <FormMessage />
                   <SelectContent>
                     <SelectItem value="light">Light</SelectItem>
                     <SelectItem value="dark">Dark</SelectItem>
@@ -129,63 +141,68 @@ export function NewProduct() {
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
+          <MoneyInput
+            form={form}
+            formItemClassName="col-span-12 md:col-span-6"
+            label="Preço de venda (unidade)"
             name="price"
-            render={({ field }) => (
-              <FormItem className="col-span-12 md:col-span-6">
-                <FormLabel>Preço de venda</FormLabel>
-                <FormControl>
-                  <Input placeholder="R$ 500,00" {...field} />
-                </FormControl>
-              </FormItem>
-            )}
+            placeholder="R$ 500,00"
           />
-          <FormField
-            control={form.control}
+          <MoneyInput
+            form={form}
+            formItemClassName="col-span-12 md:col-span-6"
+            label="Custo de produção (total)"
             name="cost"
-            render={({ field }) => (
-              <FormItem className="col-span-12 md:col-span-6">
-                <FormLabel>Custo de produção</FormLabel>
-                <FormControl>
-                  <Input placeholder="R$ 100,00" {...field} />
-                </FormControl>
-              </FormItem>
-            )}
+            placeholder="R$ 100,00"
           />
           <FormField
             control={form.control}
-            name="currentStock"
-            render={({ field }) => (
+            name="stock"
+            render={() => (
               <FormItem className="col-span-12 md:col-span-4">
                 <FormLabel>Estoque atual</FormLabel>
                 <FormControl>
-                  <Input type="number" placeholder="500" {...field} />
+                  <Input
+                    type="number"
+                    placeholder="500"
+                    {...form.register('stock', { valueAsNumber: true })}
+                  />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
           <FormField
             control={form.control}
             name="minStock"
-            render={({ field }) => (
+            render={() => (
               <FormItem className="col-span-12 md:col-span-4">
                 <FormLabel>Estoque mínimo</FormLabel>
                 <FormControl>
-                  <Input type="number" placeholder="100" {...field} />
+                  <Input
+                    type="number"
+                    placeholder="100"
+                    {...form.register('minStock', { valueAsNumber: true })}
+                  />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
           <FormField
             control={form.control}
             name="maxStock"
-            render={({ field }) => (
+            render={() => (
               <FormItem className="col-span-12 md:col-span-4">
                 <FormLabel>Estoque máximo</FormLabel>
                 <FormControl>
-                  <Input type="number" placeholder="1000" {...field} />
+                  <Input
+                    type="number"
+                    placeholder="1000"
+                    {...form.register('maxStock', { valueAsNumber: true })}
+                  />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -198,6 +215,7 @@ export function NewProduct() {
                 <FormControl>
                   <Input placeholder="Detalhes sobre o produto" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -208,13 +226,27 @@ export function NewProduct() {
               <FormItem className="col-span-12 md:col-span-6 lg:col-span-3">
                 <FormLabel>Imagem do produto</FormLabel>
                 <FormControl>
-                  <Input type="file" {...field} />
+                  <Input
+                    type="file"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      field.onChange(file)
+                    }}
+                  />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
           <div className="col-span-12">
-            <Button className="w-full md:w-auto" form="new-product-form">
+            <Button
+              className="w-full cursor-pointer md:w-auto"
+              form="new-product-form"
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting && (
+                <Loader2Icon className="animate-spin" />
+              )}
               Adicionar produto
             </Button>
           </div>
