@@ -24,7 +24,7 @@ export class AddCategoryImpl implements AddCategory {
     const { image, ...dataWithoutImage } = data
     const categoryId = await this.addCategoryRepository.add(dataWithoutImage)
     if (image) {
-      const { url } = await this.uploadService.upload(image)
+      const { url } = await this.uploadService.upload(image, 'categories')
       await this.updateCategoryRepository.update(categoryId, {
         image: url,
       })

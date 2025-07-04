@@ -24,7 +24,7 @@ export class AddProductImpl implements AddProduct {
     const { image, ...dataWithoutImage } = data
     const productId = await this.addProductRepository.add(dataWithoutImage)
     if (image) {
-      const { url } = await this.uploadService.upload(image)
+      const { url } = await this.uploadService.upload(image, 'products')
       await this.updateProductRepository.update(productId, {
         image: url,
       })

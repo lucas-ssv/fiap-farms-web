@@ -4,9 +4,9 @@ import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
 import { v4 as uuidv4 } from 'uuid'
 
 export class UploadFirebaseService implements UploadService {
-  async upload(file: File): Promise<UploadService.Result> {
+  async upload(file: File, folderName?: string): Promise<UploadService.Result> {
     const fileName = uuidv4()
-    const storageRef = ref(storage, `products/${fileName}`)
+    const storageRef = ref(storage, `${folderName}/${fileName}`)
     const blob = new Blob([file], { type: file.type })
     const snapshot = await uploadBytes(storageRef, blob)
     const downloadUrl = await getDownloadURL(snapshot.ref)

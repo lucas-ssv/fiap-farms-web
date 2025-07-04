@@ -48,10 +48,11 @@ describe('UploadFirebaseService', () => {
 
   it('should call ref with correct values', async () => {
     const sut = new UploadFirebaseService()
+    const folderName = 'any_folder'
 
-    await sut.upload(new File(['content'], 'mocked_file.txt'))
+    await sut.upload(new File(['content'], 'mocked_file.txt'), folderName)
 
-    expect(ref).toHaveBeenCalledWith(storage, 'products/any_uuid')
+    expect(ref).toHaveBeenCalledWith(storage, `${folderName}/any_uuid`)
   })
 
   it('should return the filename and download URL', async () => {

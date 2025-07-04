@@ -51,7 +51,7 @@ describe('AddCategory', () => {
 
     await sut.execute(data)
 
-    expect(uploadSpy).toHaveBeenCalledWith(data.image)
+    expect(uploadSpy).toHaveBeenCalledWith(data.image, 'categories')
   })
 
   it('should not call UploadService if image is not provided', async () => {
