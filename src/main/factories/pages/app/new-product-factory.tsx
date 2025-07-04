@@ -1,4 +1,6 @@
+import { LoadCategoriesImpl } from '@/data/usecases/category'
 import { AddProductImpl } from '@/data/usecases/product'
+import { CategoryFirebaseRepository } from '@/infra/repositories/firebase/category'
 import { ProductFirebaseRepository } from '@/infra/repositories/firebase/product'
 import { UploadFirebaseService } from '@/infra/services/firebase'
 import { NewProduct } from '@/presentation/pages/app/Products'
@@ -11,5 +13,7 @@ export function MakeNewProduct() {
     uploadService,
     productFirebaseRepository
   )
-  return <NewProduct addProduct={addProduct} />
+  const categoryFirebaseRepository = new CategoryFirebaseRepository()
+  const loadCategories = new LoadCategoriesImpl(categoryFirebaseRepository)
+  return <NewProduct addProduct={addProduct} loadCategories={loadCategories} />
 }
