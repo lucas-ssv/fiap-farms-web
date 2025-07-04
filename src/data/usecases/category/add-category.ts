@@ -17,6 +17,8 @@ export class AddCategoryImpl implements AddCategory {
   async execute(data: AddCategory.Params): Promise<void> {
     const { image, ...dataWithoutImage } = data
     await this.addCategoryRepository.add(dataWithoutImage)
-    await this.uploadService.upload(image!)
+    if (image) {
+      await this.uploadService.upload(image)
+    }
   }
 }
