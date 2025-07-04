@@ -9,7 +9,6 @@ export class LoadCategoriesImpl implements LoadCategories {
   }
 
   async execute(): Promise<LoadCategories.Result> {
-    await this.loadCategoriesRepository.loadAll()
-    return []
+    return await this.loadCategoriesRepository.loadAll()
   }
 }
