@@ -6,11 +6,15 @@ export const mockCategoriesResult = (): LoadCategories.Result => [
     name: 'Fruits',
     description: 'Fresh fruits',
     image: 'fruit.jpg',
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
   {
     id: '2',
     name: 'Vegetables',
     description: 'Organic vegetables',
     image: 'vegetable.jpg',
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
 ]

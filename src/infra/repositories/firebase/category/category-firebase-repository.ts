@@ -65,6 +65,8 @@ export class CategoryFirebaseRepository
         name: category.name,
         description: category.description,
         image: category.image as string | undefined,
+        createdAt: category.createdAt,
+        updatedAt: category.updatedAt,
       })
     })
     return categories

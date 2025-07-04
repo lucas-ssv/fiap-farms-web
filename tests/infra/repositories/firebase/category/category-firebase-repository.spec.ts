@@ -3,6 +3,8 @@ import { addDoc, collection, doc, updateDoc } from 'firebase/firestore'
 import { mockAddCategoryParams } from '@tests/data/usecases/category/mocks'
 import { CategoryFirebaseRepository } from '@/infra/repositories/firebase/category'
 
+jest.useFakeTimers()
+
 jest.mock('@/main/config/env', () => ({
   ENV: {
     APP_ID: 'any_app_id',
@@ -26,6 +28,8 @@ jest.mock('firebase/firestore', () => ({
           name: 'Fruits',
           description: 'Fresh fruits',
           image: 'fruit.jpg',
+          createdAt: new Date(),
+          updatedAt: new Date(),
         }),
       })
       callback({
@@ -35,6 +39,8 @@ jest.mock('firebase/firestore', () => ({
           name: 'Vegetables',
           description: 'Organic vegetables',
           image: 'vegetable.jpg',
+          createdAt: new Date(),
+          updatedAt: new Date(),
         }),
       })
     },
@@ -113,12 +119,16 @@ describe('CategoryFirebaseRepository', () => {
           name: 'Fruits',
           description: 'Fresh fruits',
           image: 'fruit.jpg',
+          createdAt: expect.any(Date),
+          updatedAt: expect.any(Date),
         },
         {
           id: 'any_category_id',
           name: 'Vegetables',
           description: 'Organic vegetables',
           image: 'vegetable.jpg',
+          createdAt: expect.any(Date),
+          updatedAt: expect.any(Date),
         },
       ])
     })
