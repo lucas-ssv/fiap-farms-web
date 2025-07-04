@@ -1,11 +1,24 @@
 import { LoadCategoriesImpl } from '@/data/usecases/category'
 import { LoadCategoriesRepositoryStub } from '@tests/data/mocks/category'
 
+type SutTypes = {
+  sut: LoadCategoriesImpl
+  loadCategoriesRepositoryStub: LoadCategoriesRepositoryStub
+}
+
+const makeSut = (): SutTypes => {
+  const loadCategoriesRepositoryStub = new LoadCategoriesRepositoryStub()
+  const sut = new LoadCategoriesImpl(loadCategoriesRepositoryStub)
+  return {
+    sut,
+    loadCategoriesRepositoryStub,
+  }
+}
+
 describe('LoadCategories usecase', () => {
   it('should call LoadCategoriesRepository', async () => {
-    const loadCategoriesRepositoryStub = new LoadCategoriesRepositoryStub()
+    const { sut, loadCategoriesRepositoryStub } = makeSut()
     const loadAllSpy = jest.spyOn(loadCategoriesRepositoryStub, 'loadAll')
-    const sut = new LoadCategoriesImpl(loadCategoriesRepositoryStub)
 
     await sut.execute()
 
