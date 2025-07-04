@@ -9,30 +9,49 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
   Input,
   Separator,
 } from '@/presentation/components/ui'
+import type { AddCategory } from '@/domain/usecases/category'
+import { toast } from 'sonner'
+import { Loader2Icon } from 'lucide-react'
+import { useRef } from 'react'
 
 type NewCategoryFormData = z.infer<typeof schema>
 
 const schema = z.object({
   name: z.string().min(1, 'O nome é obrigatório'),
   description: z.string().optional(),
-  image: z.string().optional(),
+  image: z.file().optional(),
 })
 
-export function NewCategory() {
+type Props = {
+  addCategory: AddCategory
+}
+
+export function NewCategory({ addCategory }: Props) {
   const form = useForm<NewCategoryFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: '',
       description: '',
-      image: '',
+      image: undefined,
     },
   })
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const onSubmit = (data: NewCategoryFormData) => {
-    console.log('Form submitted:', data)
+  const onSubmit = async (data: NewCategoryFormData) => {
+    try {
+      await addCategory.execute(data)
+      toast.success('Categoria adicionada com sucesso!')
+      form.reset()
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    } catch (error) {
+      toast.error('Erro ao adicionar categoria. Tente novamente.')
+    }
   }
 
   return (
@@ -59,6 +78,7 @@ export function NewCategory() {
                 <FormControl>
                   <Input placeholder="Digite o nome da categoria" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -71,6 +91,7 @@ export function NewCategory() {
                 <FormControl>
                   <Input placeholder="Detalhes sobre a categoria" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -81,13 +102,28 @@ export function NewCategory() {
               <FormItem className="col-span-12 md:col-span-6 lg:col-span-3">
                 <FormLabel>Imagem da categoria</FormLabel>
                 <FormControl>
-                  <Input type="file" {...field} />
+                  <Input
+                    type="file"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      field.onChange(file)
+                    }}
+                    ref={fileInputRef}
+                  />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
           <div className="col-span-12">
-            <Button className="w-full md:w-auto" form="new-product-form">
+            <Button
+              className="w-full cursor-pointer md:w-auto"
+              form="new-product-form"
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting && (
+                <Loader2Icon className="animate-spin" />
+              )}
               Adicionar categoria
             </Button>
           </div>

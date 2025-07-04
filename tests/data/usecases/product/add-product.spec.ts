@@ -62,7 +62,7 @@ describe('AddProduct usecase', () => {
 
     await sut.execute(params)
 
-    expect(uploadSpy).toHaveBeenCalledWith(params.image)
+    expect(uploadSpy).toHaveBeenCalledWith(params.image, 'products')
   })
 
   it('should call UpdateProductRepository if there is an image to save', async () => {

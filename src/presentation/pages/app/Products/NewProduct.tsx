@@ -22,6 +22,7 @@ import MoneyInput from '@/presentation/components/money-input'
 import type { AddProduct } from '@/domain/usecases/product'
 import { toast } from 'sonner'
 import { Loader2Icon } from 'lucide-react'
+import { useRef } from 'react'
 
 type NewProductFormData = z.infer<typeof schema>
 
@@ -59,12 +60,16 @@ export function NewProduct({ addProduct }: Props) {
       image: undefined,
     },
   })
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const onSubmit = async (data: NewProductFormData) => {
     try {
       await addProduct.execute(data)
       toast.success('Produto adicionado com sucesso!')
       form.reset()
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
     } catch (error) {
       toast.error('Erro ao adicionar produto. Tente novamente mais tarde.')
     }
@@ -232,6 +237,7 @@ export function NewProduct({ addProduct }: Props) {
                       const file = e.target.files?.[0]
                       field.onChange(file)
                     }}
+                    ref={fileInputRef}
                   />
                 </FormControl>
                 <FormMessage />

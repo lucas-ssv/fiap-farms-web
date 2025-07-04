@@ -2,11 +2,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router'
 
 import { MakeLogin, MakeSignUp } from '@/main/factories/pages/auth'
 import { Dashboard } from '@/presentation/pages/app'
-import {
-  Categories,
-  NewCategory,
-  Products,
-} from '@/presentation/pages/app/Products'
+import { Categories, Products } from '@/presentation/pages/app/Products'
 import { AppLayout, AuthLayout } from '@/presentation/pages/_layouts'
 import { ProtectedRoute } from './ProtectedRoute'
 import { GuestRoute } from './GuestRoute'
@@ -18,7 +14,7 @@ import {
 } from '@/presentation/pages/app/Sales'
 import { Goals, NewGoal } from '@/presentation/pages/app/Goals'
 import { Productions } from '@/presentation/pages/app/Productions'
-import { MakeNewProduct } from '@/main/factories/pages/app'
+import { MakeNewCategory, MakeNewProduct } from '@/main/factories/pages/app'
 
 export function Routes() {
   const router = createBrowserRouter([
@@ -48,7 +44,7 @@ export function Routes() {
             },
             {
               path: 'categories/new',
-              element: <NewCategory />,
+              element: <MakeNewCategory />,
             },
             {
               path: '/sales',
