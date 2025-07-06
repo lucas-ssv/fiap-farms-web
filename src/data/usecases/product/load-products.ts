@@ -9,7 +9,6 @@ export class LoadProductsImpl implements LoadProducts {
   }
 
   async execute(): Promise<LoadProducts.Result> {
-    await this.loadProductsRepository.loadAll()
-    return []
+    return await this.loadProductsRepository.loadAll()
   }
 }
