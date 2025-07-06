@@ -49,9 +49,7 @@ export class ProductFirebaseRepository
   }
 
   async loadAll(): Promise<LoadProductsRepository.Result> {
-    const q = query(
-      collection(db, 'categories').withConverter(productConverter)
-    )
+    const q = query(collection(db, 'products').withConverter(productConverter))
     const querySnapshot = await getDocs(q)
 
     if (querySnapshot.empty) {
@@ -59,37 +57,35 @@ export class ProductFirebaseRepository
     }
 
     const products: LoadProductsRepository.Result = []
-    querySnapshot.forEach(async (snapshot) => {
+    for (const snapshot of querySnapshot.docs) {
       const productId = snapshot.id
       const product = snapshot.data()
 
-      if (product.categoryId) {
-        const categoryRef = doc(
-          db,
-          'categories',
-          product.categoryId
-        ).withConverter(loadCategoriesConverter)
-        const categorySnapshot = await getDoc(categoryRef)
+      const categoryRef = doc(
+        db,
+        'categories',
+        product.categoryId
+      ).withConverter(loadCategoriesConverter)
 
-        const category = categorySnapshot.data() as any
+      const categorySnapshot = await getDoc(categoryRef)
+      const category = categorySnapshot.data() as any
 
-        products.push({
-          id: productId,
-          name: product.name,
-          price: product.price,
-          cost: product.cost,
-          category,
-          stock: product.stock,
-          minStock: product.minStock,
-          maxStock: product.maxStock,
-          unit: product.unit,
-          description: product.description,
-          image: product.image as string | undefined,
-          createdAt: product.createdAt,
-          updatedAt: product.updatedAt,
-        })
-      }
-    })
+      products.push({
+        id: productId,
+        name: product.name,
+        price: product.price,
+        cost: product.cost,
+        category,
+        stock: product.stock,
+        minStock: product.minStock,
+        maxStock: product.maxStock,
+        unit: product.unit,
+        description: product.description,
+        image: product.image as string | undefined,
+        createdAt: product.createdAt,
+        updatedAt: product.updatedAt,
+      })
+    }
     return products
   }
 }

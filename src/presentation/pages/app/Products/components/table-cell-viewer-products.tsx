@@ -2,65 +2,74 @@ import { useIsMobile } from '@/presentation/hooks'
 import { z } from 'zod/v4'
 import {
   Button,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
   Drawer,
   DrawerClose,
   DrawerContent,
-  DrawerDescription,
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
   Input,
-  Label,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Separator,
-  type ChartConfig,
 } from '@/presentation/components/ui'
-import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
-import { TrendingUp } from 'lucide-react'
+import type { ProductModel } from '@/domain/models/product'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import MoneyInput from '@/presentation/components/money-input'
 
 const schema = z.object({
-  id: z.string(),
-  name: z.string(),
-  category: z.string(),
-  currentStock: z.number(),
-  price: z.string(),
-  cost: z.string(),
-  unitProfit: z.string(),
+  name: z.string().optional(),
+  categoryId: z.string().optional(),
+  stock: z
+    .number()
+    .int()
+    .min(0, 'O estoque deve ser um número positivo')
+    .optional(),
+  minStock: z
+    .number()
+    .int()
+    .min(0, 'O estoque mínimo deve ser um número positivo')
+    .optional(),
+  maxStock: z
+    .number()
+    .int()
+    .min(0, 'O estoque máximo deve ser um número positivo')
+    .optional(),
+  price: z.number().positive('O preço deve ser um valor positivo').optional(),
+  cost: z.number().positive('O custo deve ser um valor positivo').optional(),
+  description: z.string().optional(),
+  unit: z.string().optional(),
 })
 
-const chartData = [
-  { month: 'January', desktop: 186 },
-  { month: 'February', desktop: 305 },
-  { month: 'March', desktop: 237 },
-  { month: 'April', desktop: 73 },
-  { month: 'May', desktop: 209 },
-  { month: 'June', desktop: 214 },
-]
-const chartConfig = {
-  desktop: {
-    label: 'Desktop',
-    color: 'var(--primary)',
-  },
-  mobile: {
-    label: 'Mobile',
-    color: 'var(--primary)',
-  },
-} satisfies ChartConfig
+type UpdateProductFormData = z.infer<typeof schema>
 
-export function TableCellViewerProducts({
-  item,
-}: {
-  item: z.infer<typeof schema>
-}) {
+export function TableCellViewerProducts({ item }: { item: ProductModel }) {
   const isMobile = useIsMobile()
+  const form = useForm<UpdateProductFormData>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      name: item.name,
+      categoryId: item.category.id,
+      stock: item.stock,
+      minStock: item.minStock,
+      maxStock: item.maxStock,
+      price: item.price,
+      cost: item.cost,
+      description: item.description,
+      unit: item.unit,
+    },
+  })
+
   return (
     <Drawer direction={isMobile ? 'bottom' : 'right'}>
       <DrawerTrigger asChild>
@@ -71,118 +80,159 @@ export function TableCellViewerProducts({
       <DrawerContent>
         <DrawerHeader className="gap-1">
           <DrawerTitle>{item.name}</DrawerTitle>
-          <DrawerDescription>
-            Lucro unitário nos últimos 6 meses
-          </DrawerDescription>
         </DrawerHeader>
         <div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
-          {!isMobile && (
-            <>
-              <ChartContainer config={chartConfig}>
-                <AreaChart
-                  accessibilityLayer
-                  data={chartData}
-                  margin={{
-                    left: 0,
-                    right: 10,
-                  }}
-                >
-                  <CartesianGrid vertical={false} />
-                  <XAxis
-                    dataKey="month"
-                    tickLine={false}
-                    axisLine={false}
-                    tickMargin={8}
-                    tickFormatter={(value) => value.slice(0, 3)}
-                    hide
-                  />
-                  <ChartTooltip
-                    cursor={false}
-                    content={<ChartTooltipContent indicator="dot" />}
-                  />
-                  <Area
-                    dataKey="mobile"
-                    type="natural"
-                    fill="var(--color-mobile)"
-                    fillOpacity={0.6}
-                    stroke="var(--color-mobile)"
-                    stackId="a"
-                  />
-                  <Area
-                    dataKey="desktop"
-                    type="natural"
-                    fill="var(--color-desktop)"
-                    fillOpacity={0.4}
-                    stroke="var(--color-desktop)"
-                    stackId="a"
-                  />
-                </AreaChart>
-              </ChartContainer>
-              <Separator />
-              <div className="grid gap-2">
-                <div className="flex gap-2 leading-none font-medium">
-                  Tendência de alta de 5,2% neste mês
-                  <TrendingUp className="size-4" />
-                </div>
-                <div className="text-muted-foreground">
-                  Showing total visitors for the last 6 months. This is just
-                  some random text to test the layout. It spans multiple lines
-                  and should wrap around.
-                </div>
-              </div>
-              <Separator />
-            </>
-          )}
-          <form className="flex flex-col gap-4">
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="name">Nome</Label>
-              <Input id="name" defaultValue={item.name} />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+          <img
+            src={item.image}
+            className="w-full h-1/3 object-cover rounded-lg"
+            loading="lazy"
+            alt="Imagem do produto"
+          />
+          <Form {...form}>
+            <form className="flex flex-col gap-4">
               <div className="flex flex-col gap-3">
-                <Label htmlFor="category">Categoria</Label>
-                <Select defaultValue={item.category}>
-                  <SelectTrigger id="category" className="w-full">
-                    <SelectValue placeholder="Selecione a categoria" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Category A">Categoria A</SelectItem>
-                    <SelectItem value="Executive Summary">
-                      Executive Summary
-                    </SelectItem>
-                    <SelectItem value="Technical Approach">
-                      Technical Approach
-                    </SelectItem>
-                    <SelectItem value="Design">Design</SelectItem>
-                    <SelectItem value="Capabilities">Capabilities</SelectItem>
-                    <SelectItem value="Focus Documents">
-                      Focus Documents
-                    </SelectItem>
-                    <SelectItem value="Narrative">Narrative</SelectItem>
-                    <SelectItem value="Cover Page">Cover Page</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="currentStock">Estoque atual</Label>
-                <Input
-                  type="number"
-                  id="currentStock"
-                  defaultValue={item.currentStock}
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem className="col-span-12 xl:col-span-6">
+                      <FormLabel>Nome do produto</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Digite o nome do produto"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="price">Preço</Label>
-                <Input id="price" defaultValue={item.price} />
-              </div>
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="cost">Custo</Label>
-                <Input id="cost" defaultValue={item.cost} />
-              </div>
-            </div>
-          </form>
+              <FormField
+                control={form.control}
+                name="unit"
+                render={({ field }) => (
+                  <FormItem className="col-span-12 md:col-span-6 xl:col-span-3">
+                    <FormLabel>Unidade de medida</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Selecione a unidade de medida" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <FormMessage />
+                      <SelectContent>
+                        <SelectItem value="kg">KG</SelectItem>
+                        <SelectItem value="unit">Unidade</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="categoryId"
+                render={({ field }) => (
+                  <FormItem className="col-span-12 md:col-span-6 xl:col-span-3">
+                    <FormLabel>Categoria</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Selecione a categoria" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <FormMessage />
+                      <SelectContent>
+                        <SelectItem value="kg">KG</SelectItem>
+                        <SelectItem value="unit">Unidade</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+              <MoneyInput
+                form={form}
+                formItemClassName="col-span-12 md:col-span-6"
+                label="Preço de venda (unidade)"
+                name="price"
+                placeholder="R$ 500,00"
+              />
+              <MoneyInput
+                form={form}
+                formItemClassName="col-span-12 md:col-span-6"
+                label="Custo de produção (total)"
+                name="cost"
+                placeholder="R$ 100,00"
+              />
+              <FormField
+                control={form.control}
+                name="stock"
+                render={() => (
+                  <FormItem className="col-span-12 md:col-span-4">
+                    <FormLabel>Estoque atual</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="500"
+                        {...form.register('stock', { valueAsNumber: true })}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="minStock"
+                render={() => (
+                  <FormItem className="col-span-12 md:col-span-4">
+                    <FormLabel>Estoque mínimo</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="100"
+                        {...form.register('minStock', { valueAsNumber: true })}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="maxStock"
+                render={() => (
+                  <FormItem className="col-span-12 md:col-span-4">
+                    <FormLabel>Estoque máximo</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="1000"
+                        {...form.register('maxStock', { valueAsNumber: true })}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem className="col-span-12 md:col-span-6 lg:col-span-9">
+                    <FormLabel>Descrição</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Detalhes sobre o produto"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </form>
+          </Form>
         </div>
         <DrawerFooter>
           <DrawerClose asChild>

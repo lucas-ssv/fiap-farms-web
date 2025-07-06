@@ -33,9 +33,8 @@ jest.mock('firebase/firestore', () => ({
     }),
   }),
   getDocs: jest.fn().mockResolvedValue({
-    empty: false,
-    forEach: (callback: any) => {
-      callback({
+    docs: [
+      {
         id: 'any_product_id',
         data: () => ({
           name: 'any_name',
@@ -51,8 +50,9 @@ jest.mock('firebase/firestore', () => ({
           createdAt: 'any_timestamp',
           updatedAt: 'any_timestamp',
         }),
-      })
-    },
+      },
+    ],
+    empty: false,
   }),
   Timestamp: {
     now: jest.fn(() => 'any_timestamp'),
