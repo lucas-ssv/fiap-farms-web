@@ -33,4 +33,17 @@ describe('LoadProducts usecase', () => {
 
     expect(products).toEqual(mockProductsResult())
   })
+
+  it('should throw if LoadProductsRepository throws', async () => {
+    const { sut, loadProductsRepositoryStub } = makeSut()
+    jest
+      .spyOn(loadProductsRepositoryStub, 'loadAll')
+      .mockImplementationOnce(() => {
+        throw new Error()
+      })
+
+    const promise = sut.execute()
+
+    await expect(promise).rejects.toThrow()
+  })
 })
