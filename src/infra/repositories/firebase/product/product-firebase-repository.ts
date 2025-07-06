@@ -2,6 +2,7 @@ import {
   addDoc,
   collection,
   doc,
+  getDoc,
   getDocs,
   query,
   Timestamp,
@@ -15,6 +16,7 @@ import type {
 } from '@/data/contracts/product'
 import { productConverter } from './converters'
 import { db } from '@/main/config/firebase'
+import { loadCategoriesConverter } from '../category/converters'
 
 export class ProductFirebaseRepository
   implements
@@ -57,24 +59,36 @@ export class ProductFirebaseRepository
     }
 
     const products: LoadProductsRepository.Result = []
-    querySnapshot.forEach((doc) => {
-      const productId = doc.id
-      const product = doc.data()
-      products.push({
-        id: productId,
-        name: product.name,
-        description: product.description,
-        price: product.price,
-        cost: product.cost,
-        categoryId: product.categoryId,
-        stock: product.stock,
-        minStock: product.minStock,
-        maxStock: product.maxStock,
-        unit: product.unit,
-        image: product.image as string | undefined,
-        createdAt: product.createdAt,
-        updatedAt: product.updatedAt,
-      })
+    querySnapshot.forEach(async (snapshot) => {
+      const productId = snapshot.id
+      const product = snapshot.data()
+
+      if (product.categoryId) {
+        const categoryRef = doc(
+          db,
+          'categories',
+          product.categoryId
+        ).withConverter(loadCategoriesConverter)
+        const categorySnapshot = await getDoc(categoryRef)
+
+        const category = categorySnapshot.data() as any
+
+        products.push({
+          id: productId,
+          name: product.name,
+          price: product.price,
+          cost: product.cost,
+          category,
+          stock: product.stock,
+          minStock: product.minStock,
+          maxStock: product.maxStock,
+          unit: product.unit,
+          description: product.description,
+          image: product.image as string | undefined,
+          createdAt: product.createdAt,
+          updatedAt: product.updatedAt,
+        })
+      }
     })
     return products
   }

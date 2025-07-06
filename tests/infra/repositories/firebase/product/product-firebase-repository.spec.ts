@@ -3,6 +3,8 @@ import { addDoc, collection, doc, updateDoc } from 'firebase/firestore'
 import { ProductFirebaseRepository } from '@/infra/repositories/firebase/product'
 import { mockAddProductParams } from '@tests/data/usecases/product/mocks'
 
+jest.useFakeTimers()
+
 jest.mock('@/main/config/env', () => ({
   ENV: {
     APP_ID: 'any_app_id',
@@ -19,6 +21,17 @@ jest.mock('firebase/firestore', () => ({
   updateDoc: jest.fn(),
   doc: jest.fn(),
   query: jest.fn(),
+  getDoc: jest.fn().mockResolvedValue({
+    exists: () => true,
+    data: () => ({
+      id: 'any_category_id',
+      name: 'any_category_name',
+      description: 'any_category_description',
+      image: 'any_category_image',
+      createdAt: 'any_timestamp',
+      updatedAt: 'any_timestamp',
+    }),
+  }),
   getDocs: jest.fn().mockResolvedValue({
     empty: false,
     forEach: (callback: any) => {
@@ -112,7 +125,14 @@ describe('ProductFirebaseRepository', () => {
           name: 'any_name',
           price: 100,
           cost: 50,
-          categoryId: 'any_category_id',
+          category: {
+            id: 'any_category_id',
+            name: 'any_category_name',
+            description: 'any_category_description',
+            image: 'any_category_image',
+            createdAt: 'any_timestamp',
+            updatedAt: 'any_timestamp',
+          },
           stock: 10,
           minStock: 5,
           maxStock: 20,

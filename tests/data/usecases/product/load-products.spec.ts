@@ -2,6 +2,8 @@ import { LoadProductsImpl } from '@/data/usecases/product'
 import { LoadProductsRepositoryStub } from '@tests/data/mocks/product'
 import { mockProductsResult } from '@tests/data/mocks/product/mocks'
 
+jest.useFakeTimers()
+
 type SutTypes = {
   sut: LoadProductsImpl
   loadProductsRepositoryStub: LoadProductsRepositoryStub

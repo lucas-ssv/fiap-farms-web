@@ -1,9 +1,11 @@
+import type { CategoryModel } from '@/domain/models/category'
+
 export interface ProductModel {
   id: string
   name: string
   price: number
   cost: number
-  categoryId: string
+  category: CategoryModel
   stock: number
   minStock?: number
   maxStock?: number
