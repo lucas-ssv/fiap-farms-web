@@ -1,5 +1,6 @@
 import { LoadProductsImpl } from '@/data/usecases/product'
 import { LoadProductsRepositoryStub } from '@tests/data/mocks/product'
+import { mockProductsResult } from '@tests/data/mocks/product/mocks'
 
 type SutTypes = {
   sut: LoadProductsImpl
@@ -23,5 +24,13 @@ describe('LoadProducts usecase', () => {
     await sut.execute()
 
     expect(loadAllSpy).toHaveBeenCalled()
+  })
+
+  it('should return a list of products on success', async () => {
+    const { sut } = makeSut()
+
+    const products = await sut.execute()
+
+    expect(products).toEqual(mockProductsResult())
   })
 })
