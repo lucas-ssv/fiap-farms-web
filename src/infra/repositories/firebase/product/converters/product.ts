@@ -1,13 +1,9 @@
 import type { AddProductRepository } from '@/data/contracts/product'
-import type {
-  DocumentData,
-  FirestoreDataConverter,
-  Timestamp,
-} from 'firebase/firestore'
+import type { DocumentData, FirestoreDataConverter } from 'firebase/firestore'
 
 export type Product = AddProductRepository.Params & {
-  createdAt: Timestamp
-  updatedAt: Timestamp
+  createdAt: Date
+  updatedAt: Date
 }
 
 export const productConverter: FirestoreDataConverter<Product> = {
