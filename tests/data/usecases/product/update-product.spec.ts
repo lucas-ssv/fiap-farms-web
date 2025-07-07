@@ -21,7 +21,7 @@ describe('UpdateProduct usecase', () => {
     const { sut, updateProductRepositoryMock } = makeSut()
     const updateSpy = jest.spyOn(updateProductRepositoryMock, 'update')
     const params = {
-      image: 'any_image',
+      image: new File([''], 'any_image.png', { type: 'image/png' }),
     }
 
     await sut.execute('any_product_id', params)
@@ -38,7 +38,7 @@ describe('UpdateProduct usecase', () => {
       })
 
     const promise = sut.execute('any_product_id', {
-      image: 'any_image',
+      image: new File([''], 'any_image.png', { type: 'image/png' }),
     })
 
     await expect(promise).rejects.toThrow()
