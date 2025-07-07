@@ -13,6 +13,6 @@ export namespace UpdateProduct {
     maxStock?: number
     unit?: string
     description?: string
-    image?: string
+    image?: File
   }
 }
