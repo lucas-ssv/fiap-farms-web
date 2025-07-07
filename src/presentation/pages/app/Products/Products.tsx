@@ -23,7 +23,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/presentation/components/ui/dropdown-menu'
 import { Input } from '@/presentation/components/ui/input'
@@ -44,46 +43,11 @@ import {
   SelectValue,
 } from '@/presentation/components/ui'
 import { TableCellViewerProducts } from './components'
+import type { ProductModel } from '@/domain/models/product'
+import type { LoadProducts } from '@/domain/usecases/product'
+import { toast } from 'sonner'
 
-const data: Product[] = [
-  {
-    id: '1',
-    name: 'Product 1',
-    category: 'Category A',
-    currentStock: 100,
-    price: '20.00',
-    cost: '15.00',
-    unitProfit: '5.00',
-  },
-  {
-    id: '2',
-    name: 'Product 2',
-    category: 'Category B',
-    currentStock: 50,
-    price: '30.00',
-    cost: '20.00',
-    unitProfit: '10.00',
-  },
-  {
-    id: '3',
-    name: 'Product 3',
-    category: 'Category A',
-    currentStock: 75,
-    price: '25.00',
-    cost: '18.00',
-    unitProfit: '7.00',
-  },
-]
-
-type Product = {
-  id: string
-  name: string
-  category: string
-  currentStock: number
-  price: string
-  cost: string
-  unitProfit: string
-}
+type Product = ProductModel
 
 const columns: ColumnDef<Product>[] = [
   {
@@ -100,7 +64,7 @@ const columns: ColumnDef<Product>[] = [
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         >
-          Nome
+          Produto
           <ArrowUpDown />
         </Button>
       )
@@ -110,24 +74,45 @@ const columns: ColumnDef<Product>[] = [
     },
   },
   {
-    accessorKey: 'category',
+    accessorKey: 'category.name',
     header: () => <p>Categoria</p>,
   },
   {
-    accessorKey: 'currentStock',
+    accessorKey: 'stock',
     header: () => <p>Estoque Atual</p>,
+    cell: ({ getValue, row }) => {
+      const value = getValue() as number
+      return (
+        <span>
+          {value}
+          {row.original.unit === 'unit' ? ' unidades' : ' kg'}
+        </span>
+      )
+    },
+  },
+  {
+    accessorKey: 'minStock',
+    header: () => <p>Estoque Mínimo</p>,
+  },
+  {
+    accessorKey: 'maxStock',
+    header: () => <p>Estoque Máximo</p>,
   },
   {
     accessorKey: 'price',
     header: () => <p>Preço</p>,
+    cell: ({ getValue }) => {
+      const value = getValue() as number
+      return <span>R$ {value.toFixed(2)}</span>
+    },
   },
   {
     accessorKey: 'cost',
     header: () => <p>Custo</p>,
-  },
-  {
-    accessorKey: 'unitProfit',
-    header: () => <p>Lucro Unitário</p>,
+    cell: ({ getValue }) => {
+      const value = getValue() as number
+      return <span>R$ {value.toFixed(2)}</span>
+    },
   },
   {
     id: 'actions',
@@ -142,11 +127,7 @@ const columns: ColumnDef<Product>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-32">
-            <DropdownMenuItem>Edit</DropdownMenuItem>
-            <DropdownMenuItem>Make a copy</DropdownMenuItem>
-            <DropdownMenuItem>Favorite</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
+            <DropdownMenuItem variant="destructive">Remover</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )
@@ -154,7 +135,11 @@ const columns: ColumnDef<Product>[] = [
   },
 ]
 
-export function Products() {
+type Props = {
+  loadProducts: LoadProducts
+}
+
+export function Products({ loadProducts }: Props) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -162,9 +147,10 @@ export function Products() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
+  const [products, setProducts] = React.useState<Product[]>([])
 
   const table = useReactTable({
-    data,
+    data: products,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -182,24 +168,22 @@ export function Products() {
     },
   })
 
+  const fetchProducts = React.useCallback(async () => {
+    try {
+      const products = await loadProducts.execute()
+      setProducts(products)
+    } catch (error) {
+      toast.error('Erro ao carregar produtos. Tente novamente mais tarde.')
+    }
+  }, [loadProducts])
+
+  React.useEffect(() => {
+    fetchProducts()
+  }, [fetchProducts])
+
   return (
     <div className="@container/card mx-4 mt-4 lg:mx-6">
-      <div className="grid grid-cols-[1fr_2fr] gap-4">
-        <div>
-          <Label htmlFor="rows-per-page" className="text-sm font-medium">
-            Filtrar categoria
-          </Label>
-          <Select>
-            <SelectTrigger className="w-full mt-2">
-              <SelectValue placeholder="Categoria" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="light">Light</SelectItem>
-              <SelectItem value="dark">Dark</SelectItem>
-              <SelectItem value="system">System</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+      <div className="grid gap-4">
         <div>
           <Label htmlFor="rows-per-page" className="text-sm font-medium">
             Filtrar produtos

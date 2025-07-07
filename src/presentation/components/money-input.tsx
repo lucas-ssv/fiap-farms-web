@@ -17,11 +17,9 @@ type TextInputProps = {
   formItemClassName?: string
 }
 
-// Brazilian currency config
+// Formatador para moeda BRL
 const moneyFormatter = Intl.NumberFormat('pt-BR', {
   currency: 'BRL',
-  currencyDisplay: 'symbol',
-  currencySign: 'standard',
   style: 'currency',
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
@@ -35,12 +33,22 @@ export default function MoneyInput(props: TextInputProps) {
     return moneyFormatter.format(Number(digits) / 100)
   }, '')
 
+  // Inicializa com o valor default (apenas na primeira renderização)
+  useEffect(() => {
+    const defaultValue = form.getValues(name)
+    if (defaultValue) {
+      setValue(moneyFormatter.format(defaultValue))
+    }
+  }, [form, name]) // <- só na montagem
+
+  // Assiste mudanças em tempo real
   useEffect(() => {
     const subscription = form.watch((values) => {
-      if (!values[name]) {
+      const watchedValue = values[name]
+      if (!watchedValue) {
         setValue('')
       } else {
-        setValue(moneyFormatter.format(values[name]))
+        setValue(moneyFormatter.format(watchedValue))
       }
     })
     return () => subscription.unsubscribe()

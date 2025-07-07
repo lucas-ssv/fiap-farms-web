@@ -2,6 +2,8 @@ import { LoadCategoriesImpl } from '@/data/usecases/category'
 import { LoadCategoriesRepositoryStub } from '@tests/data/mocks/category'
 import { mockCategoriesResult } from '@tests/data/mocks/category/mocks'
 
+jest.useFakeTimers()
+
 type SutTypes = {
   sut: LoadCategoriesImpl
   loadCategoriesRepositoryStub: LoadCategoriesRepositoryStub

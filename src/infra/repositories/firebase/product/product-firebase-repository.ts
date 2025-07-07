@@ -2,19 +2,27 @@ import {
   addDoc,
   collection,
   doc,
+  getDoc,
+  getDocs,
+  query,
   Timestamp,
   updateDoc,
 } from 'firebase/firestore'
 
 import type {
   AddProductRepository,
+  LoadProductsRepository,
   UpdateProductRepository,
 } from '@/data/contracts/product'
 import { productConverter } from './converters'
 import { db } from '@/main/config/firebase'
+import { loadCategoriesConverter } from '../category/converters'
 
 export class ProductFirebaseRepository
-  implements AddProductRepository, UpdateProductRepository
+  implements
+    AddProductRepository,
+    UpdateProductRepository,
+    LoadProductsRepository
 {
   async add(
     data: AddProductRepository.Params
@@ -38,5 +46,46 @@ export class ProductFirebaseRepository
       doc(db, 'products', productId).withConverter(productConverter),
       data
     )
+  }
+
+  async loadAll(): Promise<LoadProductsRepository.Result> {
+    const q = query(collection(db, 'products').withConverter(productConverter))
+    const querySnapshot = await getDocs(q)
+
+    if (querySnapshot.empty) {
+      return []
+    }
+
+    const products: LoadProductsRepository.Result = []
+    for (const snapshot of querySnapshot.docs) {
+      const productId = snapshot.id
+      const product = snapshot.data()
+
+      const categoryRef = doc(
+        db,
+        'categories',
+        product.categoryId
+      ).withConverter(loadCategoriesConverter)
+
+      const categorySnapshot = await getDoc(categoryRef)
+      const category = categorySnapshot.data() as any
+
+      products.push({
+        id: productId,
+        name: product.name,
+        price: product.price,
+        cost: product.cost,
+        category,
+        stock: product.stock,
+        minStock: product.minStock,
+        maxStock: product.maxStock,
+        unit: product.unit,
+        description: product.description,
+        image: product.image as string | undefined,
+        createdAt: product.createdAt,
+        updatedAt: product.updatedAt,
+      })
+    }
+    return products
   }
 }
