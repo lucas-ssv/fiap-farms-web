@@ -69,13 +69,21 @@ export class ProductFirebaseRepository
 
       const categorySnapshot = await getDoc(categoryRef)
       const category = categorySnapshot.data() as any
+      const categoryId = categorySnapshot.id
 
       products.push({
         id: productId,
         name: product.name,
         price: product.price,
         cost: product.cost,
-        category,
+        category: {
+          id: categoryId,
+          name: category.name,
+          description: category.description,
+          image: category.image as string | undefined,
+          createdAt: category.createdAt,
+          updatedAt: category.updatedAt,
+        },
         stock: product.stock,
         minStock: product.minStock,
         maxStock: product.maxStock,
