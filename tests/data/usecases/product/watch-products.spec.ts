@@ -38,4 +38,18 @@ describe('WatchProducts usecase', () => {
 
     expect(unsubscribe).toBe(unsubscribeSpy)
   })
+
+  it('should throw if WatchProductsRepository throws', async () => {
+    const { sut, watchProductsRepositoryStub } = makeSut()
+    jest
+      .spyOn(watchProductsRepositoryStub, 'watchAll')
+      .mockImplementationOnce(() => {
+        throw new Error()
+      })
+    const onChange = jest.fn()
+
+    const promise = sut.execute(onChange)
+
+    await expect(promise).rejects.toThrow()
+  })
 })
