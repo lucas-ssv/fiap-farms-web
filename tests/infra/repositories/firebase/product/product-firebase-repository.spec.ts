@@ -1,4 +1,10 @@
-import { addDoc, collection, doc, updateDoc } from 'firebase/firestore'
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  updateDoc,
+} from 'firebase/firestore'
 
 import { ProductFirebaseRepository } from '@/infra/repositories/firebase/product'
 import { mockAddProductParams } from '@tests/data/usecases/product/mocks'
@@ -19,6 +25,7 @@ jest.mock('firebase/firestore', () => ({
   collection: jest.fn(),
   getFirestore: jest.fn(),
   updateDoc: jest.fn(),
+  deleteDoc: jest.fn(),
   doc: jest.fn(),
   query: jest.fn(),
   getDoc: jest.fn().mockResolvedValue({
@@ -146,6 +153,23 @@ describe('ProductFirebaseRepository', () => {
           updatedAt: 'any_timestamp',
         },
       ])
+    })
+  })
+
+  describe('remove()', () => {
+    it('should remove a product on success', async () => {
+      const mockedCollectionWithConverter = 'mockedCollectionWithConverter'
+      const withConverterMock = jest
+        .fn()
+        .mockReturnValue(mockedCollectionWithConverter)
+      ;(doc as jest.Mock).mockReturnValue({
+        withConverter: withConverterMock,
+      })
+      const sut = new ProductFirebaseRepository()
+
+      await sut.remove('any_product_id')
+
+      expect(deleteDoc).toHaveBeenCalledWith(mockedCollectionWithConverter)
     })
   })
 })
