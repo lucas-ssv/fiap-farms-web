@@ -48,6 +48,7 @@ import type {
   LoadProducts,
   RemoveProduct,
   UpdateProduct,
+  WatchProducts,
 } from '@/domain/usecases/product'
 import { toast } from 'sonner'
 import type { LoadCategories } from '@/domain/usecases/category'
@@ -165,6 +166,7 @@ type Props = {
   loadCategories: LoadCategories
   updateProduct: UpdateProduct
   removeProduct: RemoveProduct
+  watchProducts: WatchProducts
 }
 
 export function Products({
@@ -172,6 +174,7 @@ export function Products({
   loadCategories,
   updateProduct,
   removeProduct,
+  watchProducts,
 }: Props) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -227,6 +230,16 @@ export function Products({
   React.useEffect(() => {
     fetchProducts()
   }, [fetchProducts])
+
+  React.useEffect(() => {
+    const unsubscribe = watchProducts.execute((newProducts) => {
+      setProducts(newProducts)
+    })
+
+    return () => {
+      unsubscribe()
+    }
+  }, [watchProducts])
 
   return (
     <div className="@container/card mx-4 mt-4 lg:mx-6">
