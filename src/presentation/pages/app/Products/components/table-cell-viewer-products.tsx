@@ -27,6 +27,7 @@ import type { ProductModel } from '@/domain/models/product'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import MoneyInput from '@/presentation/components/money-input'
+import type { LoadCategories } from '@/domain/usecases/category'
 
 const schema = z.object({
   name: z.string().optional(),
@@ -54,7 +55,12 @@ const schema = z.object({
 
 type UpdateProductFormData = z.infer<typeof schema>
 
-export function TableCellViewerProducts({ item }: { item: ProductModel }) {
+type Props = {
+  item: ProductModel
+  categories: LoadCategories.Result
+}
+
+export function TableCellViewerProducts({ item, categories }: Props) {
   const isMobile = useIsMobile()
   const form = useForm<UpdateProductFormData>({
     resolver: zodResolver(schema),
@@ -164,23 +170,31 @@ export function TableCellViewerProducts({ item }: { item: ProductModel }) {
               <FormField
                 control={form.control}
                 name="categoryId"
-                render={({ field }) => (
-                  <FormItem className="col-span-12 md:col-span-6 xl:col-span-3">
-                    <FormLabel>Categoria</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Selecione a categoria" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <FormMessage />
-                      <SelectContent>
-                        <SelectItem value="kg">KG</SelectItem>
-                        <SelectItem value="unit">Unidade</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  return (
+                    <FormItem className="col-span-12 md:col-span-6 xl:col-span-3">
+                      <FormLabel>Categoria</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Selecione a categoria" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <FormMessage />
+                        <SelectContent>
+                          {categories.map((category) => (
+                            <SelectItem key={category.id} value={category.id}>
+                              {category.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )
+                }}
               />
               <MoneyInput
                 form={form}

@@ -46,100 +46,109 @@ import { TableCellViewerProducts } from './components'
 import type { ProductModel } from '@/domain/models/product'
 import type { LoadProducts } from '@/domain/usecases/product'
 import { toast } from 'sonner'
+import type { LoadCategories } from '@/domain/usecases/category'
 
 type Product = ProductModel
 
-const columns: ColumnDef<Product>[] = [
-  {
-    accessorKey: 'id',
-    header: () => {
-      return <p>ID</p>
+const columns = (categories: LoadCategories.Result): ColumnDef<Product>[] => {
+  return [
+    {
+      accessorKey: 'id',
+      header: () => {
+        return <p>ID</p>
+      },
     },
-  },
-  {
-    accessorKey: 'name',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          Produto
-          <ArrowUpDown />
-        </Button>
-      )
+    {
+      accessorKey: 'name',
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Produto
+            <ArrowUpDown />
+          </Button>
+        )
+      },
+      cell: ({ row }) => {
+        return (
+          <TableCellViewerProducts
+            item={row.original}
+            categories={categories}
+          />
+        )
+      },
     },
-    cell: ({ row }) => {
-      return <TableCellViewerProducts item={row.original} />
+    {
+      accessorKey: 'category.name',
+      header: () => <p>Categoria</p>,
     },
-  },
-  {
-    accessorKey: 'category.name',
-    header: () => <p>Categoria</p>,
-  },
-  {
-    accessorKey: 'stock',
-    header: () => <p>Estoque Atual</p>,
-    cell: ({ getValue, row }) => {
-      const value = getValue() as number
-      return (
-        <span>
-          {value}
-          {row.original.unit === 'unit' ? ' unidades' : ' kg'}
-        </span>
-      )
+    {
+      accessorKey: 'stock',
+      header: () => <p>Estoque Atual</p>,
+      cell: ({ getValue, row }) => {
+        const value = getValue() as number
+        return (
+          <span>
+            {value}
+            {row.original.unit === 'unit' ? ' unidades' : ' kg'}
+          </span>
+        )
+      },
     },
-  },
-  {
-    accessorKey: 'minStock',
-    header: () => <p>Estoque Mínimo</p>,
-  },
-  {
-    accessorKey: 'maxStock',
-    header: () => <p>Estoque Máximo</p>,
-  },
-  {
-    accessorKey: 'price',
-    header: () => <p>Preço</p>,
-    cell: ({ getValue }) => {
-      const value = getValue() as number
-      return <span>R$ {value.toFixed(2)}</span>
+    {
+      accessorKey: 'minStock',
+      header: () => <p>Estoque Mínimo</p>,
     },
-  },
-  {
-    accessorKey: 'cost',
-    header: () => <p>Custo</p>,
-    cell: ({ getValue }) => {
-      const value = getValue() as number
-      return <span>R$ {value.toFixed(2)}</span>
+    {
+      accessorKey: 'maxStock',
+      header: () => <p>Estoque Máximo</p>,
     },
-  },
-  {
-    id: 'actions',
-    enableHiding: false,
-    cell: () => {
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-32">
-            <DropdownMenuItem variant="destructive">Remover</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
+    {
+      accessorKey: 'price',
+      header: () => <p>Preço</p>,
+      cell: ({ getValue }) => {
+        const value = getValue() as number
+        return <span>R$ {value.toFixed(2)}</span>
+      },
     },
-  },
-]
+    {
+      accessorKey: 'cost',
+      header: () => <p>Custo</p>,
+      cell: ({ getValue }) => {
+        const value = getValue() as number
+        return <span>R$ {value.toFixed(2)}</span>
+      },
+    },
+    {
+      id: 'actions',
+      enableHiding: false,
+      cell: () => {
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-32">
+              <DropdownMenuItem variant="destructive">Remover</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )
+      },
+    },
+  ]
+}
 
 type Props = {
   loadProducts: LoadProducts
+  loadCategories: LoadCategories
 }
 
-export function Products({ loadProducts }: Props) {
+export function Products({ loadProducts, loadCategories }: Props) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -148,10 +157,11 @@ export function Products({ loadProducts }: Props) {
     React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
   const [products, setProducts] = React.useState<Product[]>([])
+  const [categories, setCategories] = React.useState<LoadCategories.Result>([])
 
   const table = useReactTable({
     data: products,
-    columns,
+    columns: columns(categories),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -171,11 +181,25 @@ export function Products({ loadProducts }: Props) {
   const fetchProducts = React.useCallback(async () => {
     try {
       const products = await loadProducts.execute()
+      console.log('products', products)
       setProducts(products)
     } catch (error) {
       toast.error('Erro ao carregar produtos. Tente novamente mais tarde.')
     }
   }, [loadProducts])
+
+  const fetchCategories = React.useCallback(async () => {
+    try {
+      const categories = await loadCategories.execute()
+      setCategories(categories)
+    } catch (error) {
+      toast.error('Erro ao carregar categorias. Tente novamente mais tarde.')
+    }
+  }, [loadCategories])
+
+  React.useEffect(() => {
+    fetchCategories()
+  }, [fetchCategories])
 
   React.useEffect(() => {
     fetchProducts()
