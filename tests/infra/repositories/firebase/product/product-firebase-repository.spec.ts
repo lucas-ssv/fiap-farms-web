@@ -102,7 +102,9 @@ describe('ProductFirebaseRepository', () => {
       })
       const sut = new ProductFirebaseRepository()
       const data = {
-        image: 'any_image',
+        image: new File(['any_image'], 'any_image.jpg', {
+          type: 'image/jpeg',
+        }),
       }
 
       await sut.update('any_product_id', data)
