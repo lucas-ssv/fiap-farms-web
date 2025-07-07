@@ -110,7 +110,6 @@ export function TableCellViewerProducts({
       await updateProduct.execute(item.id, data)
       toast.success('Produto atualizado com sucesso!')
     } catch (error) {
-      console.error('Erro ao atualizar produto:', error)
       toast.error('Erro ao atualizar o produto. Tente novamente.')
     }
   }
