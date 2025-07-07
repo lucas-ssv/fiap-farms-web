@@ -2,9 +2,9 @@ import type { WatchProductsRepository } from '@/data/contracts/product'
 import type { ProductModel } from '@/domain/models/product'
 
 export class WatchProductsRepositoryStub implements WatchProductsRepository {
-  async watchAll(
+  watchAll(
     onChange: WatchProductsRepository.Params
-  ): Promise<WatchProductsRepository.Result> {
+  ): WatchProductsRepository.Result {
     const products: ProductModel[] = [
       {
         id: 'any_product_id',

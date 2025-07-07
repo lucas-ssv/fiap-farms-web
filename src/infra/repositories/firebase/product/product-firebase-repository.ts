@@ -103,9 +103,9 @@ export class ProductFirebaseRepository
     return products
   }
 
-  async watchAll(
+  watchAll(
     onChange: WatchProductsRepository.Params
-  ): Promise<WatchProductsRepository.Result> {
+  ): WatchProductsRepository.Result {
     const q = query(collection(db, 'products').withConverter(productConverter))
 
     const unsubscribe = onSnapshot(q, async (querySnapshot) => {

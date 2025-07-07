@@ -3,7 +3,7 @@ import type { ProductModel } from '@/domain/models/product'
 export interface WatchProductsRepository {
   watchAll: (
     onChange: WatchProductsRepository.Params
-  ) => Promise<WatchProductsRepository.Result>
+  ) => WatchProductsRepository.Result
 }
 
 export namespace WatchProductsRepository {

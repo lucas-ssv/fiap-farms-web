@@ -1,7 +1,7 @@
 import type { ProductModel } from '@/domain/models/product'
 
 export interface WatchProducts {
-  execute: (onChange: WatchProducts.Params) => Promise<WatchProducts.Result>
+  execute: (onChange: WatchProducts.Params) => WatchProducts.Result
 }
 
 export namespace WatchProducts {

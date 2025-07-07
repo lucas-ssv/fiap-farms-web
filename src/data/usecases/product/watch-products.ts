@@ -8,7 +8,7 @@ export class WatchProductsImpl implements WatchProducts {
     this.watchProductsRepository = watchProductsRepository
   }
 
-  async execute(onChange: WatchProducts.Params): Promise<WatchProducts.Result> {
-    return await this.watchProductsRepository.watchAll(onChange)
+  execute(onChange: WatchProducts.Params): WatchProducts.Result {
+    return this.watchProductsRepository.watchAll(onChange)
   }
 }
