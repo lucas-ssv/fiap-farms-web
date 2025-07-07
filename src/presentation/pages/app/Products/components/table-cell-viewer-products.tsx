@@ -28,6 +28,9 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import MoneyInput from '@/presentation/components/money-input'
 import type { LoadCategories } from '@/domain/usecases/category'
+import type { UpdateProduct } from '@/domain/usecases/product'
+import { toast } from 'sonner'
+import { Loader2Icon } from 'lucide-react'
 
 const schema = z.object({
   name: z.string().optional(),
@@ -51,6 +54,7 @@ const schema = z.object({
   cost: z.number().positive('O custo deve ser um valor positivo').optional(),
   description: z.string().optional(),
   unit: z.string().optional(),
+  image: z.file().optional().or(z.url('A imagem deve ser uma URL válida')),
 })
 
 type UpdateProductFormData = z.infer<typeof schema>
@@ -58,9 +62,14 @@ type UpdateProductFormData = z.infer<typeof schema>
 type Props = {
   item: ProductModel
   categories: LoadCategories.Result
+  updateProduct: UpdateProduct
 }
 
-export function TableCellViewerProducts({ item, categories }: Props) {
+export function TableCellViewerProducts({
+  item,
+  categories,
+  updateProduct,
+}: Props) {
   const isMobile = useIsMobile()
   const form = useForm<UpdateProductFormData>({
     resolver: zodResolver(schema),
@@ -74,6 +83,7 @@ export function TableCellViewerProducts({ item, categories }: Props) {
       cost: item.cost,
       description: item.description,
       unit: item.unit,
+      image: item?.image,
     },
   })
   const [image, setImage] = React.useState<string | undefined>(item.image)
@@ -84,8 +94,24 @@ export function TableCellViewerProducts({ item, categories }: Props) {
       const reader = new FileReader()
       reader.onloadend = () => {
         setImage(reader.result as string)
+        form.setValue('image', file)
       }
       reader.readAsDataURL(file)
+    } else {
+      setImage(undefined)
+      form.setValue('image', undefined)
+    }
+  }
+
+  const handleUpdateProduct = async () => {
+    const data = form.getValues()
+
+    try {
+      await updateProduct.execute(item.id, data)
+      toast.success('Produto atualizado com sucesso!')
+    } catch (error) {
+      console.error('Erro ao atualizar produto:', error)
+      toast.error('Erro ao atualizar o produto. Tente novamente.')
     }
   }
 
@@ -105,7 +131,7 @@ export function TableCellViewerProducts({ item, categories }: Props) {
         </DrawerHeader>
         <div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
           <Form {...form}>
-            <form className="flex flex-col gap-4">
+            <form id="form-update" className="flex flex-col gap-4">
               <div>
                 <Input
                   type="file"
@@ -281,9 +307,16 @@ export function TableCellViewerProducts({ item, categories }: Props) {
           </Form>
         </div>
         <DrawerFooter>
-          <DrawerClose asChild>
-            <Button>Atualizar produto</Button>
-          </DrawerClose>
+          <Button
+            form="form-update"
+            onClick={form.handleSubmit(handleUpdateProduct)}
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting && (
+              <Loader2Icon className="animate-spin" />
+            )}
+            Atualizar produto
+          </Button>
           <DrawerClose asChild>
             <Button variant="destructive">Excluir produto</Button>
           </DrawerClose>

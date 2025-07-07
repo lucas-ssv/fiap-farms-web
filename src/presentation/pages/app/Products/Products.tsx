@@ -44,13 +44,16 @@ import {
 } from '@/presentation/components/ui'
 import { TableCellViewerProducts } from './components'
 import type { ProductModel } from '@/domain/models/product'
-import type { LoadProducts } from '@/domain/usecases/product'
+import type { LoadProducts, UpdateProduct } from '@/domain/usecases/product'
 import { toast } from 'sonner'
 import type { LoadCategories } from '@/domain/usecases/category'
 
 type Product = ProductModel
 
-const columns = (categories: LoadCategories.Result): ColumnDef<Product>[] => {
+const columns = (
+  categories: LoadCategories.Result,
+  updateProduct: UpdateProduct
+): ColumnDef<Product>[] => {
   return [
     {
       accessorKey: 'id',
@@ -76,6 +79,7 @@ const columns = (categories: LoadCategories.Result): ColumnDef<Product>[] => {
           <TableCellViewerProducts
             item={row.original}
             categories={categories}
+            updateProduct={updateProduct}
           />
         )
       },
@@ -146,9 +150,14 @@ const columns = (categories: LoadCategories.Result): ColumnDef<Product>[] => {
 type Props = {
   loadProducts: LoadProducts
   loadCategories: LoadCategories
+  updateProduct: UpdateProduct
 }
 
-export function Products({ loadProducts, loadCategories }: Props) {
+export function Products({
+  loadProducts,
+  loadCategories,
+  updateProduct,
+}: Props) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -161,7 +170,7 @@ export function Products({ loadProducts, loadCategories }: Props) {
 
   const table = useReactTable({
     data: products,
-    columns: columns(categories),
+    columns: columns(categories, updateProduct),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -181,7 +190,6 @@ export function Products({ loadProducts, loadCategories }: Props) {
   const fetchProducts = React.useCallback(async () => {
     try {
       const products = await loadProducts.execute()
-      console.log('products', products)
       setProducts(products)
     } catch (error) {
       toast.error('Erro ao carregar produtos. Tente novamente mais tarde.')
