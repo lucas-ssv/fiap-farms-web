@@ -24,4 +24,15 @@ describe('RemoveProduct usecase', () => {
 
     expect(removeSpy).toHaveBeenCalledWith('any_product_id')
   })
+
+  it('should throw if RemoveProductRepository throws', async () => {
+    const { sut, removeProductRepositoryMock } = makeSut()
+    jest
+      .spyOn(removeProductRepositoryMock, 'remove')
+      .mockRejectedValueOnce(new Error('any_error'))
+
+    const promise = sut.execute('any_product_id')
+
+    await expect(promise).rejects.toThrow(new Error('any_error'))
+  })
 })
