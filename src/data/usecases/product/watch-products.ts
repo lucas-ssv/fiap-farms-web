@@ -9,7 +9,6 @@ export class WatchProductsImpl implements WatchProducts {
   }
 
   async execute(onChange: WatchProducts.Params): Promise<WatchProducts.Result> {
-    await this.watchProductsRepository.watchAll(onChange)
-    return () => {}
+    return await this.watchProductsRepository.watchAll(onChange)
   }
 }
