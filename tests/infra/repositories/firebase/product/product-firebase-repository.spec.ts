@@ -3,6 +3,8 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
+  onSnapshot,
   updateDoc,
 } from 'firebase/firestore'
 
@@ -26,6 +28,7 @@ jest.mock('firebase/firestore', () => ({
   getFirestore: jest.fn(),
   updateDoc: jest.fn(),
   deleteDoc: jest.fn(),
+  onSnapshot: jest.fn(),
   doc: jest.fn(),
   query: jest.fn(),
   getDoc: jest.fn().mockResolvedValue({
@@ -130,6 +133,84 @@ describe('ProductFirebaseRepository', () => {
       const products = await sut.loadAll()
 
       expect(products).toEqual([
+        {
+          id: 'any_product_id',
+          name: 'any_name',
+          price: 100,
+          cost: 50,
+          category: {
+            id: 'any_category_id',
+            name: 'any_category_name',
+            description: 'any_category_description',
+            image: 'any_category_image',
+            createdAt: 'any_timestamp',
+            updatedAt: 'any_timestamp',
+          },
+          stock: 10,
+          minStock: 5,
+          maxStock: 20,
+          unit: 'kg',
+          description: 'any_description',
+          image: 'any_image',
+          createdAt: 'any_timestamp',
+          updatedAt: 'any_timestamp',
+        },
+      ])
+    })
+  })
+
+  describe('watchAll()', () => {
+    it('should watch all products on success', async () => {
+      // Mock de category
+      const categoryData = {
+        name: 'any_category_name',
+        description: 'any_category_description',
+        image: 'any_category_image',
+        createdAt: 'any_timestamp',
+        updatedAt: 'any_timestamp',
+      }
+
+      ;(getDoc as jest.Mock).mockResolvedValue({
+        id: 'any_category_id',
+        data: () => categoryData,
+      })
+
+      // Mock do produto retornado
+      const productData = {
+        name: 'any_name',
+        price: 100,
+        cost: 50,
+        categoryId: 'any_category_id',
+        stock: 10,
+        minStock: 5,
+        maxStock: 20,
+        unit: 'kg',
+        description: 'any_description',
+        image: 'any_image',
+        createdAt: 'any_timestamp',
+        updatedAt: 'any_timestamp',
+      }
+
+      // Mock do onSnapshot
+      ;(onSnapshot as jest.Mock).mockImplementation((_q, callback) => {
+        callback({
+          docs: [
+            {
+              id: 'any_product_id',
+              data: () => productData,
+            },
+          ],
+        })
+
+        return jest.fn()
+      })
+
+      const sut = new ProductFirebaseRepository()
+
+      const onChange = jest.fn()
+      await sut.watchAll(onChange)
+
+      expect(onChange).toHaveBeenCalledWith([
         {
           id: 'any_product_id',
           name: 'any_name',

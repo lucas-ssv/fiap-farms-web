@@ -5,6 +5,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  onSnapshot,
   query,
   Timestamp,
   updateDoc,
@@ -15,6 +16,7 @@ import type {
   LoadProductsRepository,
   RemoveProductRepository,
   UpdateProductRepository,
+  WatchProductsRepository,
 } from '@/data/contracts/product'
 import { productConverter } from './converters'
 import { db } from '@/main/config/firebase'
@@ -25,6 +27,7 @@ export class ProductFirebaseRepository
     AddProductRepository,
     UpdateProductRepository,
     LoadProductsRepository,
+    WatchProductsRepository,
     RemoveProductRepository
 {
   async add(
@@ -98,6 +101,57 @@ export class ProductFirebaseRepository
       })
     }
     return products
+  }
+
+  watchAll(
+    onChange: WatchProductsRepository.Params
+  ): WatchProductsRepository.Result {
+    const q = query(collection(db, 'products').withConverter(productConverter))
+
+    const unsubscribe = onSnapshot(q, async (querySnapshot) => {
+      const products = []
+
+      for (const snapshot of querySnapshot.docs) {
+        const product = snapshot.data()
+        const productId = snapshot.id
+
+        const categorySnapshot = await getDoc(
+          doc(db, 'categories', product.categoryId).withConverter(
+            loadCategoriesConverter
+          )
+        )
+
+        const category = categorySnapshot.data()
+        const categoryId = categorySnapshot.id
+
+        products.push({
+          id: productId,
+          name: product.name,
+          price: product.price,
+          cost: product.cost,
+          stock: product.stock,
+          minStock: product.minStock,
+          maxStock: product.maxStock,
+          unit: product.unit,
+          description: product.description,
+          image: product.image as string | undefined,
+          createdAt: product.createdAt,
+          updatedAt: product.updatedAt,
+          category: {
+            id: categoryId,
+            name: category!.name,
+            description: category!.description,
+            image: category!.image,
+            createdAt: category!.createdAt,
+            updatedAt: category!.updatedAt,
+          },
+        })
+      }
+
+      onChange(products)
+    })
+
+    return unsubscribe
   }
 
   async remove(productId: string): Promise<void> {
