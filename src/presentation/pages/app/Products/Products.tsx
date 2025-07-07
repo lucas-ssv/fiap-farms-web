@@ -44,7 +44,11 @@ import {
 } from '@/presentation/components/ui'
 import { TableCellViewerProducts } from './components'
 import type { ProductModel } from '@/domain/models/product'
-import type { LoadProducts, UpdateProduct } from '@/domain/usecases/product'
+import type {
+  LoadProducts,
+  RemoveProduct,
+  UpdateProduct,
+} from '@/domain/usecases/product'
 import { toast } from 'sonner'
 import type { LoadCategories } from '@/domain/usecases/category'
 
@@ -52,7 +56,8 @@ type Product = ProductModel
 
 const columns = (
   categories: LoadCategories.Result,
-  updateProduct: UpdateProduct
+  updateProduct: UpdateProduct,
+  removeProduct: RemoveProduct
 ): ColumnDef<Product>[] => {
   return [
     {
@@ -80,6 +85,7 @@ const columns = (
             item={row.original}
             categories={categories}
             updateProduct={updateProduct}
+            removeProduct={removeProduct}
           />
         )
       },
@@ -128,7 +134,7 @@ const columns = (
     {
       id: 'actions',
       enableHiding: false,
-      cell: () => {
+      cell: ({ row }) => {
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -138,7 +144,14 @@ const columns = (
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-32">
-              <DropdownMenuItem variant="destructive">Remover</DropdownMenuItem>
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={async () =>
+                  await removeProduct.execute(row.original.id)
+                }
+              >
+                Remover
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         )
@@ -151,12 +164,14 @@ type Props = {
   loadProducts: LoadProducts
   loadCategories: LoadCategories
   updateProduct: UpdateProduct
+  removeProduct: RemoveProduct
 }
 
 export function Products({
   loadProducts,
   loadCategories,
   updateProduct,
+  removeProduct,
 }: Props) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -170,7 +185,7 @@ export function Products({
 
   const table = useReactTable({
     data: products,
-    columns: columns(categories, updateProduct),
+    columns: columns(categories, updateProduct, removeProduct),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),

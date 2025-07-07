@@ -4,7 +4,6 @@ import { z } from 'zod/v4'
 import {
   Button,
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerFooter,
   DrawerHeader,
@@ -28,7 +27,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import MoneyInput from '@/presentation/components/money-input'
 import type { LoadCategories } from '@/domain/usecases/category'
-import type { UpdateProduct } from '@/domain/usecases/product'
+import type { RemoveProduct, UpdateProduct } from '@/domain/usecases/product'
 import { toast } from 'sonner'
 import { Loader2Icon } from 'lucide-react'
 
@@ -63,12 +62,14 @@ type Props = {
   item: ProductModel
   categories: LoadCategories.Result
   updateProduct: UpdateProduct
+  removeProduct: RemoveProduct
 }
 
 export function TableCellViewerProducts({
   item,
   categories,
   updateProduct,
+  removeProduct,
 }: Props) {
   const isMobile = useIsMobile()
   const form = useForm<UpdateProductFormData>({
@@ -111,6 +112,15 @@ export function TableCellViewerProducts({
       toast.success('Produto atualizado com sucesso!')
     } catch (error) {
       toast.error('Erro ao atualizar o produto. Tente novamente.')
+    }
+  }
+
+  const handleRemoveProduct = async (productId: string) => {
+    try {
+      await removeProduct.execute(productId)
+      toast.success('Produto removido com sucesso!')
+    } catch (error) {
+      toast.error('Erro ao remover o produto. Tente novamente.')
     }
   }
 
@@ -316,9 +326,12 @@ export function TableCellViewerProducts({
             )}
             Atualizar produto
           </Button>
-          <DrawerClose asChild>
-            <Button variant="destructive">Excluir produto</Button>
-          </DrawerClose>
+          <Button
+            variant="destructive"
+            onClick={() => handleRemoveProduct(item.id)}
+          >
+            Excluir produto
+          </Button>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

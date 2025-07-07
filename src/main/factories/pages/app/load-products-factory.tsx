@@ -1,5 +1,9 @@
 import { LoadCategoriesImpl } from '@/data/usecases/category'
-import { LoadProductsImpl, UpdateProductImpl } from '@/data/usecases/product'
+import {
+  LoadProductsImpl,
+  RemoveProductImpl,
+  UpdateProductImpl,
+} from '@/data/usecases/product'
 import { CategoryFirebaseRepository } from '@/infra/repositories/firebase/category'
 import { ProductFirebaseRepository } from '@/infra/repositories/firebase/product'
 import { UploadFirebaseService } from '@/infra/services/firebase'
@@ -15,11 +19,13 @@ export function MakeProducts() {
     uploadService,
     productFirebaseRepository
   )
+  const removeProduct = new RemoveProductImpl(productFirebaseRepository)
   return (
     <Products
       loadProducts={loadProducts}
       loadCategories={loadCategories}
       updateProduct={updateProduct}
+      removeProduct={removeProduct}
     />
   )
 }
