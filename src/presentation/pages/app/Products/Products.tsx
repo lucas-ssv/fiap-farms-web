@@ -23,7 +23,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/presentation/components/ui/dropdown-menu'
 import { Input } from '@/presentation/components/ui/input'
@@ -46,6 +45,7 @@ import {
 import { TableCellViewerProducts } from './components'
 import type { ProductModel } from '@/domain/models/product'
 import type { LoadProducts } from '@/domain/usecases/product'
+import { toast } from 'sonner'
 
 type Product = ProductModel
 
@@ -127,11 +127,7 @@ const columns: ColumnDef<Product>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-32">
-            <DropdownMenuItem>Edit</DropdownMenuItem>
-            <DropdownMenuItem>Make a copy</DropdownMenuItem>
-            <DropdownMenuItem>Favorite</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
+            <DropdownMenuItem variant="destructive">Remover</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )
@@ -177,7 +173,7 @@ export function Products({ loadProducts }: Props) {
       const products = await loadProducts.execute()
       setProducts(products)
     } catch (error) {
-      console.error('Error fetching products:', error)
+      toast.error('Erro ao carregar produtos. Tente novamente mais tarde.')
     }
   }, [loadProducts])
 

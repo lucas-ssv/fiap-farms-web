@@ -1,3 +1,4 @@
+import React from 'react'
 import { useIsMobile } from '@/presentation/hooks'
 import { z } from 'zod/v4'
 import {
@@ -69,11 +70,26 @@ export function TableCellViewerProducts({ item }: { item: ProductModel }) {
       unit: item.unit,
     },
   })
+  const [image, setImage] = React.useState<string | undefined>(item.image)
+
+  const handleChangeImage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setImage(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
 
   return (
     <Drawer direction={isMobile ? 'bottom' : 'right'}>
       <DrawerTrigger asChild>
-        <Button variant="link" className="text-foreground w-fit px-0 text-left">
+        <Button
+          variant="link"
+          className="text-foreground cursor-pointer w-fit px-0 text-left"
+        >
           {item.name}
         </Button>
       </DrawerTrigger>
@@ -82,14 +98,30 @@ export function TableCellViewerProducts({ item }: { item: ProductModel }) {
           <DrawerTitle>{item.name}</DrawerTitle>
         </DrawerHeader>
         <div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
-          <img
-            src={item.image}
-            className="w-full h-1/3 object-cover rounded-lg"
-            loading="lazy"
-            alt="Imagem do produto"
-          />
           <Form {...form}>
             <form className="flex flex-col gap-4">
+              <div>
+                <Input
+                  type="file"
+                  id="image"
+                  onChange={handleChangeImage}
+                  hidden
+                />
+                <label htmlFor="image" className="cursor-pointer">
+                  {image ? (
+                    <img
+                      src={image}
+                      className="w-full h-[250px] object-cover rounded-lg"
+                      loading="lazy"
+                      alt="Imagem do produto"
+                    />
+                  ) : (
+                    <div className="w-full h-[250px] bg-gray-200 rounded-lg flex items-center justify-center">
+                      <span className="text-gray-500">Nenhuma imagem</span>
+                    </div>
+                  )}
+                </label>
+              </div>
               <div className="flex flex-col gap-3">
                 <FormField
                   control={form.control}
