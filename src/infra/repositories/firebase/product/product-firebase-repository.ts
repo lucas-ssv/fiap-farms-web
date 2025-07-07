@@ -1,6 +1,7 @@
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -12,6 +13,7 @@ import {
 import type {
   AddProductRepository,
   LoadProductsRepository,
+  RemoveProductRepository,
   UpdateProductRepository,
 } from '@/data/contracts/product'
 import { productConverter } from './converters'
@@ -22,7 +24,8 @@ export class ProductFirebaseRepository
   implements
     AddProductRepository,
     UpdateProductRepository,
-    LoadProductsRepository
+    LoadProductsRepository,
+    RemoveProductRepository
 {
   async add(
     data: AddProductRepository.Params
@@ -95,5 +98,11 @@ export class ProductFirebaseRepository
       })
     }
     return products
+  }
+
+  async remove(productId: string): Promise<void> {
+    await deleteDoc(
+      doc(db, 'products', productId).withConverter(productConverter)
+    )
   }
 }
