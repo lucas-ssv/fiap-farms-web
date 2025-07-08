@@ -15,6 +15,7 @@ import {
   ArrowUpDown,
   ChevronLeft,
   ChevronRight,
+  Loader2Icon,
   MoreHorizontal,
 } from 'lucide-react'
 
@@ -185,6 +186,7 @@ export function Products({
   const [rowSelection, setRowSelection] = React.useState({})
   const [products, setProducts] = React.useState<Product[]>([])
   const [categories, setCategories] = React.useState<LoadCategories.Result>([])
+  const [isLoading, setIsLoading] = React.useState(true)
 
   const table = useReactTable({
     data: products,
@@ -234,12 +236,21 @@ export function Products({
   React.useEffect(() => {
     const unsubscribe = watchProducts.execute((newProducts) => {
       setProducts(newProducts)
+      setIsLoading(false)
     })
 
     return () => {
       unsubscribe()
     }
   }, [watchProducts])
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full">
+        <Loader2Icon className="animate-spin" />
+      </div>
+    )
+  }
 
   return (
     <div className="@container/card mx-4 mt-4 lg:mx-6">
