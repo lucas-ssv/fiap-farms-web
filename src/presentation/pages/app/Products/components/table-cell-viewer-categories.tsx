@@ -13,21 +13,49 @@ import {
   Input,
   Label,
 } from '@/presentation/components/ui'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import type { CategoryModel } from '@/domain/models/category'
 
 const schema = z.object({
   id: z.string(),
   name: z.string(),
   description: z.string().optional(),
-  image: z.string().optional(),
+  image: z.file().optional().or(z.url('A imagem deve ser uma URL válida')),
 })
 
-export function TableCellViewerCategories({
-  item,
-}: {
-  item: z.infer<typeof schema>
-}) {
+type UpdateCategoryFormData = z.infer<typeof schema>
+
+type Props = {
+  item: CategoryModel
+}
+
+export function TableCellViewerCategories({ item }: Props) {
   const isMobile = useIsMobile()
+  const form = useForm<UpdateCategoryFormData>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      name: item.name,
+      description: item.description,
+      image: item?.image,
+    },
+  })
   const [image, setImage] = React.useState<string | undefined>(item.image)
+
+  const handleChangeImage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setImage(reader.result as string)
+        form.setValue('image', file)
+      }
+      reader.readAsDataURL(file)
+    } else {
+      setImage(undefined)
+      form.setValue('image', undefined)
+    }
+  }
 
   return (
     <Drawer direction={isMobile ? 'bottom' : 'right'}>
@@ -43,7 +71,12 @@ export function TableCellViewerCategories({
         <div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
           <form className="flex flex-col gap-4">
             <div>
-              <Input type="file" id="image" onChange={() => {}} hidden />
+              <Input
+                type="file"
+                id="image"
+                onChange={handleChangeImage}
+                hidden
+              />
               <label htmlFor="image" className="cursor-pointer">
                 {image ? (
                   <img
