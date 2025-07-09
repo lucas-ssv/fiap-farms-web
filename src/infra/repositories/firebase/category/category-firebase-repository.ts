@@ -3,6 +3,7 @@ import {
   collection,
   doc,
   getDocs,
+  onSnapshot,
   query,
   Timestamp,
   updateDoc,
@@ -14,13 +15,15 @@ import type {
   AddCategoryRepository,
   LoadCategoriesRepository,
   UpdateCategoryRepository,
+  WatchCategoriesRepository,
 } from '@/data/contracts/category'
 
 export class CategoryFirebaseRepository
   implements
     AddCategoryRepository,
     UpdateCategoryRepository,
-    LoadCategoriesRepository
+    LoadCategoriesRepository,
+    WatchCategoriesRepository
 {
   async add(
     data: AddCategoryRepository.Params
@@ -70,5 +73,29 @@ export class CategoryFirebaseRepository
       })
     })
     return categories
+  }
+
+  watchAll(onChange: WatchCategoriesRepository.Params): WatchCategoriesRepository.Result {
+    const q = query(
+      collection(db, 'categories').withConverter(categoryConverter)
+    )
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const categories: LoadCategoriesRepository.Result = []
+      querySnapshot.forEach((doc) => {
+        const categoryId = doc.id
+        const category = doc.data()
+        categories.push({
+          id: categoryId,
+          name: category.name,
+          description: category.description,
+          image: category.image as string | undefined,
+          createdAt: category.createdAt,
+          updatedAt: category.updatedAt,
+        })
+      })
+      onChange(categories)
+    })
+
+    return unsubscribe
   }
 }
