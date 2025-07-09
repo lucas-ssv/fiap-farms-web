@@ -15,6 +15,7 @@ import {
   ArrowUpDown,
   ChevronLeft,
   ChevronRight,
+  Loader2Icon,
   MoreHorizontal,
 } from 'lucide-react'
 
@@ -23,7 +24,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/presentation/components/ui/dropdown-menu'
 import { Input } from '@/presentation/components/ui/input'
@@ -44,34 +44,13 @@ import {
   SelectValue,
 } from '@/presentation/components/ui'
 import { TableCellViewerCategories } from './components'
+import type { CategoryModel } from '@/domain/models/category'
+import type {
+  LoadCategories,
+  WatchCategories,
+} from '@/domain/usecases/category'
 
-const data: Category[] = [
-  {
-    id: '1',
-    name: 'Frutas',
-    description: 'Categoria de frutas frescas',
-    image: '/images/fruits.jpg',
-  },
-  {
-    id: '2',
-    name: 'Verduras',
-    description: 'Categoria de verduras orgânicas',
-    image: '/images/vegetables.jpg',
-  },
-  {
-    id: '3',
-    name: 'Laticínios',
-    description: 'Categoria de laticínios variados',
-    image: '/images/dairy.jpg',
-  },
-]
-
-type Category = {
-  id: string
-  name: string
-  description?: string
-  image?: string
-}
+type Category = CategoryModel
 
 const columns: ColumnDef<Category>[] = [
   {
@@ -114,11 +93,7 @@ const columns: ColumnDef<Category>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-32">
-            <DropdownMenuItem>Edit</DropdownMenuItem>
-            <DropdownMenuItem>Make a copy</DropdownMenuItem>
-            <DropdownMenuItem>Favorite</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
+            <DropdownMenuItem variant="destructive">Remover</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )
@@ -126,7 +101,11 @@ const columns: ColumnDef<Category>[] = [
   },
 ]
 
-export function Categories() {
+type Props = {
+  watchCategories: WatchCategories
+}
+
+export function Categories({ watchCategories }: Props) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -134,9 +113,11 @@ export function Categories() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
+  const [categories, setCategories] = React.useState<LoadCategories.Result>([])
+  const [isLoading, setIsLoading] = React.useState(true)
 
   const table = useReactTable({
-    data,
+    data: categories,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -153,6 +134,23 @@ export function Categories() {
       rowSelection,
     },
   })
+
+  React.useEffect(() => {
+    const unsubscribe = watchCategories.execute((categories) => {
+      setCategories(categories)
+      setIsLoading(false)
+    })
+
+    return () => unsubscribe()
+  }, [watchCategories])
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full">
+        <Loader2Icon className="animate-spin" />
+      </div>
+    )
+  }
 
   return (
     <div className="@container/card mx-4 mt-4 lg:mx-6">
