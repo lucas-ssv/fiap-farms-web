@@ -25,4 +25,17 @@ describe('WatchCategories usecase', () => {
 
     expect(watchAllSpy).toHaveBeenCalledWith(onChange)
   })
+
+  it('should return an unsubscribe function', async () => {
+    const { sut, watchCategoriesRepositoryStub } = makeSut()
+    const unsubscribeSpy = jest.fn()
+    jest
+      .spyOn(watchCategoriesRepositoryStub, 'watchAll')
+      .mockReturnValueOnce(unsubscribeSpy)
+    const onChange = jest.fn()
+
+    const unsubscribe = sut.execute(onChange)
+
+    expect(unsubscribe).toBe(unsubscribeSpy)
+  })
 });
