@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, onSnapshot, query, updateDoc } from 'firebase/firestore'
+import { addDoc, collection, deleteDoc, doc, onSnapshot, query, updateDoc } from 'firebase/firestore'
 
 import { mockAddCategoryParams } from '@tests/data/usecases/category/mocks'
 import { CategoryFirebaseRepository } from '@/infra/repositories/firebase/category'
@@ -66,6 +66,7 @@ jest.mock('firebase/firestore', () => ({
   }),
   getFirestore: jest.fn(),
   updateDoc: jest.fn(),
+  deleteDoc: jest.fn(),
   Timestamp: {
     now: jest.fn(() => 'any_timestamp'),
   },
@@ -195,4 +196,21 @@ describe('CategoryFirebaseRepository', () => {
       expect(onSnapshot).toHaveBeenCalled()
     })
   })
+
+  describe('remove()', () => {
+    it('should remove a category on success', async () => {
+      const mockedCollectionWithConverter = 'mockedCollectionWithConverter'
+      const withConverterMock = jest
+        .fn()
+        .mockReturnValue(mockedCollectionWithConverter)
+      ;(doc as jest.Mock).mockReturnValue({
+        withConverter: withConverterMock,
+      })
+      const sut = new CategoryFirebaseRepository()
+
+      await sut.remove('any_category_id')
+
+      expect(deleteDoc).toHaveBeenCalledWith(mockedCollectionWithConverter)
+    })
+  });
 })

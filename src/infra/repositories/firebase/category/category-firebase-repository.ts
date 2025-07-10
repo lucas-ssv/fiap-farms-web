@@ -1,6 +1,7 @@
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDocs,
   onSnapshot,
@@ -14,6 +15,7 @@ import { db } from '@/main/config/firebase'
 import type {
   AddCategoryRepository,
   LoadCategoriesRepository,
+  RemoveCategoryRepository,
   UpdateCategoryRepository,
   WatchCategoriesRepository,
 } from '@/data/contracts/category'
@@ -23,7 +25,8 @@ export class CategoryFirebaseRepository
     AddCategoryRepository,
     UpdateCategoryRepository,
     LoadCategoriesRepository,
-    WatchCategoriesRepository
+    WatchCategoriesRepository,
+    RemoveCategoryRepository
 {
   async add(
     data: AddCategoryRepository.Params
@@ -97,5 +100,11 @@ export class CategoryFirebaseRepository
     })
 
     return unsubscribe
+  }
+
+  async remove(categoryId: string): Promise<void> {
+    await deleteDoc(
+      doc(db, 'categories', categoryId).withConverter(categoryConverter)
+    )
   }
 }
