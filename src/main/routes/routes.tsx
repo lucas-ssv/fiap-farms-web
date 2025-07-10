@@ -2,7 +2,6 @@ import { createBrowserRouter, RouterProvider } from 'react-router'
 
 import { MakeLogin, MakeSignUp } from '@/main/factories/pages/auth'
 import { Dashboard } from '@/presentation/pages/app'
-import { Categories } from '@/presentation/pages/app/Products'
 import { AppLayout, AuthLayout } from '@/presentation/pages/_layouts'
 import { ProtectedRoute } from './ProtectedRoute'
 import { GuestRoute } from './GuestRoute'
@@ -15,6 +14,7 @@ import {
 import { Goals, NewGoal } from '@/presentation/pages/app/Goals'
 import { Productions } from '@/presentation/pages/app/Productions'
 import {
+  MakeCategories,
   MakeNewCategory,
   MakeNewProduct,
   MakeProducts,
@@ -44,7 +44,7 @@ export function Routes() {
             },
             {
               path: 'categories',
-              element: <Categories />,
+              element: <MakeCategories />,
             },
             {
               path: 'categories/new',

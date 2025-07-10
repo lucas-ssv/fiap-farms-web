@@ -15,6 +15,7 @@ import {
   ArrowUpDown,
   ChevronLeft,
   ChevronRight,
+  Loader2Icon,
   MoreHorizontal,
 } from 'lucide-react'
 
@@ -23,7 +24,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/presentation/components/ui/dropdown-menu'
 import { Input } from '@/presentation/components/ui/input'
@@ -44,89 +44,92 @@ import {
   SelectValue,
 } from '@/presentation/components/ui'
 import { TableCellViewerCategories } from './components'
+import type { CategoryModel } from '@/domain/models/category'
+import type {
+  LoadCategories,
+  RemoveCategory,
+  UpdateCategory,
+  WatchCategories,
+} from '@/domain/usecases/category'
 
-const data: Category[] = [
-  {
-    id: '1',
-    name: 'Frutas',
-    description: 'Categoria de frutas frescas',
-    image: '/images/fruits.jpg',
-  },
-  {
-    id: '2',
-    name: 'Verduras',
-    description: 'Categoria de verduras orgânicas',
-    image: '/images/vegetables.jpg',
-  },
-  {
-    id: '3',
-    name: 'Laticínios',
-    description: 'Categoria de laticínios variados',
-    image: '/images/dairy.jpg',
-  },
-]
+type Category = CategoryModel
 
-type Category = {
-  id: string
-  name: string
-  description?: string
-  image?: string
+const columns = (
+  updateCategory: UpdateCategory,
+  removeCategory: RemoveCategory
+): ColumnDef<Category>[] => {
+  return [
+    {
+      accessorKey: 'id',
+      header: () => {
+        return <p>ID</p>
+      },
+    },
+    {
+      accessorKey: 'name',
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Categoria
+            <ArrowUpDown />
+          </Button>
+        )
+      },
+      cell: ({ row }) => {
+        return (
+          <TableCellViewerCategories
+            item={row.original}
+            updateCategory={updateCategory}
+            removeCategory={removeCategory}
+          />
+        )
+      },
+    },
+    {
+      accessorKey: 'description',
+      header: () => <p>Descrição</p>,
+    },
+    {
+      id: 'actions',
+      enableHiding: false,
+      cell: ({ row }) => {
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-32">
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={async () => removeCategory.execute(row.original.id)}
+              >
+                Remover
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )
+      },
+    },
+  ]
 }
 
-const columns: ColumnDef<Category>[] = [
-  {
-    accessorKey: 'id',
-    header: () => {
-      return <p>ID</p>
-    },
-  },
-  {
-    accessorKey: 'name',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          Categoria
-          <ArrowUpDown />
-        </Button>
-      )
-    },
-    cell: ({ row }) => {
-      return <TableCellViewerCategories item={row.original} />
-    },
-  },
-  {
-    accessorKey: 'description',
-    header: () => <p>Descrição</p>,
-  },
-  {
-    id: 'actions',
-    enableHiding: false,
-    cell: () => {
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-32">
-            <DropdownMenuItem>Edit</DropdownMenuItem>
-            <DropdownMenuItem>Make a copy</DropdownMenuItem>
-            <DropdownMenuItem>Favorite</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
-    },
-  },
-]
+type Props = {
+  watchCategories: WatchCategories
+  updateCategory: UpdateCategory
+  removeCategory: RemoveCategory
+}
 
-export function Categories() {
+export function Categories({
+  watchCategories,
+  updateCategory,
+  removeCategory,
+}: Props) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -134,10 +137,12 @@ export function Categories() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
+  const [categories, setCategories] = React.useState<LoadCategories.Result>([])
+  const [isLoading, setIsLoading] = React.useState(true)
 
   const table = useReactTable({
-    data,
-    columns,
+    data: categories,
+    columns: columns(updateCategory, removeCategory),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -153,6 +158,23 @@ export function Categories() {
       rowSelection,
     },
   })
+
+  React.useEffect(() => {
+    const unsubscribe = watchCategories.execute((categories) => {
+      setCategories(categories)
+      setIsLoading(false)
+    })
+
+    return () => unsubscribe()
+  }, [watchCategories])
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full">
+        <Loader2Icon className="animate-spin" />
+      </div>
+    )
+  }
 
   return (
     <div className="@container/card mx-4 mt-4 lg:mx-6">

@@ -1,8 +1,10 @@
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDocs,
+  onSnapshot,
   query,
   Timestamp,
   updateDoc,
@@ -13,14 +15,18 @@ import { db } from '@/main/config/firebase'
 import type {
   AddCategoryRepository,
   LoadCategoriesRepository,
+  RemoveCategoryRepository,
   UpdateCategoryRepository,
+  WatchCategoriesRepository,
 } from '@/data/contracts/category'
 
 export class CategoryFirebaseRepository
   implements
     AddCategoryRepository,
     UpdateCategoryRepository,
-    LoadCategoriesRepository
+    LoadCategoriesRepository,
+    WatchCategoriesRepository,
+    RemoveCategoryRepository
 {
   async add(
     data: AddCategoryRepository.Params
@@ -70,5 +76,35 @@ export class CategoryFirebaseRepository
       })
     })
     return categories
+  }
+
+  watchAll(onChange: WatchCategoriesRepository.Params): WatchCategoriesRepository.Result {
+    const q = query(
+      collection(db, 'categories').withConverter(categoryConverter)
+    )
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const categories: LoadCategoriesRepository.Result = []
+      querySnapshot.forEach((doc) => {
+        const categoryId = doc.id
+        const category = doc.data()
+        categories.push({
+          id: categoryId,
+          name: category.name,
+          description: category.description,
+          image: category.image as string | undefined,
+          createdAt: category.createdAt,
+          updatedAt: category.updatedAt,
+        })
+      })
+      onChange(categories)
+    })
+
+    return unsubscribe
+  }
+
+  async remove(categoryId: string): Promise<void> {
+    await deleteDoc(
+      doc(db, 'categories', categoryId).withConverter(categoryConverter)
+    )
   }
 }

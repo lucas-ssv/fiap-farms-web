@@ -1,58 +1,94 @@
+import React from 'react'
 import { useIsMobile } from '@/presentation/hooks'
 import { z } from 'zod/v4'
 import {
   Button,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
   Drawer,
-  DrawerClose,
   DrawerContent,
-  DrawerDescription,
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
   Input,
-  Label,
-  Separator,
-  type ChartConfig,
 } from '@/presentation/components/ui'
-import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
-import { TrendingUp } from 'lucide-react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import type { CategoryModel } from '@/domain/models/category'
+import type { RemoveCategory, UpdateCategory } from '@/domain/usecases/category'
+import { toast } from 'sonner'
 
 const schema = z.object({
-  id: z.string(),
   name: z.string(),
   description: z.string().optional(),
-  image: z.string().optional(),
+  image: z.file().optional().or(z.url('A imagem deve ser uma URL válida')),
 })
 
-const chartData = [
-  { month: 'January', desktop: 186 },
-  { month: 'February', desktop: 305 },
-  { month: 'March', desktop: 237 },
-  { month: 'April', desktop: 73 },
-  { month: 'May', desktop: 209 },
-  { month: 'June', desktop: 214 },
-]
-const chartConfig = {
-  desktop: {
-    label: 'Desktop',
-    color: 'var(--primary)',
-  },
-  mobile: {
-    label: 'Mobile',
-    color: 'var(--primary)',
-  },
-} satisfies ChartConfig
+type UpdateCategoryFormData = z.infer<typeof schema>
+
+type Props = {
+  item: CategoryModel
+  updateCategory: UpdateCategory
+  removeCategory: RemoveCategory
+}
 
 export function TableCellViewerCategories({
   item,
-}: {
-  item: z.infer<typeof schema>
-}) {
+  updateCategory,
+  removeCategory,
+}: Props) {
   const isMobile = useIsMobile()
+  const form = useForm<UpdateCategoryFormData>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      name: item.name,
+      description: item.description,
+      image: item?.image,
+    },
+  })
+  const [image, setImage] = React.useState<string | undefined>(item.image)
+
+  const handleChangeImage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setImage(reader.result as string)
+        form.setValue('image', file)
+      }
+      reader.readAsDataURL(file)
+    } else {
+      setImage(undefined)
+      form.setValue('image', undefined)
+    }
+  }
+
+  const handleUpdateCategory = async () => {
+    const data = form.getValues()
+
+    try {
+      await updateCategory.execute(item.id, data)
+      toast.success('Categoria atualizada com sucesso!')
+    } catch (error) {
+      console.error('Error updating category:', error)
+      toast.error('Erro ao atualizar categoria. Tente novamente.')
+    }
+  }
+
+  const handleRemoveCategory = async (categoryId: string) => {
+    try {
+      await removeCategory.execute(categoryId)
+      toast.success('Categoria removida com sucesso!')
+    } catch (error) {
+      toast.error('Erro ao remover a categoria. Tente novamente.')
+    }
+  }
+
   return (
     <Drawer direction={isMobile ? 'bottom' : 'right'}>
       <DrawerTrigger asChild>
@@ -63,90 +99,85 @@ export function TableCellViewerCategories({
       <DrawerContent>
         <DrawerHeader className="gap-1">
           <DrawerTitle>{item.name}</DrawerTitle>
-          <DrawerDescription>
-            Lucro unitário nos últimos 6 meses
-          </DrawerDescription>
         </DrawerHeader>
         <div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
-          {!isMobile && (
-            <>
-              <ChartContainer config={chartConfig}>
-                <AreaChart
-                  accessibilityLayer
-                  data={chartData}
-                  margin={{
-                    left: 0,
-                    right: 10,
-                  }}
-                >
-                  <CartesianGrid vertical={false} />
-                  <XAxis
-                    dataKey="month"
-                    tickLine={false}
-                    axisLine={false}
-                    tickMargin={8}
-                    tickFormatter={(value) => value.slice(0, 3)}
-                    hide
-                  />
-                  <ChartTooltip
-                    cursor={false}
-                    content={<ChartTooltipContent indicator="dot" />}
-                  />
-                  <Area
-                    dataKey="mobile"
-                    type="natural"
-                    fill="var(--color-mobile)"
-                    fillOpacity={0.6}
-                    stroke="var(--color-mobile)"
-                    stackId="a"
-                  />
-                  <Area
-                    dataKey="desktop"
-                    type="natural"
-                    fill="var(--color-desktop)"
-                    fillOpacity={0.4}
-                    stroke="var(--color-desktop)"
-                    stackId="a"
-                  />
-                </AreaChart>
-              </ChartContainer>
-              <Separator />
-              <div className="grid gap-2">
-                <div className="flex gap-2 leading-none font-medium">
-                  Tendência de alta de 5,2% neste mês
-                  <TrendingUp className="size-4" />
-                </div>
-                <div className="text-muted-foreground">
-                  Showing total visitors for the last 6 months. This is just
-                  some random text to test the layout. It spans multiple lines
-                  and should wrap around.
-                </div>
+          <Form {...form}>
+            <form id="form-update" className="flex flex-col gap-4">
+              <div>
+                <Input
+                  type="file"
+                  id="image"
+                  onChange={handleChangeImage}
+                  hidden
+                />
+                <label htmlFor="image" className="cursor-pointer">
+                  {image ? (
+                    <img
+                      src={image}
+                      className="w-full h-[250px] object-cover rounded-lg"
+                      loading="lazy"
+                      alt="Imagem do produto"
+                    />
+                  ) : (
+                    <div className="w-full h-[250px] bg-gray-200 rounded-lg flex items-center justify-center">
+                      <span className="text-gray-500">Nenhuma imagem</span>
+                    </div>
+                  )}
+                </label>
               </div>
-              <Separator />
-            </>
-          )}
-          <form className="flex flex-col gap-4">
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="name">Categoria</Label>
-              <Input id="name" defaultValue={item.name} />
-            </div>
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="description">Descrição</Label>
-              <Input id="description" defaultValue={item.description} />
-            </div>
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="image">Imagem da categoria</Label>
-              <Input type="file" id="image" />
-            </div>
-          </form>
+              <div className="flex flex-col gap-3">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem className="col-span-12 xl:col-span-6">
+                      <FormLabel>Nome da categoria</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Digite o nome da categoria"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="flex flex-col gap-3">
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem className="col-span-12 xl:col-span-6">
+                      <FormLabel>Descrição</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Digite a descrição da categoria"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </form>
+          </Form>
         </div>
         <DrawerFooter>
-          <DrawerClose asChild>
-            <Button>Atualizar categoria</Button>
-          </DrawerClose>
-          <DrawerClose asChild>
-            <Button variant="destructive">Excluir categoria</Button>
-          </DrawerClose>
+          <Button
+            form="form-update"
+            onClick={form.handleSubmit(handleUpdateCategory)}
+            disabled={form.formState.isSubmitting}
+          >
+            Atualizar categoria
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={() => handleRemoveCategory(item.id)}
+          >
+            Excluir categoria
+          </Button>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

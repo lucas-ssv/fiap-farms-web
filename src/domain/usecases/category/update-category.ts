@@ -6,6 +6,6 @@ export namespace UpdateCategory {
   export type Params = {
     name?: string
     description?: string
-    image?: string
+    image?: string | File
   }
 }
