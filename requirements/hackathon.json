@@ -78,7 +78,6 @@
       "address": "123 Main St",
       "addressNumber": "101",
       "addressComplement": "Apt 4B",
-      "loyaltyPoints": 100,
       "createdAt": "2023-01-01T10:00:00Z",
       "updatedAt": "2023-10-01T12:00:00Z"
     }
