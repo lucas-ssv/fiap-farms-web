@@ -12,6 +12,8 @@ import {
   Input,
   Separator,
 } from '@/presentation/components/ui'
+import { toast } from 'sonner'
+import { useCallback, useEffect } from 'react'
 
 type NewCustomerFormData = z.infer<typeof schema>
 
@@ -23,9 +25,9 @@ const schema = z.object({
   city: z.string(),
   state: z.string(),
   neighborhood: z.string(),
-  street: z.string(),
-  number: z.number(),
-  complement: z.string().optional(),
+  address: z.string(),
+  addressNumber: z.number(),
+  addressComplement: z.string().optional(),
 })
 
 export function NewCustomer() {
@@ -39,14 +41,46 @@ export function NewCustomer() {
       city: '',
       state: '',
       neighborhood: '',
-      street: '',
-      number: 0,
+      address: '',
+      addressNumber: 0,
+      addressComplement: '',
     },
   })
+  const watchPostalCode = form.watch('postalCode')
 
   const onSubmit = (data: NewCustomerFormData) => {
     console.log('Form submitted:', data)
   }
+
+  const handlePostalCodeChange = useCallback(async () => {
+    try {
+      const postalCode = watchPostalCode.replace(/\D/g, '')
+
+      if (postalCode.length === 8) {
+        const response = await fetch(
+          `https://viacep.com.br/ws/${watchPostalCode}/json/`
+        )
+        const data = await response.json()
+
+        if (data.erro) {
+          toast.error('CEP inválido')
+          return
+        }
+
+        form.setValue('address', data.logradouro || '')
+        form.setValue('neighborhood', data.bairro || '')
+        form.setValue('city', data.localidade || '')
+        form.setValue('state', data.uf || '')
+        form.setValue('postalCode', data.cep || '')
+      }
+    } catch (error) {
+      toast.error('Erro ao buscar o CEP')
+    }
+  }, [watchPostalCode, form])
+
+  useEffect(() => {
+    handlePostalCodeChange()
+  }, [handlePostalCodeChange, watchPostalCode])
 
   return (
     <main>
@@ -150,7 +184,7 @@ export function NewCustomer() {
           />
           <FormField
             control={form.control}
-            name="street"
+            name="address"
             render={({ field }) => (
               <FormItem className="col-span-12 md:col-span-6">
                 <FormLabel>Rua</FormLabel>
@@ -162,7 +196,7 @@ export function NewCustomer() {
           />
           <FormField
             control={form.control}
-            name="number"
+            name="addressNumber"
             render={({ field }) => (
               <FormItem className="col-span-12 md:col-span-2">
                 <FormLabel>Número</FormLabel>
@@ -174,7 +208,7 @@ export function NewCustomer() {
           />
           <FormField
             control={form.control}
-            name="complement"
+            name="addressComplement"
             render={({ field }) => (
               <FormItem className="col-span-12 md:col-span-4">
                 <FormLabel>Complemento</FormLabel>
