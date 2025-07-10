@@ -47,13 +47,17 @@ import { TableCellViewerCategories } from './components'
 import type { CategoryModel } from '@/domain/models/category'
 import type {
   LoadCategories,
+  RemoveCategory,
   UpdateCategory,
   WatchCategories,
 } from '@/domain/usecases/category'
 
 type Category = CategoryModel
 
-const columns = (updateCategory: UpdateCategory): ColumnDef<Category>[] => {
+const columns = (
+  updateCategory: UpdateCategory,
+  removeCategory: RemoveCategory
+): ColumnDef<Category>[] => {
   return [
     {
       accessorKey: 'id',
@@ -79,6 +83,7 @@ const columns = (updateCategory: UpdateCategory): ColumnDef<Category>[] => {
           <TableCellViewerCategories
             item={row.original}
             updateCategory={updateCategory}
+            removeCategory={removeCategory}
           />
         )
       },
@@ -90,7 +95,7 @@ const columns = (updateCategory: UpdateCategory): ColumnDef<Category>[] => {
     {
       id: 'actions',
       enableHiding: false,
-      cell: () => {
+      cell: ({ row }) => {
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -100,7 +105,12 @@ const columns = (updateCategory: UpdateCategory): ColumnDef<Category>[] => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-32">
-              <DropdownMenuItem variant="destructive">Remover</DropdownMenuItem>
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={async () => removeCategory.execute(row.original.id)}
+              >
+                Remover
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         )
@@ -112,9 +122,14 @@ const columns = (updateCategory: UpdateCategory): ColumnDef<Category>[] => {
 type Props = {
   watchCategories: WatchCategories
   updateCategory: UpdateCategory
+  removeCategory: RemoveCategory
 }
 
-export function Categories({ watchCategories, updateCategory }: Props) {
+export function Categories({
+  watchCategories,
+  updateCategory,
+  removeCategory,
+}: Props) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -127,7 +142,7 @@ export function Categories({ watchCategories, updateCategory }: Props) {
 
   const table = useReactTable({
     data: categories,
-    columns: columns(updateCategory),
+    columns: columns(updateCategory, removeCategory),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),

@@ -4,7 +4,6 @@ import { z } from 'zod/v4'
 import {
   Button,
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerFooter,
   DrawerHeader,
@@ -21,7 +20,7 @@ import {
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import type { CategoryModel } from '@/domain/models/category'
-import type { UpdateCategory } from '@/domain/usecases/category'
+import type { RemoveCategory, UpdateCategory } from '@/domain/usecases/category'
 import { toast } from 'sonner'
 
 const schema = z.object({
@@ -35,9 +34,14 @@ type UpdateCategoryFormData = z.infer<typeof schema>
 type Props = {
   item: CategoryModel
   updateCategory: UpdateCategory
+  removeCategory: RemoveCategory
 }
 
-export function TableCellViewerCategories({ item, updateCategory }: Props) {
+export function TableCellViewerCategories({
+  item,
+  updateCategory,
+  removeCategory,
+}: Props) {
   const isMobile = useIsMobile()
   const form = useForm<UpdateCategoryFormData>({
     resolver: zodResolver(schema),
@@ -71,7 +75,17 @@ export function TableCellViewerCategories({ item, updateCategory }: Props) {
       await updateCategory.execute(item.id, data)
       toast.success('Categoria atualizada com sucesso!')
     } catch (error) {
+      console.error('Error updating category:', error)
       toast.error('Erro ao atualizar categoria. Tente novamente.')
+    }
+  }
+
+  const handleRemoveCategory = async (categoryId: string) => {
+    try {
+      await removeCategory.execute(categoryId)
+      toast.success('Categoria removida com sucesso!')
+    } catch (error) {
+      toast.error('Erro ao remover a categoria. Tente novamente.')
     }
   }
 
@@ -157,9 +171,12 @@ export function TableCellViewerCategories({ item, updateCategory }: Props) {
           >
             Atualizar categoria
           </Button>
-          <DrawerClose asChild>
-            <Button variant="destructive">Excluir categoria</Button>
-          </DrawerClose>
+          <Button
+            variant="destructive"
+            onClick={() => handleRemoveCategory(item.id)}
+          >
+            Excluir categoria
+          </Button>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
