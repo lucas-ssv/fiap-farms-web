@@ -5,12 +5,7 @@ import { Dashboard } from '@/presentation/pages/app'
 import { AppLayout, AuthLayout } from '@/presentation/pages/_layouts'
 import { ProtectedRoute } from './ProtectedRoute'
 import { GuestRoute } from './GuestRoute'
-import {
-  Customers,
-  NewCustomer,
-  NewSale,
-  Sales,
-} from '@/presentation/pages/app/Sales'
+import { Customers, NewSale, Sales } from '@/presentation/pages/app/Sales'
 import { Goals, NewGoal } from '@/presentation/pages/app/Goals'
 import { Productions } from '@/presentation/pages/app/Productions'
 import {
@@ -18,7 +13,8 @@ import {
   MakeNewCategory,
   MakeNewProduct,
   MakeProducts,
-} from '@/main/factories/pages/app'
+} from '@/main/factories/pages/app/Products'
+import { MakeNewCustomer } from '@/main/factories/pages/app/Sales'
 
 export function Routes() {
   const router = createBrowserRouter([
@@ -64,7 +60,7 @@ export function Routes() {
             },
             {
               path: '/customers/new',
-              element: <NewCustomer />,
+              element: <MakeNewCustomer />,
             },
             {
               path: '/goals',

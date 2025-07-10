@@ -9,44 +9,90 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
   Input,
   Separator,
 } from '@/presentation/components/ui'
+import { toast } from 'sonner'
+import { useCallback, useEffect } from 'react'
+import type { AddCustomer } from '@/domain/usecases/customer'
+import { Loader2Icon } from 'lucide-react'
 
 type NewCustomerFormData = z.infer<typeof schema>
 
 const schema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
   email: z.email('Email inválido'),
-  phone: z.string().min(1, 'Telefone é obrigatório'),
-  postalCode: z.string(),
-  city: z.string(),
-  state: z.string(),
-  neighborhood: z.string(),
-  street: z.string(),
-  number: z.number(),
-  complement: z.string().optional(),
+  phone: z.string().optional(),
+  postalCode: z.string('CEP é obrigatório').min(8, 'CEP deve ter 8 dígitos'),
+  city: z.string('Cidade é obrigatória'),
+  state: z.string('Estado é obrigatório'),
+  neighborhood: z.string('Bairro é obrigatório'),
+  address: z.string('Endereço é obrigatório'),
+  addressNumber: z.number('Número é obrigatório'),
+  addressComplement: z.string().optional(),
 })
 
-export function NewCustomer() {
+type Props = {
+  addCustomer: AddCustomer
+}
+
+export function NewCustomer({ addCustomer }: Props) {
   const form = useForm<NewCustomerFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: '',
       email: '',
-      phone: '',
       postalCode: '',
       city: '',
       state: '',
       neighborhood: '',
-      street: '',
-      number: 0,
+      address: '',
     },
   })
+  const watchPostalCode = form.watch('postalCode')
 
-  const onSubmit = (data: NewCustomerFormData) => {
-    console.log('Form submitted:', data)
+  const onSubmit = async (data: NewCustomerFormData) => {
+    try {
+      await addCustomer.execute(data)
+      toast.success('Cliente adicionado com sucesso!')
+      form.reset()
+    } catch (error) {
+      toast.error(
+        'Erro ao adicionar cliente. Verifique os dados e tente novamente.'
+      )
+    }
   }
+
+  const handlePostalCodeChange = useCallback(async () => {
+    try {
+      const postalCode = watchPostalCode.replace(/\D/g, '')
+
+      if (postalCode.length === 8) {
+        const response = await fetch(
+          `https://viacep.com.br/ws/${watchPostalCode}/json/`
+        )
+        const data = await response.json()
+
+        if (data.erro) {
+          toast.error('CEP inválido')
+          return
+        }
+
+        form.setValue('address', data.logradouro || '')
+        form.setValue('neighborhood', data.bairro || '')
+        form.setValue('city', data.localidade || '')
+        form.setValue('state', data.uf || '')
+        form.setValue('postalCode', data.cep || '')
+      }
+    } catch (error) {
+      toast.error('Erro ao buscar o CEP')
+    }
+  }, [watchPostalCode, form])
+
+  useEffect(() => {
+    handlePostalCodeChange()
+  }, [handlePostalCodeChange, watchPostalCode])
 
   return (
     <main>
@@ -72,6 +118,7 @@ export function NewCustomer() {
                 <FormControl>
                   <Input placeholder="Digite o nome completo" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -84,6 +131,7 @@ export function NewCustomer() {
                 <FormControl>
                   <Input placeholder="11 95555-5555" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -96,6 +144,7 @@ export function NewCustomer() {
                 <FormControl>
                   <Input placeholder="Digite o e-mail" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -109,6 +158,7 @@ export function NewCustomer() {
                 <FormControl>
                   <Input placeholder="Digite o CEP" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -121,6 +171,7 @@ export function NewCustomer() {
                 <FormControl>
                   <Input placeholder="Digite a cidade" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -133,6 +184,7 @@ export function NewCustomer() {
                 <FormControl>
                   <Input placeholder="Digite o estado" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -145,47 +197,61 @@ export function NewCustomer() {
                 <FormControl>
                   <Input placeholder="Digite o bairro" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
           <FormField
             control={form.control}
-            name="street"
+            name="address"
             render={({ field }) => (
               <FormItem className="col-span-12 md:col-span-6">
                 <FormLabel>Rua</FormLabel>
                 <FormControl>
                   <Input placeholder="Digite a rua" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
           <FormField
             control={form.control}
-            name="number"
-            render={({ field }) => (
+            name="addressNumber"
+            render={() => (
               <FormItem className="col-span-12 md:col-span-2">
                 <FormLabel>Número</FormLabel>
                 <FormControl>
-                  <Input placeholder="Digite o número" {...field} />
+                  <Input
+                    placeholder="Digite o número"
+                    {...form.register('addressNumber', { valueAsNumber: true })}
+                  />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
           <FormField
             control={form.control}
-            name="complement"
+            name="addressComplement"
             render={({ field }) => (
               <FormItem className="col-span-12 md:col-span-4">
                 <FormLabel>Complemento</FormLabel>
                 <FormControl>
                   <Input placeholder="Digite o complemento" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
           <div className="col-span-12">
-            <Button className="w-full md:w-auto" form="new-product-form">
+            <Button
+              className="w-full cursor-pointer md:w-auto"
+              form="new-product-form"
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting && (
+                <Loader2Icon className="animate-spin" />
+              )}
               Adicionar cliente
             </Button>
           </div>

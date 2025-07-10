@@ -71,8 +71,13 @@
       "name": "John Doe",
       "email": "johndue@email.com",
       "phone": "123-456-7890",
-      "address": "123 Main St, Springfield, USA",
-      "loyaltyPoints": 100,
+      "postalCode": "12345",
+      "city": "Springfield",
+      "state": "IL",
+      "neighborhood": "Downtown",
+      "address": "123 Main St",
+      "addressNumber": "101",
+      "addressComplement": "Apt 4B",
       "createdAt": "2023-01-01T10:00:00Z",
       "updatedAt": "2023-10-01T12:00:00Z"
     }
