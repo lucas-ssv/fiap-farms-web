@@ -10,15 +10,21 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
   Input,
-  Label,
 } from '@/presentation/components/ui'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import type { CategoryModel } from '@/domain/models/category'
+import type { UpdateCategory } from '@/domain/usecases/category'
+import { toast } from 'sonner'
 
 const schema = z.object({
-  id: z.string(),
   name: z.string(),
   description: z.string().optional(),
   image: z.file().optional().or(z.url('A imagem deve ser uma URL válida')),
@@ -28,9 +34,10 @@ type UpdateCategoryFormData = z.infer<typeof schema>
 
 type Props = {
   item: CategoryModel
+  updateCategory: UpdateCategory
 }
 
-export function TableCellViewerCategories({ item }: Props) {
+export function TableCellViewerCategories({ item, updateCategory }: Props) {
   const isMobile = useIsMobile()
   const form = useForm<UpdateCategoryFormData>({
     resolver: zodResolver(schema),
@@ -57,6 +64,17 @@ export function TableCellViewerCategories({ item }: Props) {
     }
   }
 
+  const handleUpdateCategory = async () => {
+    const data = form.getValues()
+
+    try {
+      await updateCategory.execute(item.id, data)
+      toast.success('Categoria atualizada com sucesso!')
+    } catch (error) {
+      toast.error('Erro ao atualizar categoria. Tente novamente.')
+    }
+  }
+
   return (
     <Drawer direction={isMobile ? 'bottom' : 'right'}>
       <DrawerTrigger asChild>
@@ -69,51 +87,76 @@ export function TableCellViewerCategories({ item }: Props) {
           <DrawerTitle>{item.name}</DrawerTitle>
         </DrawerHeader>
         <div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
-          <form className="flex flex-col gap-4">
-            <div>
-              <Input
-                type="file"
-                id="image"
-                onChange={handleChangeImage}
-                hidden
-              />
-              <label htmlFor="image" className="cursor-pointer">
-                {image ? (
-                  <img
-                    src={image}
-                    className="w-full h-[250px] object-cover rounded-lg"
-                    loading="lazy"
-                    alt="Imagem do produto"
-                  />
-                ) : (
-                  <div className="w-full h-[250px] bg-gray-200 rounded-lg flex items-center justify-center">
-                    <span className="text-gray-500">Nenhuma imagem</span>
-                  </div>
-                )}
-              </label>
-            </div>
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="name">Nome da categoria</Label>
-              <Input
-                id="name"
-                defaultValue={item.name}
-                placeholder="Digite o nome da categoria"
-              />
-            </div>
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="description">Descrição</Label>
-              <Input
-                id="description"
-                defaultValue={item.description}
-                placeholder="Digite a descrição da categoria"
-              />
-            </div>
-          </form>
+          <Form {...form}>
+            <form id="form-update" className="flex flex-col gap-4">
+              <div>
+                <Input
+                  type="file"
+                  id="image"
+                  onChange={handleChangeImage}
+                  hidden
+                />
+                <label htmlFor="image" className="cursor-pointer">
+                  {image ? (
+                    <img
+                      src={image}
+                      className="w-full h-[250px] object-cover rounded-lg"
+                      loading="lazy"
+                      alt="Imagem do produto"
+                    />
+                  ) : (
+                    <div className="w-full h-[250px] bg-gray-200 rounded-lg flex items-center justify-center">
+                      <span className="text-gray-500">Nenhuma imagem</span>
+                    </div>
+                  )}
+                </label>
+              </div>
+              <div className="flex flex-col gap-3">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem className="col-span-12 xl:col-span-6">
+                      <FormLabel>Nome da categoria</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Digite o nome da categoria"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="flex flex-col gap-3">
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem className="col-span-12 xl:col-span-6">
+                      <FormLabel>Descrição</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Digite a descrição da categoria"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </form>
+          </Form>
         </div>
         <DrawerFooter>
-          <DrawerClose asChild>
-            <Button>Atualizar categoria</Button>
-          </DrawerClose>
+          <Button
+            form="form-update"
+            onClick={form.handleSubmit(handleUpdateCategory)}
+          >
+            Atualizar categoria
+          </Button>
           <DrawerClose asChild>
             <Button variant="destructive">Excluir categoria</Button>
           </DrawerClose>

@@ -47,65 +47,74 @@ import { TableCellViewerCategories } from './components'
 import type { CategoryModel } from '@/domain/models/category'
 import type {
   LoadCategories,
+  UpdateCategory,
   WatchCategories,
 } from '@/domain/usecases/category'
 
 type Category = CategoryModel
 
-const columns: ColumnDef<Category>[] = [
-  {
-    accessorKey: 'id',
-    header: () => {
-      return <p>ID</p>
+const columns = (updateCategory: UpdateCategory): ColumnDef<Category>[] => {
+  return [
+    {
+      accessorKey: 'id',
+      header: () => {
+        return <p>ID</p>
+      },
     },
-  },
-  {
-    accessorKey: 'name',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          Categoria
-          <ArrowUpDown />
-        </Button>
-      )
+    {
+      accessorKey: 'name',
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Categoria
+            <ArrowUpDown />
+          </Button>
+        )
+      },
+      cell: ({ row }) => {
+        return (
+          <TableCellViewerCategories
+            item={row.original}
+            updateCategory={updateCategory}
+          />
+        )
+      },
     },
-    cell: ({ row }) => {
-      return <TableCellViewerCategories item={row.original} />
+    {
+      accessorKey: 'description',
+      header: () => <p>Descrição</p>,
     },
-  },
-  {
-    accessorKey: 'description',
-    header: () => <p>Descrição</p>,
-  },
-  {
-    id: 'actions',
-    enableHiding: false,
-    cell: () => {
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-32">
-            <DropdownMenuItem variant="destructive">Remover</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
+    {
+      id: 'actions',
+      enableHiding: false,
+      cell: () => {
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-32">
+              <DropdownMenuItem variant="destructive">Remover</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )
+      },
     },
-  },
-]
+  ]
+}
 
 type Props = {
   watchCategories: WatchCategories
+  updateCategory: UpdateCategory
 }
 
-export function Categories({ watchCategories }: Props) {
+export function Categories({ watchCategories, updateCategory }: Props) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -118,7 +127,7 @@ export function Categories({ watchCategories }: Props) {
 
   const table = useReactTable({
     data: categories,
-    columns,
+    columns: columns(updateCategory),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
