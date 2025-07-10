@@ -5,13 +5,10 @@ import { db } from '@/main/config/firebase'
 
 export class CustomerFirebaseRepository implements AddCustomerRepository {
   async add(params: AddCustomerRepository.Params): Promise<void> {
-    await addDoc(
-      collection(db, 'categories').withConverter(customerConverter),
-      {
-        ...params,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
-      }
-    )
+    await addDoc(collection(db, 'customers').withConverter(customerConverter), {
+      ...params,
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
+    })
   }
 }

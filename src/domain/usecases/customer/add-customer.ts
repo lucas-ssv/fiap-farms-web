@@ -6,13 +6,13 @@ export namespace AddCustomer {
   export type Params = {
     name: string
     email: string
-    phone: string
+    phone?: string
     postalCode: string
     city: string
     state: string
     neighborhood: string
     address: string
-    addressNumber: string
+    addressNumber: number
     addressComplement?: string
   }
 }
