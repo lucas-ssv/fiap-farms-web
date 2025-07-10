@@ -11,8 +11,10 @@ export namespace AddSale {
     saleDate: Date
     totalPrice: number
     unitPrice: number
+    unit: string
     discount?: number
     paymentMethod: string
+    observations?: string
     status: 'pending' | 'completed' | 'cancelled'
   }
 }

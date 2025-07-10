@@ -11,4 +11,6 @@ export const mockAddSaleParams = (): AddSale.Params => ({
   discount: 0,
   paymentMethod: 'Credit Card',
   status: 'pending',
+  unit: 'kg',
+  observations: 'First sale of the month',
 })

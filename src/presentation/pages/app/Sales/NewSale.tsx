@@ -9,6 +9,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
   Input,
   Select,
   SelectContent,
@@ -23,32 +24,38 @@ import { InputDate } from '@/presentation/components'
 type NewProductFormData = z.infer<typeof schema>
 
 const schema = z.object({
-  productName: z.string().min(1, 'O nome é obrigatório'),
-  customerName: z.string().optional(),
-  quantity: z.number().min(1, 'A quantidade deve ser maior que zero'),
-  price: z.string().min(1, 'O preço é obrigatório'),
-  discount: z.string().optional(),
-  paymentMethod: z.string().min(1, 'O método de pagamento é obrigatório'),
-  status: z.string().min(1, 'O status é obrigatório'),
-  saleDate: z.date('A data da venda é obrigatória'),
+  productId: z.string().min(1, 'Selecione um produto'),
+  customerId: z.string().optional(),
+  quantity: z.number().min(1, 'Quantidade deve ser maior que 0'),
+  saleDate: z.date().optional(),
+  totalPrice: z.number().min(0, 'Valor total deve ser maior ou igual a 0'),
+  unitPrice: z.number().min(1, 'Preço unitário é obrigatório'),
+  discount: z
+    .number()
+    .min(0, 'Desconto deve ser maior ou igual a 0')
+    .max(15, 'Desconto não pode ser maior que 15%')
+    .optional(),
+  paymentMethod: z.string().min(1, 'Selecione uma forma de pagamento'),
+  status: z.enum(['pending', 'completed', 'cancelled']),
   observations: z.string().optional(),
-  totalValue: z.string().min(1, 'O valor total é obrigatório').optional(),
+  unit: z.string().min(1, 'A unidade de medida é obrigatória'),
 })
 
 export function NewSale() {
   const form = useForm<NewProductFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      productName: '',
-      customerName: '',
+      productId: '',
+      customerId: '',
+      status: 'pending',
+      unitPrice: 0,
+      totalPrice: 0,
       quantity: 1,
-      price: '',
-      discount: '',
+      discount: 0,
       paymentMethod: '',
-      status: '',
       saleDate: undefined,
       observations: '',
-      totalValue: '',
+      unit: '',
     },
   })
 
@@ -73,9 +80,9 @@ export function NewSale() {
         >
           <FormField
             control={form.control}
-            name="productName"
+            name="productId"
             render={({ field }) => (
-              <FormItem className="col-span-12 xl:col-span-6">
+              <FormItem className="col-span-12 xl:col-span-4">
                 <FormLabel>Produto</FormLabel>
                 <Select
                   onValueChange={field.onChange}
@@ -97,7 +104,7 @@ export function NewSale() {
           />
           <FormField
             control={form.control}
-            name="customerName"
+            name="customerId"
             render={({ field }) => (
               <FormItem className="col-span-12 md:col-span-6 xl:col-span-3">
                 <FormLabel>Cliente</FormLabel>
@@ -122,24 +129,51 @@ export function NewSale() {
           <FormField
             control={form.control}
             name="quantity"
-            render={({ field }) => (
+            render={() => (
               <FormItem className="col-span-12 md:col-span-6 xl:col-span-3">
                 <FormLabel>Quantidade</FormLabel>
                 <FormControl>
-                  <Input type="number" placeholder="0" {...field} />
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    {...form.register('quantity', { valueAsNumber: true })}
+                  />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
           <FormField
             control={form.control}
-            name="price"
+            name="unit"
+            render={({ field }) => (
+              <FormItem className="col-span-12 md:col-span-6 xl:col-span-2">
+                <FormLabel>Unidade de medida</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecione a unidade de medida" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <FormMessage />
+                  <SelectContent>
+                    <SelectItem value="kg">KG</SelectItem>
+                    <SelectItem value="unit">Unidade</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="unitPrice"
             render={({ field }) => (
               <FormItem className="col-span-12 md:col-span-6">
                 <FormLabel>Preço unitário</FormLabel>
                 <FormControl>
                   <Input placeholder="R$ 0,00" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -158,6 +192,7 @@ export function NewSale() {
                     {...field}
                   />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -176,6 +211,7 @@ export function NewSale() {
                       <SelectValue placeholder="Selecione a forma de pagamento" />
                     </SelectTrigger>
                   </FormControl>
+                  <FormMessage />
                   <SelectContent>
                     <SelectItem value="light">Light</SelectItem>
                     <SelectItem value="dark">Dark</SelectItem>
@@ -200,6 +236,7 @@ export function NewSale() {
                       <SelectValue placeholder="Selecione o status" />
                     </SelectTrigger>
                   </FormControl>
+                  <FormMessage />
                   <SelectContent>
                     <SelectItem value="light">Light</SelectItem>
                     <SelectItem value="dark">Dark</SelectItem>
@@ -221,6 +258,7 @@ export function NewSale() {
                     value={field.value}
                   />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -236,18 +274,20 @@ export function NewSale() {
                     {...field}
                   />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
           <FormField
             control={form.control}
-            name="totalValue"
+            name="totalPrice"
             render={({ field }) => (
               <FormItem className="col-span-12">
                 <FormLabel>Valor total</FormLabel>
                 <FormControl>
                   <Input placeholder="Valor total" disabled {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
