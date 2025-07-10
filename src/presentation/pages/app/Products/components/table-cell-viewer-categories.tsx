@@ -168,6 +168,7 @@ export function TableCellViewerCategories({
           <Button
             form="form-update"
             onClick={form.handleSubmit(handleUpdateCategory)}
+            disabled={form.formState.isSubmitting}
           >
             Atualizar categoria
           </Button>
