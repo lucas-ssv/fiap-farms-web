@@ -26,4 +26,15 @@ describe('AddCustomer usecase', () => {
 
     expect(addSpy).toHaveBeenCalledWith(params)
   })
+
+  it('should throw if AddCustomerRepository throws', async () => {
+    const { sut, addCustomerRepositoryMock } = makeSut()
+    jest.spyOn(addCustomerRepositoryMock, 'add').mockImplementationOnce(() => {
+      throw new Error('Repository error')
+    })
+
+    const promise = sut.execute(mockAddCustomerParams())
+
+    await expect(promise).rejects.toThrow('Repository error')
+  })
 })
