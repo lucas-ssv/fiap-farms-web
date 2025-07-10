@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod/v4'
 
 import {
@@ -20,6 +20,8 @@ import {
   Textarea,
 } from '@/presentation/components/ui'
 import { InputDate } from '@/presentation/components'
+import MoneyInput from '@/presentation/components/money-input'
+import { useEffect } from 'react'
 
 type NewProductFormData = z.infer<typeof schema>
 
@@ -29,9 +31,11 @@ const schema = z.object({
   quantity: z.number().min(1, 'Quantidade deve ser maior que 0'),
   saleDate: z.date().optional(),
   totalPrice: z.number().min(0, 'Valor total deve ser maior ou igual a 0'),
-  unitPrice: z.number().min(1, 'Preço unitário é obrigatório'),
+  unitPrice: z
+    .number('Preço unitário deve ser um número')
+    .min(1, 'Preço unitário é obrigatório'),
   discount: z
-    .number()
+    .number('Desconto deve ser um número')
     .min(0, 'Desconto deve ser maior ou igual a 0')
     .max(15, 'Desconto não pode ser maior que 15%')
     .optional(),
@@ -53,15 +57,33 @@ export function NewSale() {
       quantity: 1,
       discount: 0,
       paymentMethod: '',
-      saleDate: undefined,
+      saleDate: new Date(),
       observations: '',
       unit: '',
     },
   })
+  const quantity = useWatch({ control: form.control, name: 'quantity' })
+  const unitPrice = useWatch({ control: form.control, name: 'unitPrice' })
+  const discount = useWatch({ control: form.control, name: 'discount' })
 
   const onSubmit = (data: NewProductFormData) => {
     console.log('Form submitted:', data)
   }
+
+  useEffect(() => {
+    if (quantity && unitPrice) {
+      const totalPrice = quantity * unitPrice * (1 - (discount || 0) / 100)
+      const current = form.getValues('totalPrice')
+
+      if (current !== totalPrice) {
+        form.setValue('totalPrice', totalPrice, {
+          shouldDirty: false,
+          shouldTouch: false,
+          shouldValidate: false,
+        })
+      }
+    }
+  }, [quantity, unitPrice, discount, form])
 
   return (
     <main>
@@ -167,20 +189,21 @@ export function NewSale() {
           <FormField
             control={form.control}
             name="unitPrice"
-            render={({ field }) => (
+            render={() => (
               <FormItem className="col-span-12 md:col-span-6">
-                <FormLabel>Preço unitário</FormLabel>
-                <FormControl>
-                  <Input placeholder="R$ 0,00" {...field} />
-                </FormControl>
-                <FormMessage />
+                <MoneyInput
+                  form={form}
+                  label="Preço unitário"
+                  name="unitPrice"
+                  placeholder="R$ 0,00"
+                />
               </FormItem>
             )}
           />
           <FormField
             control={form.control}
             name="discount"
-            render={({ field }) => (
+            render={() => (
               <FormItem className="col-span-12 md:col-span-6">
                 <FormLabel>Desconto (%)</FormLabel>
                 <FormControl>
@@ -189,7 +212,7 @@ export function NewSale() {
                     max={15}
                     type="number"
                     placeholder="0"
-                    {...field}
+                    {...form.register('discount', { valueAsNumber: true })}
                   />
                 </FormControl>
                 <FormMessage />
@@ -213,9 +236,11 @@ export function NewSale() {
                   </FormControl>
                   <FormMessage />
                   <SelectContent>
-                    <SelectItem value="light">Light</SelectItem>
-                    <SelectItem value="dark">Dark</SelectItem>
-                    <SelectItem value="system">System</SelectItem>
+                    <SelectItem value="debit">Débito</SelectItem>
+                    <SelectItem value="credit">Crédito</SelectItem>
+                    <SelectItem value="cash">Dinheiro</SelectItem>
+                    <SelectItem value="pix">Pix</SelectItem>
+                    <SelectItem value="other">Outro</SelectItem>
                   </SelectContent>
                 </Select>
               </FormItem>
@@ -238,9 +263,9 @@ export function NewSale() {
                   </FormControl>
                   <FormMessage />
                   <SelectContent>
-                    <SelectItem value="light">Light</SelectItem>
-                    <SelectItem value="dark">Dark</SelectItem>
-                    <SelectItem value="system">System</SelectItem>
+                    <SelectItem value="pending">Pendente</SelectItem>
+                    <SelectItem value="completed">Concluída</SelectItem>
+                    <SelectItem value="cancelled">Cancelada</SelectItem>
                   </SelectContent>
                 </Select>
               </FormItem>
@@ -281,13 +306,15 @@ export function NewSale() {
           <FormField
             control={form.control}
             name="totalPrice"
-            render={({ field }) => (
+            render={() => (
               <FormItem className="col-span-12">
-                <FormLabel>Valor total</FormLabel>
-                <FormControl>
-                  <Input placeholder="Valor total" disabled {...field} />
-                </FormControl>
-                <FormMessage />
+                <MoneyInput
+                  form={form}
+                  label="Valor total"
+                  name="totalPrice"
+                  placeholder="Valor total"
+                  disabled
+                />
               </FormItem>
             )}
           />
