@@ -12,6 +12,7 @@ export type ObserveAndLoadAccountByEmailParams = (
 ) => void
 
 export type ObserveAndLoadAccountByEmailUserParams = {
+  id: string
   name: string
   username: string
   email: string

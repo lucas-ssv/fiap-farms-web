@@ -1,4 +1,4 @@
-import { AddCustomerImpl } from '@/data/usecases/customer/add-customer'
+import { AddCustomerImpl } from '@/data/usecases/customer'
 import { AddCustomerRepositoryMock } from '@tests/data/mocks/customer'
 import { mockAddCustomerParams } from '@tests/data/usecases/customer/mocks'
 

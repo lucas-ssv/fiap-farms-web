@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod/v4'
 
 import {
@@ -9,6 +9,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
   Input,
   Select,
   SelectContent,
@@ -19,42 +20,141 @@ import {
   Textarea,
 } from '@/presentation/components/ui'
 import { InputDate } from '@/presentation/components'
+import MoneyInput from '@/presentation/components/money-input'
+import { useCallback, useEffect, useState } from 'react'
+import type { LoadProducts } from '@/domain/usecases/product'
+import { toast } from 'sonner'
+import type { LoadCustomers } from '@/domain/usecases/customer'
+import type { AddSale } from '@/domain/usecases/sale'
+import { useAuth } from '@/presentation/contexts'
+import { Loader2Icon } from 'lucide-react'
 
 type NewProductFormData = z.infer<typeof schema>
 
 const schema = z.object({
-  productName: z.string().min(1, 'O nome é obrigatório'),
-  customerName: z.string().optional(),
-  quantity: z.number().min(1, 'A quantidade deve ser maior que zero'),
-  price: z.string().min(1, 'O preço é obrigatório'),
-  discount: z.string().optional(),
-  paymentMethod: z.string().min(1, 'O método de pagamento é obrigatório'),
-  status: z.string().min(1, 'O status é obrigatório'),
-  saleDate: z.date('A data da venda é obrigatória'),
+  productId: z.string().min(1, 'Selecione um produto'),
+  customerId: z.string().optional(),
+  quantity: z
+    .number('Quantidade deve ser um número')
+    .min(1, 'Quantidade deve ser maior que 0'),
+  saleDate: z.date(),
+  totalPrice: z.number().min(0, 'Valor total deve ser maior ou igual a 0'),
+  unitPrice: z
+    .number('Preço unitário deve ser um número')
+    .min(1, 'Preço unitário é obrigatório'),
+  discount: z
+    .number('Desconto deve ser um número')
+    .min(0, 'Desconto deve ser maior ou igual a 0')
+    .max(15, 'Desconto não pode ser maior que 15%')
+    .optional(),
+  paymentMethod: z.string().min(1, 'Selecione uma forma de pagamento'),
+  status: z.enum(['pending', 'completed', 'cancelled']),
   observations: z.string().optional(),
-  totalValue: z.string().min(1, 'O valor total é obrigatório').optional(),
+  unit: z.string().min(1, 'A unidade de medida é obrigatória'),
 })
 
-export function NewSale() {
+type Props = {
+  addSale: AddSale
+  loadProducts: LoadProducts
+  loadCustomers: LoadCustomers
+}
+
+export function NewSale({ addSale, loadProducts, loadCustomers }: Props) {
+  const { user } = useAuth()
   const form = useForm<NewProductFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      productName: '',
-      customerName: '',
+      productId: '',
+      customerId: '',
+      status: 'pending',
+      unitPrice: 0,
+      totalPrice: 0,
       quantity: 1,
-      price: '',
-      discount: '',
+      discount: 0,
       paymentMethod: '',
-      status: '',
-      saleDate: undefined,
+      saleDate: new Date(),
       observations: '',
-      totalValue: '',
+      unit: '',
     },
   })
+  const [products, setProducts] = useState<LoadProducts.Result>([])
+  const [customers, setCustomers] = useState<LoadCustomers.Result>([])
+  const quantity = useWatch({ control: form.control, name: 'quantity' })
+  const unitPrice = useWatch({ control: form.control, name: 'unitPrice' })
+  const discount = useWatch({ control: form.control, name: 'discount' })
+  const productId = useWatch({ control: form.control, name: 'productId' })
 
-  const onSubmit = (data: NewProductFormData) => {
-    console.log('Form submitted:', data)
+  const onSubmit = async (data: NewProductFormData) => {
+    try {
+      await addSale.execute({
+        userId: user!.id,
+        ...data,
+      })
+      form.reset()
+      toast.success('Venda efetuada com sucesso!')
+    } catch (error) {
+      toast.error('Erro ao efetuar venda. Tente novamente mais tarde.')
+    }
   }
+
+  const fetchProducts = useCallback(async () => {
+    try {
+      const products = await loadProducts.execute()
+      setProducts(products)
+    } catch (error) {
+      toast.error('Erro ao carregar produtos. Tente novamente mais tarde.')
+    }
+  }, [loadProducts])
+
+  const fetchCustomers = useCallback(async () => {
+    try {
+      const customers = await loadCustomers.execute()
+      setCustomers(customers)
+    } catch (error) {
+      toast.error('Erro ao carregar produtos. Tente novamente mais tarde.')
+    }
+  }, [loadCustomers])
+
+  useEffect(() => {
+    fetchProducts()
+  }, [fetchProducts])
+
+  useEffect(() => {
+    fetchCustomers()
+  }, [fetchCustomers])
+
+  useEffect(() => {
+    if (quantity && unitPrice) {
+      const totalPrice = quantity * unitPrice * (1 - (discount || 0) / 100)
+      const current = form.getValues('totalPrice')
+
+      if (current !== totalPrice) {
+        form.setValue('totalPrice', totalPrice, {
+          shouldDirty: false,
+          shouldTouch: false,
+          shouldValidate: false,
+        })
+      }
+    }
+  }, [quantity, unitPrice, discount, form])
+
+  useEffect(() => {
+    if (productId) {
+      const product = products.find((p) => p.id === productId)
+      if (product) {
+        form.setValue('unitPrice', product.price, {
+          shouldDirty: false,
+          shouldTouch: false,
+          shouldValidate: false,
+        })
+        form.setValue('unit', product.unit, {
+          shouldDirty: false,
+          shouldTouch: false,
+          shouldValidate: false,
+        })
+      }
+    }
+  }, [productId, products, form])
 
   return (
     <main>
@@ -73,23 +173,22 @@ export function NewSale() {
         >
           <FormField
             control={form.control}
-            name="productName"
+            name="productId"
             render={({ field }) => (
-              <FormItem className="col-span-12 xl:col-span-6">
+              <FormItem className="col-span-12 xl:col-span-4">
                 <FormLabel>Produto</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Selecione o produto" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="light">Light</SelectItem>
-                    <SelectItem value="dark">Dark</SelectItem>
-                    <SelectItem value="system">System</SelectItem>
+                    {products.map((product) => (
+                      <SelectItem key={product.id} value={product.id}>
+                        {product.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </FormItem>
@@ -97,23 +196,22 @@ export function NewSale() {
           />
           <FormField
             control={form.control}
-            name="customerName"
+            name="customerId"
             render={({ field }) => (
               <FormItem className="col-span-12 md:col-span-6 xl:col-span-3">
                 <FormLabel>Cliente</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Selecione o cliente" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="light">Light</SelectItem>
-                    <SelectItem value="dark">Dark</SelectItem>
-                    <SelectItem value="system">System</SelectItem>
+                    {customers.map((customer) => (
+                      <SelectItem key={customer.id} value={customer.id}>
+                        {customer.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </FormItem>
@@ -122,31 +220,59 @@ export function NewSale() {
           <FormField
             control={form.control}
             name="quantity"
-            render={({ field }) => (
+            render={() => (
               <FormItem className="col-span-12 md:col-span-6 xl:col-span-3">
                 <FormLabel>Quantidade</FormLabel>
                 <FormControl>
-                  <Input type="number" placeholder="0" {...field} />
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    {...form.register('quantity', { valueAsNumber: true })}
+                  />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
           <FormField
             control={form.control}
-            name="price"
+            name="unit"
             render={({ field }) => (
+              <FormItem className="col-span-12 md:col-span-6 xl:col-span-2">
+                <FormLabel>Unidade de medida</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecione a unidade de medida" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <FormMessage />
+                  <SelectContent>
+                    <SelectItem value="kg">KG</SelectItem>
+                    <SelectItem value="unit">Unidade</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="unitPrice"
+            render={() => (
               <FormItem className="col-span-12 md:col-span-6">
-                <FormLabel>Preço unitário</FormLabel>
-                <FormControl>
-                  <Input placeholder="R$ 0,00" {...field} />
-                </FormControl>
+                <MoneyInput
+                  form={form}
+                  label="Preço unitário"
+                  name="unitPrice"
+                  placeholder="R$ 0,00"
+                />
               </FormItem>
             )}
           />
           <FormField
             control={form.control}
             name="discount"
-            render={({ field }) => (
+            render={() => (
               <FormItem className="col-span-12 md:col-span-6">
                 <FormLabel>Desconto (%)</FormLabel>
                 <FormControl>
@@ -155,9 +281,10 @@ export function NewSale() {
                     max={15}
                     type="number"
                     placeholder="0"
-                    {...field}
+                    {...form.register('discount', { valueAsNumber: true })}
                   />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -167,19 +294,19 @@ export function NewSale() {
             render={({ field }) => (
               <FormItem className="col-span-12 md:col-span-6 lg:col-span-4">
                 <FormLabel>Forma de pagamento</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Selecione a forma de pagamento" />
                     </SelectTrigger>
                   </FormControl>
+                  <FormMessage />
                   <SelectContent>
-                    <SelectItem value="light">Light</SelectItem>
-                    <SelectItem value="dark">Dark</SelectItem>
-                    <SelectItem value="system">System</SelectItem>
+                    <SelectItem value="debit">Débito</SelectItem>
+                    <SelectItem value="credit">Crédito</SelectItem>
+                    <SelectItem value="cash">Dinheiro</SelectItem>
+                    <SelectItem value="pix">Pix</SelectItem>
+                    <SelectItem value="other">Outro</SelectItem>
                   </SelectContent>
                 </Select>
               </FormItem>
@@ -191,19 +318,17 @@ export function NewSale() {
             render={({ field }) => (
               <FormItem className="col-span-12 md:col-span-6 lg:col-span-4">
                 <FormLabel>Status da venda</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Selecione o status" />
                     </SelectTrigger>
                   </FormControl>
+                  <FormMessage />
                   <SelectContent>
-                    <SelectItem value="light">Light</SelectItem>
-                    <SelectItem value="dark">Dark</SelectItem>
-                    <SelectItem value="system">System</SelectItem>
+                    <SelectItem value="pending">Pendente</SelectItem>
+                    <SelectItem value="completed">Concluída</SelectItem>
+                    <SelectItem value="cancelled">Cancelada</SelectItem>
                   </SelectContent>
                 </Select>
               </FormItem>
@@ -221,6 +346,7 @@ export function NewSale() {
                     value={field.value}
                   />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -236,23 +362,34 @@ export function NewSale() {
                     {...field}
                   />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
           <FormField
             control={form.control}
-            name="totalValue"
-            render={({ field }) => (
+            name="totalPrice"
+            render={() => (
               <FormItem className="col-span-12">
-                <FormLabel>Valor total</FormLabel>
-                <FormControl>
-                  <Input placeholder="Valor total" disabled {...field} />
-                </FormControl>
+                <MoneyInput
+                  form={form}
+                  label="Valor total"
+                  name="totalPrice"
+                  placeholder="Valor total"
+                  disabled
+                />
               </FormItem>
             )}
           />
           <div className="col-span-12">
-            <Button className="w-full md:w-auto" form="new-product-form">
+            <Button
+              className="w-full cursor-pointer md:w-auto"
+              form="new-product-form"
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting && (
+                <Loader2Icon className="animate-spin" />
+              )}
               Adicionar produto
             </Button>
           </div>

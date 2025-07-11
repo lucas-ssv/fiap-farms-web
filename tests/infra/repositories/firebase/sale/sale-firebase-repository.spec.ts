@@ -1,7 +1,7 @@
 import { addDoc, collection } from 'firebase/firestore'
 
-import { mockAddCustomerParams } from '@tests/data/usecases/customer/mocks'
-import { CustomerFirebaseRepository } from '@/infra/repositories/firebase/customer'
+import { mockAddSaleParams } from '@tests/data/mocks/sale/mocks'
+import { SaleFirebaseRepository } from '@/infra/repositories/firebase/sale'
 
 jest.useFakeTimers()
 
@@ -43,17 +43,21 @@ jest.mock('firebase/firestore', () => ({
       callback({
         id: 'any_category_id',
         data: () => ({
-          id: 1,
-          name: 'John Doe',
-          email: 'johndue@email.com',
-          phone: '123-456-7890',
-          postalCode: '12345',
-          city: 'Springfield',
-          state: 'IL',
-          neighborhood: 'Downtown',
-          address: '123 Main St',
-          addressNumber: 101,
-          addressComplement: 'Apt 4B',
+          id: '1',
+          name: 'Fruits',
+          description: 'Fresh fruits',
+          image: 'fruit.jpg',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }),
+      })
+      callback({
+        id: 'any_category_id',
+        data: () => ({
+          id: '2',
+          name: 'Vegetables',
+          description: 'Organic vegetables',
+          image: 'vegetable.jpg',
           createdAt: new Date(),
           updatedAt: new Date(),
         }),
@@ -68,9 +72,9 @@ jest.mock('firebase/firestore', () => ({
   },
 }))
 
-describe('CustomerFirebaseRepository', () => {
+describe('SaleFirebaseRepository', () => {
   describe('add()', () => {
-    it('should add a customer on success', async () => {
+    it('should add a sale on success', async () => {
       const mockedCollectionWithConverter = 'mockedCollectionWithConverter'
       const withConverterMock = jest
         .fn()
@@ -78,8 +82,8 @@ describe('CustomerFirebaseRepository', () => {
       ;(collection as jest.Mock).mockReturnValue({
         withConverter: withConverterMock,
       })
-      const params = mockAddCustomerParams()
-      const sut = new CustomerFirebaseRepository()
+      const params = mockAddSaleParams()
+      const sut = new SaleFirebaseRepository()
 
       await sut.add(params)
 
@@ -88,32 +92,6 @@ describe('CustomerFirebaseRepository', () => {
         createdAt: 'any_timestamp',
         updatedAt: 'any_timestamp',
       })
-    })
-  })
-
-  describe('loadAll()', () => {
-    it('should load all categories on success', async () => {
-      const sut = new CustomerFirebaseRepository()
-
-      const categories = await sut.loadAll()
-
-      expect(categories).toEqual([
-        {
-          id: 'any_category_id',
-          name: 'John Doe',
-          email: 'johndue@email.com',
-          phone: '123-456-7890',
-          postalCode: '12345',
-          address: '123 Main St',
-          addressNumber: 101,
-          addressComplement: 'Apt 4B',
-          neighborhood: 'Downtown',
-          city: 'Springfield',
-          state: 'IL',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ])
     })
   })
 

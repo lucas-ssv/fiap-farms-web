@@ -15,6 +15,7 @@ type TextInputProps = {
   label: string
   placeholder: string
   formItemClassName?: string
+  disabled?: boolean
 }
 
 // Formatador para moeda BRL
@@ -26,7 +27,7 @@ const moneyFormatter = Intl.NumberFormat('pt-BR', {
 })
 
 export default function MoneyInput(props: TextInputProps) {
-  const { form, name } = props
+  const { form, name, disabled } = props
 
   const [value, setValue] = useReducer((_: any, next: string) => {
     const digits = next.replace(/\D/g, '')
@@ -82,6 +83,7 @@ export default function MoneyInput(props: TextInputProps) {
                   handleChange(_change, ev.target.value)
                 }}
                 value={value}
+                disabled={disabled}
               />
             </FormControl>
             <FormMessage />
