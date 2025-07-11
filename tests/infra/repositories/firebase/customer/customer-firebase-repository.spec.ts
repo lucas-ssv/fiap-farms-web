@@ -1,4 +1,11 @@
-import { addDoc, collection, onSnapshot, query } from 'firebase/firestore'
+import {
+  addDoc,
+  collection,
+  doc,
+  onSnapshot,
+  query,
+  updateDoc,
+} from 'firebase/firestore'
 
 import { mockAddCustomerParams } from '@tests/data/usecases/customer/mocks'
 import { CustomerFirebaseRepository } from '@/infra/repositories/firebase/customer'
@@ -117,28 +124,28 @@ describe('CustomerFirebaseRepository', () => {
     })
   })
 
-  // describe('update()', () => {
-  //   it('should update a category on success', async () => {
-  //     const mockedCollectionWithConverter = 'mockedCollectionWithConverter'
-  //     const withConverterMock = jest
-  //       .fn()
-  //       .mockReturnValue(mockedCollectionWithConverter)
-  //     ;(doc as jest.Mock).mockReturnValue({
-  //       withConverter: withConverterMock,
-  //     })
-  //     const sut = new CategoryFirebaseRepository()
-  //     const data = {
-  //       image: 'any_image',
-  //     }
+  describe('update()', () => {
+    it('should update a customer on success', async () => {
+      const mockedCollectionWithConverter = 'mockedCollectionWithConverter'
+      const withConverterMock = jest
+        .fn()
+        .mockReturnValue(mockedCollectionWithConverter)
+      ;(doc as jest.Mock).mockReturnValue({
+        withConverter: withConverterMock,
+      })
+      const sut = new CustomerFirebaseRepository()
+      const data = {
+        name: 'any_customer_name',
+      }
 
-  //     await sut.update('any_category_id', data)
+      await sut.update('any_customer_id', data)
 
-  //     expect(updateDoc).toHaveBeenCalledWith(
-  //       mockedCollectionWithConverter,
-  //       data
-  //     )
-  //   })
-  // })
+      expect(updateDoc).toHaveBeenCalledWith(
+        mockedCollectionWithConverter,
+        data
+      )
+    })
+  })
 
   describe('watchAll()', () => {
     it('should call onChange with all customers', async () => {

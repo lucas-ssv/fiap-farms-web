@@ -1,15 +1,18 @@
 import type {
   AddCustomerRepository,
   LoadCustomersRepository,
+  UpdateCustomerRepository,
   WatchCustomersRepository,
 } from '@/data/contracts/customer'
 import {
   addDoc,
   collection,
+  doc,
   getDocs,
   onSnapshot,
   query,
   Timestamp,
+  updateDoc,
 } from 'firebase/firestore'
 import { customerConverter } from './converters'
 import { db } from '@/main/config/firebase'
@@ -18,7 +21,8 @@ export class CustomerFirebaseRepository
   implements
     AddCustomerRepository,
     LoadCustomersRepository,
-    WatchCustomersRepository
+    WatchCustomersRepository,
+    UpdateCustomerRepository
 {
   async add(params: AddCustomerRepository.Params): Promise<void> {
     await addDoc(collection(db, 'customers').withConverter(customerConverter), {
@@ -92,5 +96,15 @@ export class CustomerFirebaseRepository
     })
 
     return unsubscribe
+  }
+
+  async update(
+    customerId: string,
+    data: UpdateCustomerRepository.Params
+  ): Promise<void> {
+    await updateDoc(
+      doc(db, 'customers', customerId).withConverter(customerConverter),
+      data
+    )
   }
 }
