@@ -1,4 +1,4 @@
-import { addDoc, collection } from 'firebase/firestore'
+import { addDoc, collection, onSnapshot, query } from 'firebase/firestore'
 
 import { mockAddCustomerParams } from '@tests/data/usecases/customer/mocks'
 import { CustomerFirebaseRepository } from '@/infra/repositories/firebase/customer'
@@ -140,49 +140,57 @@ describe('CustomerFirebaseRepository', () => {
   //   })
   // })
 
-  // describe('watchAll()', () => {
-  //   it('should call onChange with all categories', async () => {
-  //     const docMock = {
-  //       id: 'any_category_id',
-  //       data: () => ({
-  //         name: 'any_name',
-  //         description: 'any_description',
-  //         image: 'any_image',
-  //         createdAt: 'any_createdAt',
-  //         updatedAt: 'any_updatedAt',
-  //       }),
-  //     }
+  describe('watchAll()', () => {
+    it('should call onChange with all customers', async () => {
+      const docMock = {
+        id: 'any_customer_id',
+        data: () => ({
+          id: 'any_customer_id',
+          name: 'any_customer_name',
+          email: 'any_customer_email',
+          phone: 'any_customer_phone',
+          postalCode: 'any_postal_code',
+          address: 'any_address',
+          addressNumber: 123,
+          addressComplement: 'any_complement',
+          neighborhood: 'any_neighborhood',
+          city: 'any_city',
+          state: 'any_state',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }),
+      }
 
-  //     const querySnapshotMock = {
-  //       forEach: (callback: (doc: any) => void) => {
-  //         callback(docMock)
-  //       },
-  //     }
+      const querySnapshotMock = {
+        forEach: (callback: (doc: any) => void) => {
+          callback(docMock)
+        },
+      }
 
-  //     const unsubscribeMock = jest.fn()
+      const unsubscribeMock = jest.fn()
 
-  //     ;(onSnapshot as jest.Mock).mockImplementation((_q, callback) => {
-  //       callback(querySnapshotMock)
-  //       return unsubscribeMock
-  //     })
+      ;(onSnapshot as jest.Mock).mockImplementation((_q, callback) => {
+        callback(querySnapshotMock)
+        return unsubscribeMock
+      })
 
-  //     const withConverterMock = jest
-  //       .fn()
-  //       .mockReturnValue('mockedCollectionWithConverter')
-  //     ;(collection as jest.Mock).mockReturnValue({
-  //       withConverter: withConverterMock,
-  //     })
-  //     ;(query as jest.Mock).mockReturnValue('mock_query')
+      const withConverterMock = jest
+        .fn()
+        .mockReturnValue('mockedCollectionWithConverter')
+      ;(collection as jest.Mock).mockReturnValue({
+        withConverter: withConverterMock,
+      })
+      ;(query as jest.Mock).mockReturnValue('mock_query')
 
-  //     const onChangeMock = jest.fn()
+      const onChangeMock = jest.fn()
 
-  //     const sut = new CategoryFirebaseRepository()
-  //     const unsubscribe = sut.watchAll(onChangeMock)
+      const sut = new CustomerFirebaseRepository()
+      const unsubscribe = sut.watchAll(onChangeMock)
 
-  //     expect(unsubscribe).toBe(unsubscribeMock)
-  //     expect(onSnapshot).toHaveBeenCalled()
-  //   })
-  // })
+      expect(unsubscribe).toBe(unsubscribeMock)
+      expect(onSnapshot).toHaveBeenCalled()
+    })
+  })
 
   // describe('remove()', () => {
   //   it('should remove a category on success', async () => {
