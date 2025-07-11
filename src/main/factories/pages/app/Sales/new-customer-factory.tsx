@@ -1,4 +1,4 @@
-import { AddCustomerImpl } from '@/data/usecases/customer/add-customer'
+import { AddCustomerImpl } from '@/data/usecases/customer'
 import { CustomerFirebaseRepository } from '@/infra/repositories/firebase/customer'
 import { NewCustomer } from '@/presentation/pages/app/Sales'
 
