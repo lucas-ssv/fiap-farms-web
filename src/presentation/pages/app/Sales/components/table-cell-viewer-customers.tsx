@@ -3,37 +3,92 @@ import { z } from 'zod/v4'
 import {
   Button,
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
   Input,
-  Label,
 } from '@/presentation/components/ui'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useCallback, useEffect } from 'react'
+import { toast } from 'sonner'
 
 const schema = z.object({
   id: z.string(),
   name: z.string(),
   email: z.email(),
-  phone: z.string(),
+  phone: z.string().optional(),
   postalCode: z.string(),
   city: z.string(),
   state: z.string(),
   neighborhood: z.string(),
-  street: z.string(),
-  number: z.number(),
-  complement: z.string().optional(),
-  loyaltyPoints: z.number(),
+  address: z.string(),
+  addressNumber: z.number(),
+  addressComplement: z.string().optional(),
 })
+
+type UpdateCustomerFormData = z.infer<typeof schema>
 
 export function TableCellViewerCustomers({
   item,
 }: {
   item: z.infer<typeof schema>
 }) {
+  const form = useForm<UpdateCustomerFormData>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      name: item.name,
+      email: item.email,
+      phone: item.phone,
+      postalCode: item.postalCode,
+      city: item.city,
+      state: item.state,
+      neighborhood: item.neighborhood,
+      address: item.address,
+      addressNumber: item.addressNumber,
+      addressComplement: item.addressComplement,
+    },
+  })
   const isMobile = useIsMobile()
+  const watchPostalCode = form.watch('postalCode')
+
+  const handlePostalCodeChange = useCallback(async () => {
+    try {
+      const postalCode = watchPostalCode.replace(/\D/g, '')
+
+      if (postalCode.length === 8) {
+        const response = await fetch(
+          `https://viacep.com.br/ws/${watchPostalCode}/json/`
+        )
+        const data = await response.json()
+
+        if (data.erro) {
+          toast.error('CEP inválido')
+          return
+        }
+
+        form.setValue('address', data.logradouro || '')
+        form.setValue('neighborhood', data.bairro || '')
+        form.setValue('city', data.localidade || '')
+        form.setValue('state', data.uf || '')
+        form.setValue('postalCode', data.cep || '')
+      }
+    } catch (error) {
+      toast.error('Erro ao buscar o CEP')
+    }
+  }, [watchPostalCode, form])
+
+  useEffect(() => {
+    handlePostalCodeChange()
+  }, [handlePostalCodeChange, watchPostalCode])
 
   return (
     <Drawer direction={isMobile ? 'bottom' : 'right'}>
@@ -47,64 +102,181 @@ export function TableCellViewerCustomers({
           <DrawerTitle>{item.name}</DrawerTitle>
         </DrawerHeader>
         <div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
-          <form className="flex flex-col gap-4">
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="name">Nome</Label>
-              <Input id="name" defaultValue={item.name} />
-            </div>
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="email">E-mail</Label>
-              <Input id="email" defaultValue={item.email} />
-            </div>
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="phone">Telefone / Celular</Label>
-              <Input id="phone" defaultValue={item.phone} />
-            </div>
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="postalCode">CEP</Label>
-              <Input id="postalCode" defaultValue={item.postalCode} />
-            </div>
-            <div className="flex items-center gap-4">
+          <Form {...form}>
+            <form className="flex flex-col gap-4">
               <div className="flex flex-col gap-3">
-                <Label htmlFor="city">Cidade</Label>
-                <Input id="city" defaultValue={item.city} />
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem className="col-span-12 xl:col-span-6">
+                      <FormLabel>Nome do cliente</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Digite o nome do cliente"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
               <div className="flex flex-col gap-3">
-                <Label htmlFor="state">Estado</Label>
-                <Input id="state" defaultValue={item.state} />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem className="col-span-12 xl:col-span-6">
+                      <FormLabel>E-mail</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Digite o e-mail do cliente"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
-            </div>
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="neighborhood">Bairro</Label>
-              <Input id="neighborhood" defaultValue={item.neighborhood} />
-            </div>
-            <div className="grid grid-cols-12 gap-4">
-              <div className="flex flex-col gap-3 col-span-8">
-                <Label htmlFor="street">Rua</Label>
-                <Input id="street" defaultValue={item.street} />
+              <div className="flex flex-col gap-3">
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem className="col-span-12 xl:col-span-6">
+                      <FormLabel>Telefone / Celular</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Digite o telefone/celular do cliente"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
-              <div className="flex flex-col gap-3 col-span-4">
-                <Label htmlFor="number">Número</Label>
-                <Input id="number" defaultValue={item.number} />
+              <div className="flex flex-col gap-3">
+                <FormField
+                  control={form.control}
+                  name="postalCode"
+                  render={({ field }) => (
+                    <FormItem className="col-span-12 xl:col-span-6">
+                      <FormLabel>CEP</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Digite o CEP" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
-            </div>
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="complement">Complemento</Label>
-              <Input id="complement" defaultValue={item.complement} />
-            </div>
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="loyaltyPoints">Pontos de lealdade</Label>
-              <Input id="loyaltyPoints" defaultValue={item.loyaltyPoints} />
-            </div>
-          </form>
+              <div className="flex items-center gap-4">
+                <div className="flex flex-col gap-3">
+                  <FormField
+                    control={form.control}
+                    name="city"
+                    render={({ field }) => (
+                      <FormItem className="col-span-12 xl:col-span-6">
+                        <FormLabel>Cidade</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Digite a cidade" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="flex flex-col gap-3">
+                  <FormField
+                    control={form.control}
+                    name="state"
+                    render={({ field }) => (
+                      <FormItem className="col-span-12 xl:col-span-6">
+                        <FormLabel>Estado</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Digite o estado" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col gap-3">
+                <FormField
+                  control={form.control}
+                  name="neighborhood"
+                  render={({ field }) => (
+                    <FormItem className="col-span-12 xl:col-span-6">
+                      <FormLabel>Bairro</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Digite o bairro" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="grid grid-cols-12 gap-4">
+                <div className="flex flex-col gap-3 col-span-8">
+                  <FormField
+                    control={form.control}
+                    name="address"
+                    render={({ field }) => (
+                      <FormItem className="col-span-12 xl:col-span-6">
+                        <FormLabel>Rua</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Digite a rua" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="flex flex-col gap-3 col-span-4">
+                  <FormField
+                    control={form.control}
+                    name="addressNumber"
+                    render={({ field }) => (
+                      <FormItem className="col-span-12 xl:col-span-6">
+                        <FormLabel>Número</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="Digite o número"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col gap-3">
+                <FormField
+                  control={form.control}
+                  name="addressComplement"
+                  render={({ field }) => (
+                    <FormItem className="col-span-12 xl:col-span-6">
+                      <FormLabel>Complemento</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Digite o complemento" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </form>
+          </Form>
         </div>
         <DrawerFooter>
-          <DrawerClose asChild>
-            <Button>Atualizar cliente</Button>
-          </DrawerClose>
-          <DrawerClose asChild>
-            <Button variant="destructive">Excluir cliente</Button>
-          </DrawerClose>
+          <Button>Atualizar cliente</Button>
+          <Button variant="destructive">Excluir cliente</Button>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

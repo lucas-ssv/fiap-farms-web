@@ -15,6 +15,7 @@ import {
   ArrowUpDown,
   ChevronLeft,
   ChevronRight,
+  Loader2Icon,
   MoreHorizontal,
 } from 'lucide-react'
 
@@ -44,52 +45,10 @@ import {
   SelectValue,
 } from '@/presentation/components/ui'
 import { TableCellViewerCustomers } from './components'
+import type { CustomerModel } from '@/domain/models/customer'
+import type { WatchCustomers } from '@/domain/usecases/customer'
 
-const data: Customer[] = [
-  {
-    id: '1',
-    name: 'João Silva',
-    email: 'joao@mail.com',
-    phone: '1234-5678',
-    postalCode: '12345-678',
-    city: 'São Paulo',
-    state: 'SP',
-    neighborhood: 'Centro',
-    street: 'Rua A',
-    number: 123,
-    complement: 'Apto 45',
-    loyaltyPoints: 150,
-  },
-  {
-    id: '2',
-    name: 'Maria Oliveira',
-    email: 'maria@mail.com',
-    phone: '9876-5432',
-    postalCode: '87654-321',
-    city: 'Rio de Janeiro',
-    state: 'RJ',
-    neighborhood: 'Copacabana',
-    street: 'Avenida B',
-    number: 456,
-    complement: 'Casa 12',
-    loyaltyPoints: 200,
-  },
-]
-
-type Customer = {
-  id: string
-  name: string
-  email: string
-  phone: string
-  postalCode: string
-  city: string
-  state: string
-  neighborhood: string
-  street: string
-  number: number
-  complement?: string
-  loyaltyPoints: number
-}
+type Customer = CustomerModel
 
 const columns: ColumnDef<Customer>[] = [
   {
@@ -140,20 +99,16 @@ const columns: ColumnDef<Customer>[] = [
     header: () => <p>Bairro</p>,
   },
   {
-    accessorKey: 'street',
+    accessorKey: 'address',
     header: () => <p>Rua</p>,
   },
   {
-    accessorKey: 'number',
+    accessorKey: 'addressNumber',
     header: () => <p>Número</p>,
   },
   {
-    accessorKey: 'complement',
+    accessorKey: 'addressComplement',
     header: () => <p>Complemento</p>,
-  },
-  {
-    accessorKey: 'loyaltyPoints',
-    header: () => <p>Pontos de lealdade</p>,
   },
   {
     id: 'actions',
@@ -180,7 +135,11 @@ const columns: ColumnDef<Customer>[] = [
   },
 ]
 
-export function Customers() {
+type Props = {
+  watchCustomers: WatchCustomers
+}
+
+export function Customers({ watchCustomers }: Props) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -188,9 +147,11 @@ export function Customers() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
+  const [customers, setCustomers] = React.useState<Customer[]>([])
+  const [isLoading, setIsLoading] = React.useState(true)
 
   const table = useReactTable({
-    data,
+    data: customers,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -207,6 +168,23 @@ export function Customers() {
       rowSelection,
     },
   })
+
+  React.useEffect(() => {
+    const unsubscribe = watchCustomers.execute((customers) => {
+      setCustomers(customers)
+      setIsLoading(false)
+    })
+
+    return () => unsubscribe()
+  }, [watchCustomers])
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full">
+        <Loader2Icon className="animate-spin" />
+      </div>
+    )
+  }
 
   return (
     <div className="@container/card mx-4 mt-4 lg:mx-6">
