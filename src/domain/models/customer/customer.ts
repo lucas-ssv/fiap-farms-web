@@ -2,10 +2,10 @@ export interface CustomerModel {
   id: string
   name: string
   email: string
-  phone: string
+  phone?: string
   postalCode: string
   address: string
-  addressNumber: string
+  addressNumber: number
   addressComplement?: string
   neighborhood: string
   city: string
