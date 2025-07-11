@@ -24,7 +24,7 @@ import type {
   SaveUserRepository,
 } from '@/data/contracts/account'
 import { auth, db } from '@/main/config/firebase'
-import { userConverter, type User } from './converters'
+import { userConverter } from './converters'
 
 export class AccountFirebaseRepository
   implements
@@ -53,9 +53,14 @@ export class AccountFirebaseRepository
       where('email', '==', email)
     )
     const querySnapshot = await getDocs(q)
-    let user: User | null = null
+    let user: LoadAccountByEmailRepository.Result | null = null
     querySnapshot.forEach((doc) => {
-      user = doc.data()
+      const id = doc.id
+      const data = doc.data()
+      user = {
+        id,
+        ...data,
+      }
     })
     return user
   }

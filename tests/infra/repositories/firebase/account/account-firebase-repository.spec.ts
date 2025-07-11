@@ -28,6 +28,7 @@ jest.mock('firebase/firestore', () => ({
   getDocs: jest.fn().mockResolvedValue({
     forEach: (callback: (doc: unknown) => void) => {
       callback({
+        id: 'any_user_id',
         data: () => ({
           name: 'any_name',
           username: 'any_username',
@@ -162,6 +163,7 @@ describe('AccountFirebaseRepository', () => {
       const account = await sut.loadByEmail('any_email@mail.com')
 
       expect(account).toEqual({
+        id: 'any_user_id',
         name: 'any_name',
         username: 'any_username',
         email: 'any_email@mail.com',

@@ -21,15 +21,23 @@ import {
 } from '@/presentation/components/ui'
 import { InputDate } from '@/presentation/components'
 import MoneyInput from '@/presentation/components/money-input'
-import { useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import type { LoadProducts } from '@/domain/usecases/product'
+import { toast } from 'sonner'
+import type { LoadCustomers } from '@/domain/usecases/customer'
+import type { AddSale } from '@/domain/usecases/sale'
+import { useAuth } from '@/presentation/contexts'
+import { Loader2Icon } from 'lucide-react'
 
 type NewProductFormData = z.infer<typeof schema>
 
 const schema = z.object({
   productId: z.string().min(1, 'Selecione um produto'),
   customerId: z.string().optional(),
-  quantity: z.number().min(1, 'Quantidade deve ser maior que 0'),
-  saleDate: z.date().optional(),
+  quantity: z
+    .number('Quantidade deve ser um número')
+    .min(1, 'Quantidade deve ser maior que 0'),
+  saleDate: z.date(),
   totalPrice: z.number().min(0, 'Valor total deve ser maior ou igual a 0'),
   unitPrice: z
     .number('Preço unitário deve ser um número')
@@ -45,7 +53,14 @@ const schema = z.object({
   unit: z.string().min(1, 'A unidade de medida é obrigatória'),
 })
 
-export function NewSale() {
+type Props = {
+  addSale: AddSale
+  loadProducts: LoadProducts
+  loadCustomers: LoadCustomers
+}
+
+export function NewSale({ addSale, loadProducts, loadCustomers }: Props) {
+  const { user } = useAuth()
   const form = useForm<NewProductFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -62,13 +77,51 @@ export function NewSale() {
       unit: '',
     },
   })
+  const [products, setProducts] = useState<LoadProducts.Result>([])
+  const [customers, setCustomers] = useState<LoadCustomers.Result>([])
   const quantity = useWatch({ control: form.control, name: 'quantity' })
   const unitPrice = useWatch({ control: form.control, name: 'unitPrice' })
   const discount = useWatch({ control: form.control, name: 'discount' })
+  const productId = useWatch({ control: form.control, name: 'productId' })
 
-  const onSubmit = (data: NewProductFormData) => {
-    console.log('Form submitted:', data)
+  const onSubmit = async (data: NewProductFormData) => {
+    try {
+      await addSale.execute({
+        userId: user!.id,
+        ...data,
+      })
+      form.reset()
+      toast.success('Venda efetuada com sucesso!')
+    } catch (error) {
+      toast.error('Erro ao efetuar venda. Tente novamente mais tarde.')
+    }
   }
+
+  const fetchProducts = useCallback(async () => {
+    try {
+      const products = await loadProducts.execute()
+      setProducts(products)
+    } catch (error) {
+      toast.error('Erro ao carregar produtos. Tente novamente mais tarde.')
+    }
+  }, [loadProducts])
+
+  const fetchCustomers = useCallback(async () => {
+    try {
+      const customers = await loadCustomers.execute()
+      setCustomers(customers)
+    } catch (error) {
+      toast.error('Erro ao carregar produtos. Tente novamente mais tarde.')
+    }
+  }, [loadCustomers])
+
+  useEffect(() => {
+    fetchProducts()
+  }, [fetchProducts])
+
+  useEffect(() => {
+    fetchCustomers()
+  }, [fetchCustomers])
 
   useEffect(() => {
     if (quantity && unitPrice) {
@@ -84,6 +137,24 @@ export function NewSale() {
       }
     }
   }, [quantity, unitPrice, discount, form])
+
+  useEffect(() => {
+    if (productId) {
+      const product = products.find((p) => p.id === productId)
+      if (product) {
+        form.setValue('unitPrice', product.price, {
+          shouldDirty: false,
+          shouldTouch: false,
+          shouldValidate: false,
+        })
+        form.setValue('unit', product.unit, {
+          shouldDirty: false,
+          shouldTouch: false,
+          shouldValidate: false,
+        })
+      }
+    }
+  }, [productId, products, form])
 
   return (
     <main>
@@ -106,19 +177,18 @@ export function NewSale() {
             render={({ field }) => (
               <FormItem className="col-span-12 xl:col-span-4">
                 <FormLabel>Produto</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Selecione o produto" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="light">Light</SelectItem>
-                    <SelectItem value="dark">Dark</SelectItem>
-                    <SelectItem value="system">System</SelectItem>
+                    {products.map((product) => (
+                      <SelectItem key={product.id} value={product.id}>
+                        {product.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </FormItem>
@@ -130,19 +200,18 @@ export function NewSale() {
             render={({ field }) => (
               <FormItem className="col-span-12 md:col-span-6 xl:col-span-3">
                 <FormLabel>Cliente</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Selecione o cliente" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="light">Light</SelectItem>
-                    <SelectItem value="dark">Dark</SelectItem>
-                    <SelectItem value="system">System</SelectItem>
+                    {customers.map((customer) => (
+                      <SelectItem key={customer.id} value={customer.id}>
+                        {customer.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </FormItem>
@@ -225,10 +294,7 @@ export function NewSale() {
             render={({ field }) => (
               <FormItem className="col-span-12 md:col-span-6 lg:col-span-4">
                 <FormLabel>Forma de pagamento</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Selecione a forma de pagamento" />
@@ -252,10 +318,7 @@ export function NewSale() {
             render={({ field }) => (
               <FormItem className="col-span-12 md:col-span-6 lg:col-span-4">
                 <FormLabel>Status da venda</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Selecione o status" />
@@ -319,7 +382,14 @@ export function NewSale() {
             )}
           />
           <div className="col-span-12">
-            <Button className="w-full md:w-auto" form="new-product-form">
+            <Button
+              className="w-full cursor-pointer md:w-auto"
+              form="new-product-form"
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting && (
+                <Loader2Icon className="animate-spin" />
+              )}
               Adicionar produto
             </Button>
           </div>
