@@ -3,7 +3,7 @@ import type { CustomerModel } from '@/domain/models/customer'
 import type { UserModel } from '@/domain/models/account'
 
 export interface SaleModel {
-  id: number
+  id: string
   product: ProductModel
   customer?: CustomerModel
   user: UserModel
