@@ -1,12 +1,14 @@
 import type {
   AddCustomerRepository,
   LoadCustomersRepository,
+  RemoveCustomerRepository,
   UpdateCustomerRepository,
   WatchCustomersRepository,
 } from '@/data/contracts/customer'
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDocs,
   onSnapshot,
@@ -22,7 +24,8 @@ export class CustomerFirebaseRepository
     AddCustomerRepository,
     LoadCustomersRepository,
     WatchCustomersRepository,
-    UpdateCustomerRepository
+    UpdateCustomerRepository,
+    RemoveCustomerRepository
 {
   async add(params: AddCustomerRepository.Params): Promise<void> {
     await addDoc(collection(db, 'customers').withConverter(customerConverter), {
@@ -105,6 +108,12 @@ export class CustomerFirebaseRepository
     await updateDoc(
       doc(db, 'customers', customerId).withConverter(customerConverter),
       data
+    )
+  }
+
+  async remove(customerId: string): Promise<void> {
+    await deleteDoc(
+      doc(db, 'customers', customerId).withConverter(customerConverter)
     )
   }
 }

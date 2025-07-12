@@ -1,6 +1,7 @@
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   onSnapshot,
   query,
@@ -22,33 +23,16 @@ jest.mock('@/main/config/env', () => ({
 }))
 
 jest.mock('firebase/firestore', () => ({
-  addDoc: jest.fn().mockResolvedValue({ id: 'any_category_id' }),
+  addDoc: jest.fn().mockResolvedValue({ id: 'any_customer_id' }),
   collection: jest.fn(),
   query: jest.fn(),
-  onSnapshot: jest.fn().mockImplementation((_, callback) => {
-    callback({
-      docs: [
-        {
-          id: 'any_category_id',
-          data: () => ({
-            id: 'any_category_id',
-            name: 'any_category_name',
-            description: 'any_category_description',
-            image: 'any_category_image',
-            createdAt: 'any_timestamp',
-            updatedAt: 'any_timestamp',
-          }),
-        },
-      ],
-    })
-    return jest.fn()
-  }),
+  onSnapshot: jest.fn(),
   doc: jest.fn(),
   getDocs: jest.fn().mockResolvedValue({
     empty: false,
     forEach: (callback: any) => {
       callback({
-        id: 'any_category_id',
+        id: 'any_customer_id',
         data: () => ({
           id: 1,
           name: 'John Doe',
@@ -99,14 +83,14 @@ describe('CustomerFirebaseRepository', () => {
   })
 
   describe('loadAll()', () => {
-    it('should load all categories on success', async () => {
+    it('should load all customers on success', async () => {
       const sut = new CustomerFirebaseRepository()
 
-      const categories = await sut.loadAll()
+      const customers = await sut.loadAll()
 
-      expect(categories).toEqual([
+      expect(customers).toEqual([
         {
-          id: 'any_category_id',
+          id: 'any_customer_id',
           name: 'John Doe',
           email: 'johndue@email.com',
           phone: '123-456-7890',
@@ -199,20 +183,20 @@ describe('CustomerFirebaseRepository', () => {
     })
   })
 
-  // describe('remove()', () => {
-  //   it('should remove a category on success', async () => {
-  //     const mockedCollectionWithConverter = 'mockedCollectionWithConverter'
-  //     const withConverterMock = jest
-  //       .fn()
-  //       .mockReturnValue(mockedCollectionWithConverter)
-  //     ;(doc as jest.Mock).mockReturnValue({
-  //       withConverter: withConverterMock,
-  //     })
-  //     const sut = new CategoryFirebaseRepository()
+  describe('remove()', () => {
+    it('should remove a customer on success', async () => {
+      const mockedCollectionWithConverter = 'mockedCollectionWithConverter'
+      const withConverterMock = jest
+        .fn()
+        .mockReturnValue(mockedCollectionWithConverter)
+      ;(doc as jest.Mock).mockReturnValue({
+        withConverter: withConverterMock,
+      })
+      const sut = new CustomerFirebaseRepository()
 
-  //     await sut.remove('any_category_id')
+      await sut.remove('any_customer_id')
 
-  //     expect(deleteDoc).toHaveBeenCalledWith(mockedCollectionWithConverter)
-  //   })
-  // });
+      expect(deleteDoc).toHaveBeenCalledWith(mockedCollectionWithConverter)
+    })
+  })
 })
