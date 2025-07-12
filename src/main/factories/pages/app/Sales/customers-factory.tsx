@@ -1,4 +1,5 @@
 import {
+  RemoveCustomerImpl,
   UpdateCustomerImpl,
   WatchCustomersImpl,
 } from '@/data/usecases/customer'
@@ -9,10 +10,12 @@ export function MakeCustomers() {
   const customerFirebaseRepository = new CustomerFirebaseRepository()
   const watchCustomers = new WatchCustomersImpl(customerFirebaseRepository)
   const updateCustomer = new UpdateCustomerImpl(customerFirebaseRepository)
+  const removeCustomer = new RemoveCustomerImpl(customerFirebaseRepository)
   return (
     <Customers
       watchCustomers={watchCustomers}
       updateCustomer={updateCustomer}
+      removeCustomer={removeCustomer}
     />
   )
 }

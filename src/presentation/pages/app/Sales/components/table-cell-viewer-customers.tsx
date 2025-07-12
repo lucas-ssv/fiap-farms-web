@@ -20,7 +20,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
-import type { UpdateCustomer } from '@/domain/usecases/customer'
+import type { RemoveCustomer, UpdateCustomer } from '@/domain/usecases/customer'
 import type { CustomerModel } from '@/domain/models/customer'
 import { Loader2Icon } from 'lucide-react'
 
@@ -42,9 +42,14 @@ type UpdateCustomerFormData = z.infer<typeof schema>
 type Props = {
   item: CustomerModel
   updateCustomer: UpdateCustomer
+  removeCustomer: RemoveCustomer
 }
 
-export function TableCellViewerCustomers({ item, updateCustomer }: Props) {
+export function TableCellViewerCustomers({
+  item,
+  updateCustomer,
+  removeCustomer,
+}: Props) {
   const form = useForm<UpdateCustomerFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -73,6 +78,15 @@ export function TableCellViewerCustomers({ item, updateCustomer }: Props) {
       toast.error(
         'Erro ao atualizar cliente. Verifique os dados e tente novamente.'
       )
+    }
+  }
+
+  const handleRemoveCustomer = async (customerId: string) => {
+    try {
+      await removeCustomer.execute(customerId)
+      toast.success('Cliente removido com sucesso!')
+    } catch (error) {
+      toast.error('Erro ao remover cliente. Tente novamente.')
     }
   }
 
@@ -302,7 +316,12 @@ export function TableCellViewerCustomers({ item, updateCustomer }: Props) {
             )}
             Atualizar cliente
           </Button>
-          <Button variant="destructive">Excluir cliente</Button>
+          <Button
+            variant="destructive"
+            onClick={() => handleRemoveCustomer(item.id)}
+          >
+            Excluir cliente
+          </Button>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

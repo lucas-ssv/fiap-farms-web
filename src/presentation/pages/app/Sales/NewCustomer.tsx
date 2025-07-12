@@ -43,7 +43,9 @@ export function NewCustomer({ addCustomer }: Props) {
     defaultValues: {
       name: '',
       email: '',
+      phone: '',
       postalCode: '',
+      addressComplement: '',
       city: '',
       state: '',
       neighborhood: '',
@@ -58,6 +60,7 @@ export function NewCustomer({ addCustomer }: Props) {
       toast.success('Cliente adicionado com sucesso!')
       form.reset()
     } catch (error) {
+      console.error('Erro ao adicionar cliente:', error)
       toast.error(
         'Erro ao adicionar cliente. Verifique os dados e tente novamente.'
       )

@@ -24,7 +24,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/presentation/components/ui/dropdown-menu'
 import {
@@ -46,11 +45,18 @@ import {
 } from '@/presentation/components/ui'
 import { TableCellViewerCustomers } from './components'
 import type { CustomerModel } from '@/domain/models/customer'
-import type { UpdateCustomer, WatchCustomers } from '@/domain/usecases/customer'
+import type {
+  RemoveCustomer,
+  UpdateCustomer,
+  WatchCustomers,
+} from '@/domain/usecases/customer'
 
 type Customer = CustomerModel
 
-const columns = (updateCustomer: UpdateCustomer): ColumnDef<Customer>[] => {
+const columns = (
+  updateCustomer: UpdateCustomer,
+  removeCustomer: RemoveCustomer
+): ColumnDef<Customer>[] => {
   return [
     {
       accessorKey: 'id',
@@ -76,6 +82,7 @@ const columns = (updateCustomer: UpdateCustomer): ColumnDef<Customer>[] => {
           <TableCellViewerCustomers
             item={row.original}
             updateCustomer={updateCustomer}
+            removeCustomer={removeCustomer}
           />
         )
       },
@@ -119,7 +126,7 @@ const columns = (updateCustomer: UpdateCustomer): ColumnDef<Customer>[] => {
     {
       id: 'actions',
       enableHiding: false,
-      cell: () => {
+      cell: ({ row }) => {
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -129,11 +136,12 @@ const columns = (updateCustomer: UpdateCustomer): ColumnDef<Customer>[] => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-32">
-              <DropdownMenuItem>Edit</DropdownMenuItem>
-              <DropdownMenuItem>Make a copy</DropdownMenuItem>
-              <DropdownMenuItem>Favorite</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={async () => removeCustomer.execute(row.original.id)}
+              >
+                Remover
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         )
@@ -145,9 +153,14 @@ const columns = (updateCustomer: UpdateCustomer): ColumnDef<Customer>[] => {
 type Props = {
   watchCustomers: WatchCustomers
   updateCustomer: UpdateCustomer
+  removeCustomer: RemoveCustomer
 }
 
-export function Customers({ watchCustomers, updateCustomer }: Props) {
+export function Customers({
+  watchCustomers,
+  updateCustomer,
+  removeCustomer,
+}: Props) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -160,7 +173,7 @@ export function Customers({ watchCustomers, updateCustomer }: Props) {
 
   const table = useReactTable({
     data: customers,
-    columns: columns(updateCustomer),
+    columns: columns(updateCustomer, removeCustomer),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
