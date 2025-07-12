@@ -6,7 +6,7 @@ export interface SaleModel {
   id: string
   product: ProductModel
   customer?: CustomerModel
-  user: UserModel
+  user: Omit<UserModel, 'password'>
   quantity: number
   saleDate: Date
   totalPrice: number

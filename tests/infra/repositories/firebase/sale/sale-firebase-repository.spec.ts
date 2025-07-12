@@ -119,9 +119,9 @@ describe('SaleFirebaseRepository', () => {
   // })
 
   // describe('watchAll()', () => {
-  //   it('should call onChange with all categories', async () => {
+  //   it('should call onChange with all sales', async () => {
   //     const docMock = {
-  //       id: 'any_category_id',
+  //       id: 'any_sale_id',
   //       data: () => ({
   //         name: 'any_name',
   //         description: 'any_description',
@@ -154,7 +154,7 @@ describe('SaleFirebaseRepository', () => {
 
   //     const onChangeMock = jest.fn()
 
-  //     const sut = new CategoryFirebaseRepository()
+  //     const sut = new SaleFirebaseRepository()
   //     const unsubscribe = sut.watchAll(onChangeMock)
 
   //     expect(unsubscribe).toBe(unsubscribeMock)
