@@ -15,6 +15,7 @@ import {
   ArrowUpDown,
   ChevronLeft,
   ChevronRight,
+  Loader2Icon,
   MoreHorizontal,
 } from 'lucide-react'
 
@@ -23,7 +24,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/presentation/components/ui/dropdown-menu'
 import {
@@ -44,143 +44,123 @@ import {
   SelectValue,
 } from '@/presentation/components/ui'
 import { TableCellViewerCustomers } from './components'
+import type { CustomerModel } from '@/domain/models/customer'
+import type {
+  RemoveCustomer,
+  UpdateCustomer,
+  WatchCustomers,
+} from '@/domain/usecases/customer'
 
-const data: Customer[] = [
-  {
-    id: '1',
-    name: 'João Silva',
-    email: 'joao@mail.com',
-    phone: '1234-5678',
-    postalCode: '12345-678',
-    city: 'São Paulo',
-    state: 'SP',
-    neighborhood: 'Centro',
-    street: 'Rua A',
-    number: 123,
-    complement: 'Apto 45',
-    loyaltyPoints: 150,
-  },
-  {
-    id: '2',
-    name: 'Maria Oliveira',
-    email: 'maria@mail.com',
-    phone: '9876-5432',
-    postalCode: '87654-321',
-    city: 'Rio de Janeiro',
-    state: 'RJ',
-    neighborhood: 'Copacabana',
-    street: 'Avenida B',
-    number: 456,
-    complement: 'Casa 12',
-    loyaltyPoints: 200,
-  },
-]
+type Customer = CustomerModel
 
-type Customer = {
-  id: string
-  name: string
-  email: string
-  phone: string
-  postalCode: string
-  city: string
-  state: string
-  neighborhood: string
-  street: string
-  number: number
-  complement?: string
-  loyaltyPoints: number
+const columns = (
+  updateCustomer: UpdateCustomer,
+  removeCustomer: RemoveCustomer
+): ColumnDef<Customer>[] => {
+  return [
+    {
+      accessorKey: 'id',
+      header: () => {
+        return <p>ID</p>
+      },
+    },
+    {
+      accessorKey: 'name',
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Nome
+            <ArrowUpDown />
+          </Button>
+        )
+      },
+      cell: ({ row }) => {
+        return (
+          <TableCellViewerCustomers
+            item={row.original}
+            updateCustomer={updateCustomer}
+            removeCustomer={removeCustomer}
+          />
+        )
+      },
+    },
+    {
+      accessorKey: 'email',
+      header: () => <p>E-mail</p>,
+    },
+    {
+      accessorKey: 'phone',
+      header: () => <p>Telefone</p>,
+    },
+    {
+      accessorKey: 'postalCode',
+      header: () => <p>CEP</p>,
+    },
+    {
+      accessorKey: 'city',
+      header: () => <p>Cidade</p>,
+    },
+    {
+      accessorKey: 'state',
+      header: () => <p>Estado</p>,
+    },
+    {
+      accessorKey: 'neighborhood',
+      header: () => <p>Bairro</p>,
+    },
+    {
+      accessorKey: 'address',
+      header: () => <p>Rua</p>,
+    },
+    {
+      accessorKey: 'addressNumber',
+      header: () => <p>Número</p>,
+    },
+    {
+      accessorKey: 'addressComplement',
+      header: () => <p>Complemento</p>,
+    },
+    {
+      id: 'actions',
+      enableHiding: false,
+      cell: ({ row }) => {
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-32">
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={async () => removeCustomer.execute(row.original.id)}
+              >
+                Remover
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )
+      },
+    },
+  ]
 }
 
-const columns: ColumnDef<Customer>[] = [
-  {
-    accessorKey: 'id',
-    header: () => {
-      return <p>ID</p>
-    },
-  },
-  {
-    accessorKey: 'name',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          Nome
-          <ArrowUpDown />
-        </Button>
-      )
-    },
-    cell: ({ row }) => {
-      return <TableCellViewerCustomers item={row.original} />
-    },
-  },
-  {
-    accessorKey: 'email',
-    header: () => <p>E-mail</p>,
-  },
-  {
-    accessorKey: 'phone',
-    header: () => <p>Telefone</p>,
-  },
-  {
-    accessorKey: 'postalCode',
-    header: () => <p>CEP</p>,
-  },
-  {
-    accessorKey: 'city',
-    header: () => <p>Cidade</p>,
-  },
-  {
-    accessorKey: 'state',
-    header: () => <p>Estado</p>,
-  },
-  {
-    accessorKey: 'neighborhood',
-    header: () => <p>Bairro</p>,
-  },
-  {
-    accessorKey: 'street',
-    header: () => <p>Rua</p>,
-  },
-  {
-    accessorKey: 'number',
-    header: () => <p>Número</p>,
-  },
-  {
-    accessorKey: 'complement',
-    header: () => <p>Complemento</p>,
-  },
-  {
-    accessorKey: 'loyaltyPoints',
-    header: () => <p>Pontos de lealdade</p>,
-  },
-  {
-    id: 'actions',
-    enableHiding: false,
-    cell: () => {
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-32">
-            <DropdownMenuItem>Edit</DropdownMenuItem>
-            <DropdownMenuItem>Make a copy</DropdownMenuItem>
-            <DropdownMenuItem>Favorite</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
-    },
-  },
-]
+type Props = {
+  watchCustomers: WatchCustomers
+  updateCustomer: UpdateCustomer
+  removeCustomer: RemoveCustomer
+}
 
-export function Customers() {
+export function Customers({
+  watchCustomers,
+  updateCustomer,
+  removeCustomer,
+}: Props) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -188,10 +168,12 @@ export function Customers() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
+  const [customers, setCustomers] = React.useState<Customer[]>([])
+  const [isLoading, setIsLoading] = React.useState(true)
 
   const table = useReactTable({
-    data,
-    columns,
+    data: customers,
+    columns: columns(updateCustomer, removeCustomer),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -207,6 +189,23 @@ export function Customers() {
       rowSelection,
     },
   })
+
+  React.useEffect(() => {
+    const unsubscribe = watchCustomers.execute((customers) => {
+      setCustomers(customers)
+      setIsLoading(false)
+    })
+
+    return () => unsubscribe()
+  }, [watchCustomers])
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full">
+        <Loader2Icon className="animate-spin" />
+      </div>
+    )
+  }
 
   return (
     <div className="@container/card mx-4 mt-4 lg:mx-6">
