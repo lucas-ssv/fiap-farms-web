@@ -20,9 +20,11 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
+import type { UpdateCustomer } from '@/domain/usecases/customer'
+import type { CustomerModel } from '@/domain/models/customer'
+import { Loader2Icon } from 'lucide-react'
 
 const schema = z.object({
-  id: z.string(),
   name: z.string(),
   email: z.email(),
   phone: z.string().optional(),
@@ -37,11 +39,12 @@ const schema = z.object({
 
 type UpdateCustomerFormData = z.infer<typeof schema>
 
-export function TableCellViewerCustomers({
-  item,
-}: {
-  item: z.infer<typeof schema>
-}) {
+type Props = {
+  item: CustomerModel
+  updateCustomer: UpdateCustomer
+}
+
+export function TableCellViewerCustomers({ item, updateCustomer }: Props) {
   const form = useForm<UpdateCustomerFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -59,6 +62,19 @@ export function TableCellViewerCustomers({
   })
   const isMobile = useIsMobile()
   const watchPostalCode = form.watch('postalCode')
+
+  const handleUpdateCustomer = async () => {
+    const data = form.getValues()
+
+    try {
+      await updateCustomer.execute(item.id, data)
+      toast.success('Cliente atualizado com sucesso!')
+    } catch (error) {
+      toast.error(
+        'Erro ao atualizar cliente. Verifique os dados e tente novamente.'
+      )
+    }
+  }
 
   const handlePostalCodeChange = useCallback(async () => {
     try {
@@ -103,7 +119,7 @@ export function TableCellViewerCustomers({
         </DrawerHeader>
         <div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
           <Form {...form}>
-            <form className="flex flex-col gap-4">
+            <form id="form-update" className="flex flex-col gap-4">
               <div className="flex flex-col gap-3">
                 <FormField
                   control={form.control}
@@ -275,7 +291,17 @@ export function TableCellViewerCustomers({
           </Form>
         </div>
         <DrawerFooter>
-          <Button>Atualizar cliente</Button>
+          <Button
+            className="cursor-pointer"
+            form="form-update"
+            onClick={form.handleSubmit(handleUpdateCustomer)}
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting && (
+              <Loader2Icon className="animate-spin" />
+            )}
+            Atualizar cliente
+          </Button>
           <Button variant="destructive">Excluir cliente</Button>
         </DrawerFooter>
       </DrawerContent>

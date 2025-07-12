@@ -46,100 +46,108 @@ import {
 } from '@/presentation/components/ui'
 import { TableCellViewerCustomers } from './components'
 import type { CustomerModel } from '@/domain/models/customer'
-import type { WatchCustomers } from '@/domain/usecases/customer'
+import type { UpdateCustomer, WatchCustomers } from '@/domain/usecases/customer'
 
 type Customer = CustomerModel
 
-const columns: ColumnDef<Customer>[] = [
-  {
-    accessorKey: 'id',
-    header: () => {
-      return <p>ID</p>
+const columns = (updateCustomer: UpdateCustomer): ColumnDef<Customer>[] => {
+  return [
+    {
+      accessorKey: 'id',
+      header: () => {
+        return <p>ID</p>
+      },
     },
-  },
-  {
-    accessorKey: 'name',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          Nome
-          <ArrowUpDown />
-        </Button>
-      )
+    {
+      accessorKey: 'name',
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Nome
+            <ArrowUpDown />
+          </Button>
+        )
+      },
+      cell: ({ row }) => {
+        return (
+          <TableCellViewerCustomers
+            item={row.original}
+            updateCustomer={updateCustomer}
+          />
+        )
+      },
     },
-    cell: ({ row }) => {
-      return <TableCellViewerCustomers item={row.original} />
+    {
+      accessorKey: 'email',
+      header: () => <p>E-mail</p>,
     },
-  },
-  {
-    accessorKey: 'email',
-    header: () => <p>E-mail</p>,
-  },
-  {
-    accessorKey: 'phone',
-    header: () => <p>Telefone</p>,
-  },
-  {
-    accessorKey: 'postalCode',
-    header: () => <p>CEP</p>,
-  },
-  {
-    accessorKey: 'city',
-    header: () => <p>Cidade</p>,
-  },
-  {
-    accessorKey: 'state',
-    header: () => <p>Estado</p>,
-  },
-  {
-    accessorKey: 'neighborhood',
-    header: () => <p>Bairro</p>,
-  },
-  {
-    accessorKey: 'address',
-    header: () => <p>Rua</p>,
-  },
-  {
-    accessorKey: 'addressNumber',
-    header: () => <p>Número</p>,
-  },
-  {
-    accessorKey: 'addressComplement',
-    header: () => <p>Complemento</p>,
-  },
-  {
-    id: 'actions',
-    enableHiding: false,
-    cell: () => {
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-32">
-            <DropdownMenuItem>Edit</DropdownMenuItem>
-            <DropdownMenuItem>Make a copy</DropdownMenuItem>
-            <DropdownMenuItem>Favorite</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
+    {
+      accessorKey: 'phone',
+      header: () => <p>Telefone</p>,
     },
-  },
-]
+    {
+      accessorKey: 'postalCode',
+      header: () => <p>CEP</p>,
+    },
+    {
+      accessorKey: 'city',
+      header: () => <p>Cidade</p>,
+    },
+    {
+      accessorKey: 'state',
+      header: () => <p>Estado</p>,
+    },
+    {
+      accessorKey: 'neighborhood',
+      header: () => <p>Bairro</p>,
+    },
+    {
+      accessorKey: 'address',
+      header: () => <p>Rua</p>,
+    },
+    {
+      accessorKey: 'addressNumber',
+      header: () => <p>Número</p>,
+    },
+    {
+      accessorKey: 'addressComplement',
+      header: () => <p>Complemento</p>,
+    },
+    {
+      id: 'actions',
+      enableHiding: false,
+      cell: () => {
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-32">
+              <DropdownMenuItem>Edit</DropdownMenuItem>
+              <DropdownMenuItem>Make a copy</DropdownMenuItem>
+              <DropdownMenuItem>Favorite</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )
+      },
+    },
+  ]
+}
 
 type Props = {
   watchCustomers: WatchCustomers
+  updateCustomer: UpdateCustomer
 }
 
-export function Customers({ watchCustomers }: Props) {
+export function Customers({ watchCustomers, updateCustomer }: Props) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -152,7 +160,7 @@ export function Customers({ watchCustomers }: Props) {
 
   const table = useReactTable({
     data: customers,
-    columns,
+    columns: columns(updateCustomer),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
