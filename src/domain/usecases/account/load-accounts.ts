@@ -5,5 +5,5 @@ export interface LoadAccounts {
 }
 
 export namespace LoadAccounts {
-  export type Result = Array<UserModel>
+  export type Result = Array<Omit<UserModel, 'password' | 'userUID'>>
 }
