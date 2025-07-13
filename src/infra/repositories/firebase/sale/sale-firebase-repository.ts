@@ -7,16 +7,16 @@ import {
   query,
   Timestamp,
 } from 'firebase/firestore'
-import { loadSalesConverter, saleConverter } from './converters'
+import { saleConverter } from './converters'
 import { db } from '@/main/config/firebase'
 import type {
   AddSaleRepository,
   WatchSalesRepository,
 } from '@/data/contracts/sale'
-import { loadProductsConverter } from '../product/converters'
-import { loadCategoriesConverter } from '../category/converters'
+import { productConverter } from '../product/converters'
+import { categoryConverter } from '../category/converters'
 import type { SaleModel } from '@/domain/models/sale'
-import { loadCustomersConverter } from '../customer/converters'
+import { customerConverter, type Customer } from '../customer/converters'
 import { userConverter } from '../account/converters'
 
 export class SaleFirebaseRepository
@@ -31,7 +31,7 @@ export class SaleFirebaseRepository
   }
 
   watchAll(onChange: WatchSalesRepository.Params): WatchSalesRepository.Result {
-    const q = query(collection(db, 'sales').withConverter(loadSalesConverter))
+    const q = query(collection(db, 'sales').withConverter(saleConverter))
 
     const unsubscribe = onSnapshot(q, async (querySnapshot) => {
       const sales: SaleModel[] = []
@@ -41,31 +41,33 @@ export class SaleFirebaseRepository
         const saleId = snapshot.id
 
         const productSnapshot = await getDoc(
-          doc(db, 'products', sale.product.id).withConverter(
-            loadProductsConverter
+          doc(db, 'products', sale.productId).withConverter(
+            productConverter
           )
         )
+        const productId = productSnapshot.id
         const product = productSnapshot.data()
 
         const categorySnapshot = await getDoc(
-          doc(db, 'categories', product!.id).withConverter(
-            loadCategoriesConverter
+          doc(db, 'categories', product!.categoryId).withConverter(
+            categoryConverter
           )
         )
+        const categoryId = categorySnapshot.id
         const category = categorySnapshot.data()
 
         const userSnapshot = await getDoc(
-          doc(db, 'users', sale.user.id).withConverter(userConverter)
+          doc(db, 'users', sale.userId).withConverter(userConverter)
         )
         const user = userSnapshot.data()
         const userId = userSnapshot.id
 
-        let customer: SaleModel['customer'] | undefined
+        let customer: Customer | undefined
         let customerId: string | undefined
-        if (sale.customer) {
+        if (sale.customerId) {
           const customerSnapshot = await getDoc(
-            doc(db, 'customers', sale.customer.id).withConverter(
-              loadCustomersConverter
+            doc(db, 'customers', sale.customerId).withConverter(
+              customerConverter
             )
           )
           customer = customerSnapshot.data()
@@ -75,29 +77,24 @@ export class SaleFirebaseRepository
         sales.push({
           id: saleId,
           product: {
+            id: productId,
             ...product!,
+            image: product!.image as string | undefined,
             category: {
+              id: categoryId,
               ...category!,
+              image: category!.image as string | undefined,
             },
           },
-          customer: sale.customer && {
-            ...customer!,
-          },
+          customer: customer ? {
+            id: customerId as string,
+            ...customer,
+          } : undefined,
           user: {
             id: userId,
             ...user!,
           },
-          quantity: sale.quantity,
-          saleDate: sale.saleDate,
-          totalPrice: sale.totalPrice,
-          unitPrice: sale.unitPrice,
-          unit: sale.unit,
-          discount: sale.discount ?? 0,
-          status: sale.status,
-          paymentMethod: sale.paymentMethod,
-          observations: sale.observations ?? '',
-          createdAt: sale.createdAt,
-          updatedAt: sale.updatedAt,
+          ...sale,
         })
       }
 
