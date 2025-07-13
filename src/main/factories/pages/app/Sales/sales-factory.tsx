@@ -1,6 +1,8 @@
+import { LoadAccountsImpl } from '@/data/usecases/account'
 import { LoadCustomersImpl } from '@/data/usecases/customer'
 import { LoadProductsImpl } from '@/data/usecases/product'
 import { WatchSalesImpl } from '@/data/usecases/sale'
+import { AccountFirebaseRepository } from '@/infra/repositories/firebase/account'
 import { CustomerFirebaseRepository } from '@/infra/repositories/firebase/customer'
 import { ProductFirebaseRepository } from '@/infra/repositories/firebase/product'
 import { SaleFirebaseRepository } from '@/infra/repositories/firebase/sale'
@@ -13,11 +15,14 @@ export function MakeSales() {
   const loadProducts = new LoadProductsImpl(productFirebaseRepository)
   const customerFirebaseRepository = new CustomerFirebaseRepository()
   const loadCustomers = new LoadCustomersImpl(customerFirebaseRepository)
+  const accountFirebaseRepository = new AccountFirebaseRepository()
+  const loadAccounts = new LoadAccountsImpl(accountFirebaseRepository)
   return (
     <Sales
       watchSales={watchSales}
       loadProducts={loadProducts}
       loadCustomers={loadCustomers}
+      loadAccounts={loadAccounts}
     />
   )
 }

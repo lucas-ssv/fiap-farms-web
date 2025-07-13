@@ -24,7 +24,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/presentation/components/ui/dropdown-menu'
 import {
@@ -50,12 +49,14 @@ import type { WatchSales } from '@/domain/usecases/sale'
 import { Timestamp } from 'firebase/firestore'
 import type { LoadProducts } from '@/domain/usecases/product'
 import type { LoadCustomers } from '@/domain/usecases/customer'
+import type { LoadAccounts } from '@/domain/usecases/account'
 
 type Sale = SaleModel
 
 const columns = (
   loadProducts: LoadProducts,
-  loadCustomers: LoadCustomers
+  loadCustomers: LoadCustomers,
+  loadAccounts: LoadAccounts
 ): ColumnDef<Sale>[] => {
   return [
     {
@@ -83,6 +84,7 @@ const columns = (
             item={row.original}
             loadProducts={loadProducts}
             loadCustomers={loadCustomers}
+            loadAccounts={loadAccounts}
           />
         )
       },
@@ -190,10 +192,6 @@ const columns = (
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-32">
-              <DropdownMenuItem>Edit</DropdownMenuItem>
-              <DropdownMenuItem>Make a copy</DropdownMenuItem>
-              <DropdownMenuItem>Favorite</DropdownMenuItem>
-              <DropdownMenuSeparator />
               <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -207,9 +205,15 @@ type Props = {
   watchSales: WatchSales
   loadProducts: LoadProducts
   loadCustomers: LoadCustomers
+  loadAccounts: LoadAccounts
 }
 
-export function Sales({ watchSales, loadProducts, loadCustomers }: Props) {
+export function Sales({
+  watchSales,
+  loadProducts,
+  loadCustomers,
+  loadAccounts,
+}: Props) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -222,7 +226,7 @@ export function Sales({ watchSales, loadProducts, loadCustomers }: Props) {
 
   const table = useReactTable({
     data: sales,
-    columns: columns(loadProducts, loadCustomers),
+    columns: columns(loadProducts, loadCustomers, loadAccounts),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),

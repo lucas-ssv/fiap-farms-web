@@ -3,7 +3,6 @@ import { z } from 'zod/v4'
 import {
   Button,
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerFooter,
   DrawerHeader,
@@ -34,6 +33,9 @@ import { toast } from 'sonner'
 import type { ProductModel } from '@/domain/models/product'
 import type { LoadCustomers } from '@/domain/usecases/customer'
 import type { CustomerModel } from '@/domain/models/customer'
+import type { LoadAccounts } from '@/domain/usecases/account'
+import type { UserModel } from '@/domain/models/account'
+import { Loader2Icon } from 'lucide-react'
 
 const schema = z.object({
   productId: z.string().optional(),
@@ -54,12 +56,14 @@ type Props = {
   item: SaleModel
   loadProducts: LoadProducts
   loadCustomers: LoadCustomers
+  loadAccounts: LoadAccounts
 }
 
 export function TableCellViewerSales({
   item,
   loadProducts,
   loadCustomers,
+  loadAccounts,
 }: Props) {
   const isMobile = useIsMobile()
   const form = useForm<UpdateSaleFormData>({
@@ -79,6 +83,13 @@ export function TableCellViewerSales({
   })
   const [products, setProducts] = React.useState<ProductModel[]>([])
   const [customers, setCustomers] = React.useState<CustomerModel[]>([])
+  const [accounts, setAccounts] = React.useState<
+    Omit<UserModel, 'userUID' | 'password'>[]
+  >([])
+
+  const handleUpdateSale = async (data: UpdateSaleFormData) => {
+    console.log('Updating sale with data:', data)
+  }
 
   const fetchProducts = React.useCallback(async () => {
     try {
@@ -98,6 +109,15 @@ export function TableCellViewerSales({
     }
   }, [loadCustomers])
 
+  const fetchAccounts = React.useCallback(async () => {
+    try {
+      const accounts = await loadAccounts.execute()
+      setAccounts(accounts)
+    } catch (error) {
+      toast.error('Erro ao carregar vendedores. Tente novamente mais tarde.')
+    }
+  }, [loadAccounts])
+
   React.useEffect(() => {
     fetchProducts()
   }, [fetchProducts])
@@ -105,6 +125,10 @@ export function TableCellViewerSales({
   React.useEffect(() => {
     fetchCustomers()
   }, [fetchCustomers])
+
+  React.useEffect(() => {
+    fetchAccounts()
+  }, [fetchAccounts])
 
   return (
     <Drawer direction={isMobile ? 'bottom' : 'right'}>
@@ -196,8 +220,11 @@ export function TableCellViewerSales({
                         </FormControl>
                         <FormMessage />
                         <SelectContent>
-                          <SelectItem value="kg">KG</SelectItem>
-                          <SelectItem value="unit">Unidade</SelectItem>
+                          {accounts.map((account) => (
+                            <SelectItem key={account.id} value={account.id}>
+                              {account.name}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </FormItem>
@@ -298,7 +325,7 @@ export function TableCellViewerSales({
                         value={field.value ? new Date(field.value) : undefined}
                         label="Data da venda"
                         onChange={(date) => {
-                          field.onChange(date)
+                          field.onChange(date ? date.toISOString() : '')
                         }}
                       />
                       <FormMessage />
@@ -310,12 +337,18 @@ export function TableCellViewerSales({
           </Form>
         </div>
         <DrawerFooter>
-          <DrawerClose asChild>
-            <Button>Atualizar venda</Button>
-          </DrawerClose>
-          <DrawerClose asChild>
-            <Button variant="destructive">Excluir venda</Button>
-          </DrawerClose>
+          <Button
+            className="cursor-pointer"
+            form="form-update"
+            onClick={form.handleSubmit(handleUpdateSale)}
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting && (
+              <Loader2Icon className="animate-spin" />
+            )}
+            Atualizar venda
+          </Button>
+          <Button variant="destructive">Excluir venda</Button>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
