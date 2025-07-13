@@ -174,6 +174,23 @@ describe('AccountFirebaseRepository', () => {
     })
   })
 
+  describe('loadAll()', () => {
+    it('should load all accounts on success', async () => {
+      const sut = new AccountFirebaseRepository()
+
+      const accounts = await sut.loadAll()
+
+      expect(accounts).toEqual([
+        {
+          id: 'any_user_id',
+          name: 'any_name',
+          username: 'any_username',
+          email: 'any_email@mail.com'
+        }
+      ])
+    })
+  })
+
   describe('logout', () => {
     it('should call signOut on success', async () => {
       const sut = new AccountFirebaseRepository()

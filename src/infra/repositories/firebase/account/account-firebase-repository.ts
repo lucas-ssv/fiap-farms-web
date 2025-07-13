@@ -20,6 +20,7 @@ import type {
   AuthRepository,
   LoadAccountByEmailRepository,
   LoadAccountRepository,
+  LoadAccountsRepository,
   LogoutAccountRepository,
   SaveUserRepository,
 } from '@/data/contracts/account'
@@ -33,7 +34,8 @@ export class AccountFirebaseRepository
     LoadAccountRepository,
     AuthRepository<NextOrObserver<FirebaseUser>>,
     LoadAccountByEmailRepository,
-    LogoutAccountRepository
+    LogoutAccountRepository,
+    LoadAccountsRepository
 {
   async auth(params: LoadAccountRepository.Params): Promise<void> {
     const { email, password } = params
@@ -63,6 +65,30 @@ export class AccountFirebaseRepository
       }
     })
     return user
+  }
+
+  async loadAll(): Promise<LoadAccountsRepository.Result> {
+    const q = query(
+      collection(db, 'users').withConverter(userConverter)
+    )
+    const querySnapshot = await getDocs(q)
+
+    if (querySnapshot.empty) {
+      return []
+    }
+
+    const accounts: LoadAccountsRepository.Result = []
+    querySnapshot.forEach((doc) => {
+      const accountId = doc.id
+      const account = doc.data()
+      accounts.push({
+        id: accountId,
+        name: account.name,
+        username: account.username,
+        email: account.email,
+      })
+    })
+    return accounts
   }
 
   async add(account: AddAccountRepository.Params): Promise<string> {
