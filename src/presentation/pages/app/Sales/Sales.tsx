@@ -15,6 +15,7 @@ import {
   ArrowUpDown,
   ChevronLeft,
   ChevronRight,
+  Loader2Icon,
   MoreHorizontal,
 } from 'lucide-react'
 
@@ -35,6 +36,7 @@ import {
   TableRow,
 } from '@/presentation/components/ui/table'
 import {
+  Input,
   Label,
   Select,
   SelectContent,
@@ -43,62 +45,11 @@ import {
   SelectValue,
 } from '@/presentation/components/ui'
 import { TableCellViewerSales } from './components'
-import { InputDate } from '@/presentation/components'
+import type { SaleModel } from '@/domain/models/sale'
+import type { WatchSales } from '@/domain/usecases/sale'
+import { Timestamp } from 'firebase/firestore'
 
-const data: Sale[] = [
-  {
-    id: '1',
-    customer: {
-      id: 'c1',
-      name: 'João Silva',
-      email: 'any_email@mail.com',
-      phone: '1234567890',
-      address: 'Rua Exemplo, 123',
-      loyaltyPoints: 100,
-    },
-    product: 'Produto A',
-    quantity: 2,
-    price: 'R$ 50,00',
-    status: 'completed',
-    paymentMethod: 'cash',
-    date: '2023-10-01',
-  },
-  {
-    id: '1',
-    customer: {
-      id: 'c1',
-      name: 'João Silva',
-      email: 'any_email@mail.com',
-      phone: '1234567890',
-      address: 'Rua Exemplo, 123',
-      loyaltyPoints: 100,
-    },
-    product: 'Produto A',
-    quantity: 2,
-    price: 'R$ 50,00',
-    status: 'completed',
-    paymentMethod: 'credit card',
-    date: '2023-10-01',
-  },
-]
-
-type Sale = {
-  id: string
-  customer?: {
-    id: string
-    name: string
-    email: string
-    phone: string
-    address: string
-    loyaltyPoints: number
-  }
-  product: string
-  quantity: number
-  price: string
-  status: 'completed' | 'pending' | 'in progress' | 'canceled'
-  paymentMethod: 'credit card' | 'debit card' | 'cash' | 'pix'
-  date: string
-}
+type Sale = SaleModel
 
 const columns: ColumnDef<Sale>[] = [
   {
@@ -108,14 +59,14 @@ const columns: ColumnDef<Sale>[] = [
     },
   },
   {
-    accessorKey: 'customer.name',
+    accessorKey: 'product.name',
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         >
-          Cliente
+          Produto
           <ArrowUpDown />
         </Button>
       )
@@ -125,24 +76,94 @@ const columns: ColumnDef<Sale>[] = [
     },
   },
   {
-    accessorKey: 'product',
-    header: () => <p>Produto</p>,
+    accessorKey: 'customer.name',
+    header: () => <p>Cliente</p>,
+  },
+  {
+    accessorKey: 'user.name',
+    header: () => <p>Vendedor</p>,
   },
   {
     accessorKey: 'quantity',
     header: () => <p>Quantidade</p>,
   },
   {
-    accessorKey: 'price',
-    header: () => <p>Preço total</p>,
+    accessorKey: 'product.unit',
+    header: () => <p>Unidade</p>,
+    cell: ({ row }) => {
+      const unit = row.original.product.unit === 'kg' ? 'kg' : 'Unidade'
+      return <span>{unit}</span>
+    },
   },
   {
     accessorKey: 'status',
     header: () => <p>Status</p>,
+    cell: ({ row }) => {
+      const status = row.original.status
+      switch (status) {
+        case 'pending':
+          return (
+            <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800">
+              Pendente
+            </span>
+          )
+        case 'completed':
+          return (
+            <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-800">
+              Concluída
+            </span>
+          )
+        case 'cancelled':
+          return (
+            <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-red-100 text-red-800">
+              Cancelada
+            </span>
+          )
+        default:
+          return <span className="text-gray-500">Desconhecido</span>
+      }
+    },
   },
   {
-    accessorKey: 'date',
-    header: () => <p>Data</p>,
+    accessorKey: 'saleDate',
+    header: () => <p>Data da venda</p>,
+    cell: ({ row }) => {
+      const saleDate = row.original.saleDate as Timestamp | Date
+      let formattedDate = ''
+      if (saleDate instanceof Date) {
+        formattedDate = saleDate.toLocaleDateString()
+      } else if (
+        saleDate &&
+        typeof saleDate === 'object' &&
+        'toDate' in saleDate &&
+        typeof saleDate.toDate === 'function'
+      ) {
+        formattedDate = saleDate.toDate().toLocaleDateString()
+      }
+      return <span>{formattedDate}</span>
+    },
+  },
+  {
+    accessorKey: 'unitPrice',
+    header: () => <p>Preço unitário</p>,
+    cell: ({ row }) => {
+      const priceFormat = new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      })
+      return <span>{priceFormat.format(row.original.unitPrice)}</span>
+    },
+  },
+  {
+    accessorKey: 'totalPrice',
+    header: () => <p>Preço total</p>,
+    cell: ({ row }) => {
+      const priceFormat = new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      })
+      return <span>{priceFormat.format(row.original.totalPrice)}</span>
+    },
   },
   {
     id: 'actions',
@@ -169,7 +190,11 @@ const columns: ColumnDef<Sale>[] = [
   },
 ]
 
-export function Sales() {
+type Props = {
+  watchSales: WatchSales
+}
+
+export function Sales({ watchSales }: Props) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -177,10 +202,11 @@ export function Sales() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
-  const [date, setDate] = React.useState<Date | undefined>(undefined)
+  const [sales, setSales] = React.useState<Sale[]>([])
+  const [isLoading, setIsLoading] = React.useState(true)
 
   const table = useReactTable({
-    data,
+    data: sales,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -198,26 +224,38 @@ export function Sales() {
     },
   })
 
+  React.useEffect(() => {
+    const unsubscribe = watchSales.execute((sales) => {
+      setSales(sales)
+      setIsLoading(false)
+    })
+
+    return () => unsubscribe()
+  }, [watchSales])
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full">
+        <Loader2Icon className="animate-spin" />
+      </div>
+    )
+  }
+
   return (
     <div className="@container/card mx-4 mt-4 lg:mx-6">
-      <div className="grid grid-cols-[1fr_1fr] gap-4">
+      <div className="grid">
         <div>
           <Label htmlFor="rows-per-page" className="text-sm font-medium">
-            Filtrar status
+            Filtrar vendas
           </Label>
-          <Select>
-            <SelectTrigger className="w-full mt-2">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="light">Light</SelectItem>
-              <SelectItem value="dark">Dark</SelectItem>
-              <SelectItem value="system">System</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <InputDate label="Filtrar período" date={date} setDate={setDate} />
+          <Input
+            placeholder="Filtrar vendas..."
+            value={(table.getColumn('id')?.getFilterValue() as string) ?? ''}
+            onChange={(event) =>
+              table.getColumn('id')?.setFilterValue(event.target.value)
+            }
+            className="max-w mt-2"
+          />
         </div>
       </div>
       <div className="rounded-md border mt-4">
@@ -263,7 +301,7 @@ export function Sales() {
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  Nenhum produto encontrado.
+                  Nenhuma venda encontrada.
                 </TableCell>
               </TableRow>
             )}
