@@ -32,6 +32,8 @@ import type { LoadProducts } from '@/domain/usecases/product'
 import React from 'react'
 import { toast } from 'sonner'
 import type { ProductModel } from '@/domain/models/product'
+import type { LoadCustomers } from '@/domain/usecases/customer'
+import type { CustomerModel } from '@/domain/models/customer'
 
 const schema = z.object({
   productId: z.string().optional(),
@@ -51,9 +53,14 @@ type UpdateSaleFormData = z.infer<typeof schema>
 type Props = {
   item: SaleModel
   loadProducts: LoadProducts
+  loadCustomers: LoadCustomers
 }
 
-export function TableCellViewerSales({ item, loadProducts }: Props) {
+export function TableCellViewerSales({
+  item,
+  loadProducts,
+  loadCustomers,
+}: Props) {
   const isMobile = useIsMobile()
   const form = useForm<UpdateSaleFormData>({
     resolver: zodResolver(schema),
@@ -71,6 +78,7 @@ export function TableCellViewerSales({ item, loadProducts }: Props) {
     },
   })
   const [products, setProducts] = React.useState<ProductModel[]>([])
+  const [customers, setCustomers] = React.useState<CustomerModel[]>([])
 
   const fetchProducts = React.useCallback(async () => {
     try {
@@ -81,9 +89,22 @@ export function TableCellViewerSales({ item, loadProducts }: Props) {
     }
   }, [loadProducts])
 
+  const fetchCustomers = React.useCallback(async () => {
+    try {
+      const customers = await loadCustomers.execute()
+      setCustomers(customers)
+    } catch (error) {
+      toast.error('Erro ao carregar clientes. Tente novamente mais tarde.')
+    }
+  }, [loadCustomers])
+
   React.useEffect(() => {
     fetchProducts()
   }, [fetchProducts])
+
+  React.useEffect(() => {
+    fetchCustomers()
+  }, [fetchCustomers])
 
   return (
     <Drawer direction={isMobile ? 'bottom' : 'right'}>
@@ -146,8 +167,11 @@ export function TableCellViewerSales({ item, loadProducts }: Props) {
                         </FormControl>
                         <FormMessage />
                         <SelectContent>
-                          <SelectItem value="kg">KG</SelectItem>
-                          <SelectItem value="unit">Unidade</SelectItem>
+                          {customers.map((customer) => (
+                            <SelectItem key={customer.id} value={customer.id}>
+                              {customer.name}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </FormItem>
