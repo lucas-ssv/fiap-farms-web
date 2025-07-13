@@ -48,153 +48,162 @@ import { TableCellViewerSales } from './components'
 import type { SaleModel } from '@/domain/models/sale'
 import type { WatchSales } from '@/domain/usecases/sale'
 import { Timestamp } from 'firebase/firestore'
+import type { LoadProducts } from '@/domain/usecases/product'
 
 type Sale = SaleModel
 
-const columns: ColumnDef<Sale>[] = [
-  {
-    accessorKey: 'id',
-    header: () => {
-      return <p>ID</p>
+const columns = (loadProducts: LoadProducts): ColumnDef<Sale>[] => {
+  return [
+    {
+      accessorKey: 'id',
+      header: () => {
+        return <p>ID</p>
+      },
     },
-  },
-  {
-    accessorKey: 'product.name',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          Produto
-          <ArrowUpDown />
-        </Button>
-      )
+    {
+      accessorKey: 'product.name',
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Produto
+            <ArrowUpDown />
+          </Button>
+        )
+      },
+      cell: ({ row }) => {
+        return (
+          <TableCellViewerSales
+            item={row.original}
+            loadProducts={loadProducts}
+          />
+        )
+      },
     },
-    cell: ({ row }) => {
-      return <TableCellViewerSales item={row.original} />
+    {
+      accessorKey: 'customer.name',
+      header: () => <p>Cliente</p>,
     },
-  },
-  {
-    accessorKey: 'customer.name',
-    header: () => <p>Cliente</p>,
-  },
-  {
-    accessorKey: 'user.name',
-    header: () => <p>Vendedor</p>,
-  },
-  {
-    accessorKey: 'quantity',
-    header: () => <p>Quantidade</p>,
-  },
-  {
-    accessorKey: 'product.unit',
-    header: () => <p>Unidade</p>,
-    cell: ({ row }) => {
-      const unit = row.original.product.unit === 'kg' ? 'kg' : 'Unidade'
-      return <span>{unit}</span>
+    {
+      accessorKey: 'user.name',
+      header: () => <p>Vendedor</p>,
     },
-  },
-  {
-    accessorKey: 'status',
-    header: () => <p>Status</p>,
-    cell: ({ row }) => {
-      const status = row.original.status
-      switch (status) {
-        case 'pending':
-          return (
-            <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800">
-              Pendente
-            </span>
-          )
-        case 'completed':
-          return (
-            <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-800">
-              Concluída
-            </span>
-          )
-        case 'cancelled':
-          return (
-            <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-red-100 text-red-800">
-              Cancelada
-            </span>
-          )
-        default:
-          return <span className="text-gray-500">Desconhecido</span>
-      }
+    {
+      accessorKey: 'quantity',
+      header: () => <p>Quantidade</p>,
     },
-  },
-  {
-    accessorKey: 'saleDate',
-    header: () => <p>Data da venda</p>,
-    cell: ({ row }) => {
-      const saleDate = row.original.saleDate as Timestamp | Date
-      let formattedDate = ''
-      if (saleDate instanceof Date) {
-        formattedDate = saleDate.toLocaleDateString()
-      } else if (
-        saleDate &&
-        typeof saleDate === 'object' &&
-        'toDate' in saleDate &&
-        typeof saleDate.toDate === 'function'
-      ) {
-        formattedDate = saleDate.toDate().toLocaleDateString()
-      }
-      return <span>{formattedDate}</span>
+    {
+      accessorKey: 'product.unit',
+      header: () => <p>Unidade</p>,
+      cell: ({ row }) => {
+        const unit = row.original.product.unit === 'kg' ? 'kg' : 'Unidade'
+        return <span>{unit}</span>
+      },
     },
-  },
-  {
-    accessorKey: 'unitPrice',
-    header: () => <p>Preço unitário</p>,
-    cell: ({ row }) => {
-      const priceFormat = new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-      })
-      return <span>{priceFormat.format(row.original.unitPrice)}</span>
+    {
+      accessorKey: 'status',
+      header: () => <p>Status</p>,
+      cell: ({ row }) => {
+        const status = row.original.status
+        switch (status) {
+          case 'pending':
+            return (
+              <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800">
+                Pendente
+              </span>
+            )
+          case 'completed':
+            return (
+              <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-800">
+                Concluída
+              </span>
+            )
+          case 'cancelled':
+            return (
+              <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-red-100 text-red-800">
+                Cancelada
+              </span>
+            )
+          default:
+            return <span className="text-gray-500">Desconhecido</span>
+        }
+      },
     },
-  },
-  {
-    accessorKey: 'totalPrice',
-    header: () => <p>Preço total</p>,
-    cell: ({ row }) => {
-      const priceFormat = new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-      })
-      return <span>{priceFormat.format(row.original.totalPrice)}</span>
+    {
+      accessorKey: 'saleDate',
+      header: () => <p>Data da venda</p>,
+      cell: ({ row }) => {
+        const saleDate = row.original.saleDate as Timestamp | Date
+        let formattedDate = ''
+        if (saleDate instanceof Date) {
+          formattedDate = saleDate.toLocaleDateString()
+        } else if (
+          saleDate &&
+          typeof saleDate === 'object' &&
+          'toDate' in saleDate &&
+          typeof saleDate.toDate === 'function'
+        ) {
+          formattedDate = saleDate.toDate().toLocaleDateString()
+        }
+        return <span>{formattedDate}</span>
+      },
     },
-  },
-  {
-    id: 'actions',
-    enableHiding: false,
-    cell: () => {
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-32">
-            <DropdownMenuItem>Edit</DropdownMenuItem>
-            <DropdownMenuItem>Make a copy</DropdownMenuItem>
-            <DropdownMenuItem>Favorite</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
+    {
+      accessorKey: 'unitPrice',
+      header: () => <p>Preço unitário</p>,
+      cell: ({ row }) => {
+        const priceFormat = new Intl.NumberFormat('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+        })
+        return <span>{priceFormat.format(row.original.unitPrice)}</span>
+      },
     },
-  },
-]
+    {
+      accessorKey: 'totalPrice',
+      header: () => <p>Preço total</p>,
+      cell: ({ row }) => {
+        const priceFormat = new Intl.NumberFormat('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+        })
+        return <span>{priceFormat.format(row.original.totalPrice)}</span>
+      },
+    },
+    {
+      id: 'actions',
+      enableHiding: false,
+      cell: () => {
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-32">
+              <DropdownMenuItem>Edit</DropdownMenuItem>
+              <DropdownMenuItem>Make a copy</DropdownMenuItem>
+              <DropdownMenuItem>Favorite</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )
+      },
+    },
+  ]
+}
 
 type Props = {
   watchSales: WatchSales
+  loadProducts: LoadProducts
 }
 
-export function Sales({ watchSales }: Props) {
+export function Sales({ watchSales, loadProducts }: Props) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -207,7 +216,7 @@ export function Sales({ watchSales }: Props) {
 
   const table = useReactTable({
     data: sales,
-    columns,
+    columns: columns(loadProducts),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),

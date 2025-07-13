@@ -28,6 +28,10 @@ import type { SaleModel } from '@/domain/models/sale'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import MoneyInput from '@/presentation/components/money-input'
+import type { LoadProducts } from '@/domain/usecases/product'
+import React from 'react'
+import { toast } from 'sonner'
+import type { ProductModel } from '@/domain/models/product'
 
 const schema = z.object({
   productId: z.string().optional(),
@@ -46,9 +50,10 @@ type UpdateSaleFormData = z.infer<typeof schema>
 
 type Props = {
   item: SaleModel
+  loadProducts: LoadProducts
 }
 
-export function TableCellViewerSales({ item }: Props) {
+export function TableCellViewerSales({ item, loadProducts }: Props) {
   const isMobile = useIsMobile()
   const form = useForm<UpdateSaleFormData>({
     resolver: zodResolver(schema),
@@ -65,6 +70,20 @@ export function TableCellViewerSales({ item }: Props) {
       paymentMethod: item.paymentMethod,
     },
   })
+  const [products, setProducts] = React.useState<ProductModel[]>([])
+
+  const fetchProducts = React.useCallback(async () => {
+    try {
+      const products = await loadProducts.execute()
+      setProducts(products)
+    } catch (error) {
+      toast.error('Erro ao carregar produtos. Tente novamente mais tarde.')
+    }
+  }, [loadProducts])
+
+  React.useEffect(() => {
+    fetchProducts()
+  }, [fetchProducts])
 
   return (
     <Drawer direction={isMobile ? 'bottom' : 'right'}>
@@ -98,8 +117,11 @@ export function TableCellViewerSales({ item }: Props) {
                         </FormControl>
                         <FormMessage />
                         <SelectContent>
-                          <SelectItem value="kg">KG</SelectItem>
-                          <SelectItem value="unit">Unidade</SelectItem>
+                          {products.map((product) => (
+                            <SelectItem key={product.id} value={product.id}>
+                              {product.name}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </FormItem>
