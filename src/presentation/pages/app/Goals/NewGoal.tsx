@@ -23,20 +23,36 @@ import { InputDate } from '@/presentation/components'
 
 type NewGoalFormData = z.infer<typeof schema>
 
-const schema = z.object({
-  productId: z.string().min(1, 'O ID do produto é obrigatório'),
-  description: z.string().min(1, 'A descrição é obrigatória'),
-  type: z.enum(['sales', 'production']),
-  status: z.enum(['active', 'inactive']),
-  targetValue: z
-    .number()
-    .min(100, 'O valor alvo deve ser maior ou igual a R$ 100,00'),
-  currentValue: z
-    .number()
-    .min(0, 'O valor atual deve ser maior ou igual a zero'),
-  startDate: z.date('A data de início é obrigatória'),
-  deadline: z.date('O prazo final é obrigatório'),
-})
+const schema = z
+  .object({
+    productId: z.string().min(1, 'Selecione um produto'),
+    description: z.string().optional(),
+    type: z.enum(['sales', 'production'], 'Selecione o tipo de meta'),
+    status: z.enum(
+      ['in_progress', 'done', 'active', 'inactive'],
+      'Selecione o status da meta'
+    ),
+    targetValue: z
+      .number('O valor alvo deve ser um número')
+      .min(1, 'O valor alvo deve ser maior que zero'),
+    currentValue: z
+      .number('O valor atual deve ser um número')
+      .min(1, 'O valor atual não pode ser negativo'),
+    startDate: z
+      .date('A data de início deve ser uma data válida')
+      .refine((date) => date <= new Date(), {
+        message: 'A data de início deve ser anterior ou igual à data atual',
+      }),
+    deadline: z
+      .date('A data final deve ser uma data válida')
+      .refine((date) => date > new Date(), {
+        message: 'A data final deve ser posterior à data de início',
+      }),
+  })
+  .refine((data) => data.targetValue > data.currentValue, {
+    path: ['currentValue'],
+    message: 'O valor alvo deve ser maior ao valor atual',
+  })
 
 export function NewGoal() {
   const form = useForm<NewGoalFormData>({
@@ -45,11 +61,11 @@ export function NewGoal() {
       productId: '',
       description: '',
       type: 'sales',
-      status: 'active',
+      status: 'in_progress',
       targetValue: 0,
       currentValue: 0,
-      startDate: undefined,
-      deadline: undefined,
+      startDate: new Date(),
+      deadline: new Date(new Date().setDate(new Date().getDate() + 30)),
     },
   })
 

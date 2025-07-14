@@ -5,7 +5,7 @@ export interface AddGoal {
 export namespace AddGoal {
   export type Params = {
     productId: string
-    description: string
+    description?: string
     type: 'sales' | 'production'
     status: 'in_progress' | 'done' | 'active' | 'inactive'
     targetValue: number
