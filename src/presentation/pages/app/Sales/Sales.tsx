@@ -45,7 +45,7 @@ import {
 } from '@/presentation/components/ui'
 import { TableCellViewerSales } from './components'
 import type { SaleModel } from '@/domain/models/sale'
-import type { WatchSales } from '@/domain/usecases/sale'
+import type { UpdateSale, WatchSales } from '@/domain/usecases/sale'
 import { Timestamp } from 'firebase/firestore'
 import type { LoadProducts } from '@/domain/usecases/product'
 import type { LoadCustomers } from '@/domain/usecases/customer'
@@ -56,7 +56,8 @@ type Sale = SaleModel
 const columns = (
   loadProducts: LoadProducts,
   loadCustomers: LoadCustomers,
-  loadAccounts: LoadAccounts
+  loadAccounts: LoadAccounts,
+  updateSale: UpdateSale
 ): ColumnDef<Sale>[] => {
   return [
     {
@@ -85,6 +86,7 @@ const columns = (
             loadProducts={loadProducts}
             loadCustomers={loadCustomers}
             loadAccounts={loadAccounts}
+            updateSale={updateSale}
           />
         )
       },
@@ -206,6 +208,7 @@ type Props = {
   loadProducts: LoadProducts
   loadCustomers: LoadCustomers
   loadAccounts: LoadAccounts
+  updateSale: UpdateSale
 }
 
 export function Sales({
@@ -213,6 +216,7 @@ export function Sales({
   loadProducts,
   loadCustomers,
   loadAccounts,
+  updateSale,
 }: Props) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -226,7 +230,7 @@ export function Sales({
 
   const table = useReactTable({
     data: sales,
-    columns: columns(loadProducts, loadCustomers, loadAccounts),
+    columns: columns(loadProducts, loadCustomers, loadAccounts, updateSale),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),

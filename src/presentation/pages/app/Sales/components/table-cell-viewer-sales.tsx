@@ -36,6 +36,7 @@ import type { CustomerModel } from '@/domain/models/customer'
 import type { LoadAccounts } from '@/domain/usecases/account'
 import type { UserModel } from '@/domain/models/account'
 import { Loader2Icon } from 'lucide-react'
+import type { UpdateSale } from '@/domain/usecases/sale'
 
 const schema = z.object({
   productId: z.string().optional(),
@@ -46,7 +47,7 @@ const schema = z.object({
   totalPrice: z.number().optional(),
   unitPrice: z.number().optional(),
   discount: z.number().optional(),
-  status: z.string().optional(),
+  status: z.enum(['pending', 'completed', 'cancelled']).optional(),
   paymentMethod: z.string().optional(),
 })
 
@@ -57,6 +58,7 @@ type Props = {
   loadProducts: LoadProducts
   loadCustomers: LoadCustomers
   loadAccounts: LoadAccounts
+  updateSale: UpdateSale
 }
 
 export function TableCellViewerSales({
@@ -64,6 +66,7 @@ export function TableCellViewerSales({
   loadProducts,
   loadCustomers,
   loadAccounts,
+  updateSale,
 }: Props) {
   const isMobile = useIsMobile()
   const form = useForm<UpdateSaleFormData>({
@@ -87,8 +90,15 @@ export function TableCellViewerSales({
     Omit<UserModel, 'userUID' | 'password'>[]
   >([])
 
-  const handleUpdateSale = async (data: UpdateSaleFormData) => {
-    console.log('Updating sale with data:', data)
+  const handleUpdateSale = async () => {
+    const data = form.getValues()
+
+    try {
+      await updateSale.execute(item.id, data)
+      toast.success('Venda atualizada com sucesso!')
+    } catch (error) {
+      toast.error('Erro ao atualizar a venda. Tente novamente.')
+    }
   }
 
   const fetchProducts = React.useCallback(async () => {
