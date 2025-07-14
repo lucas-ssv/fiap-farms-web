@@ -45,7 +45,7 @@ import {
 } from '@/presentation/components/ui'
 import { TableCellViewerSales } from './components'
 import type { SaleModel } from '@/domain/models/sale'
-import type { UpdateSale, WatchSales } from '@/domain/usecases/sale'
+import type { RemoveSale, UpdateSale, WatchSales } from '@/domain/usecases/sale'
 import { Timestamp } from 'firebase/firestore'
 import type { LoadProducts } from '@/domain/usecases/product'
 import type { LoadCustomers } from '@/domain/usecases/customer'
@@ -57,7 +57,8 @@ const columns = (
   loadProducts: LoadProducts,
   loadCustomers: LoadCustomers,
   loadAccounts: LoadAccounts,
-  updateSale: UpdateSale
+  updateSale: UpdateSale,
+  removeSale: RemoveSale
 ): ColumnDef<Sale>[] => {
   return [
     {
@@ -87,6 +88,7 @@ const columns = (
             loadCustomers={loadCustomers}
             loadAccounts={loadAccounts}
             updateSale={updateSale}
+            removeSale={removeSale}
           />
         )
       },
@@ -184,7 +186,7 @@ const columns = (
     {
       id: 'actions',
       enableHiding: false,
-      cell: () => {
+      cell: ({ row }) => {
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -194,7 +196,12 @@ const columns = (
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-32">
-              <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={async () => await removeSale.execute(row.original.id)}
+              >
+                Remover
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         )
@@ -209,6 +216,7 @@ type Props = {
   loadCustomers: LoadCustomers
   loadAccounts: LoadAccounts
   updateSale: UpdateSale
+  removeSale: RemoveSale
 }
 
 export function Sales({
@@ -217,6 +225,7 @@ export function Sales({
   loadCustomers,
   loadAccounts,
   updateSale,
+  removeSale,
 }: Props) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -230,7 +239,13 @@ export function Sales({
 
   const table = useReactTable({
     data: sales,
-    columns: columns(loadProducts, loadCustomers, loadAccounts, updateSale),
+    columns: columns(
+      loadProducts,
+      loadCustomers,
+      loadAccounts,
+      updateSale,
+      removeSale
+    ),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),

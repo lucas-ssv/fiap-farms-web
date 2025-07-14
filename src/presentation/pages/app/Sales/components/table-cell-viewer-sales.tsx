@@ -36,7 +36,7 @@ import type { CustomerModel } from '@/domain/models/customer'
 import type { LoadAccounts } from '@/domain/usecases/account'
 import type { UserModel } from '@/domain/models/account'
 import { Loader2Icon } from 'lucide-react'
-import type { UpdateSale } from '@/domain/usecases/sale'
+import type { RemoveSale, UpdateSale } from '@/domain/usecases/sale'
 
 const schema = z.object({
   productId: z.string().optional(),
@@ -59,6 +59,7 @@ type Props = {
   loadCustomers: LoadCustomers
   loadAccounts: LoadAccounts
   updateSale: UpdateSale
+  removeSale: RemoveSale
 }
 
 export function TableCellViewerSales({
@@ -67,6 +68,7 @@ export function TableCellViewerSales({
   loadCustomers,
   loadAccounts,
   updateSale,
+  removeSale,
 }: Props) {
   const isMobile = useIsMobile()
   const form = useForm<UpdateSaleFormData>({
@@ -98,6 +100,15 @@ export function TableCellViewerSales({
       toast.success('Venda atualizada com sucesso!')
     } catch (error) {
       toast.error('Erro ao atualizar a venda. Tente novamente.')
+    }
+  }
+
+  const handleRemoveSale = async (saleId: string) => {
+    try {
+      await removeSale.execute(saleId)
+      toast.success('Venda removida com sucesso!')
+    } catch (error) {
+      toast.error('Erro ao remover a venda. Tente novamente.')
     }
   }
 
@@ -358,7 +369,12 @@ export function TableCellViewerSales({
             )}
             Atualizar venda
           </Button>
-          <Button variant="destructive">Excluir venda</Button>
+          <Button
+            variant="destructive"
+            onClick={() => handleRemoveSale(item.id)}
+          >
+            Excluir venda
+          </Button>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
