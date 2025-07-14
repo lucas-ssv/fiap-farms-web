@@ -42,7 +42,7 @@ const schema = z.object({
   customerId: z.string().optional(),
   userId: z.string().optional(),
   quantity: z.number().optional(),
-  saleDate: z.string().optional(),
+  saleDate: z.date().optional(),
   totalPrice: z.number().optional(),
   unitPrice: z.number().optional(),
   discount: z.number().optional(),
