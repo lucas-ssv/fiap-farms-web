@@ -6,11 +6,13 @@ import {
   onSnapshot,
   query,
   Timestamp,
+  updateDoc,
 } from 'firebase/firestore'
 import { saleConverter } from './converters'
 import { db } from '@/main/config/firebase'
 import type {
   AddSaleRepository,
+  UpdateSaleRepository,
   WatchSalesRepository,
 } from '@/data/contracts/sale'
 import { productConverter } from '../product/converters'
@@ -20,7 +22,7 @@ import { customerConverter, type Customer } from '../customer/converters'
 import { userConverter } from '../account/converters'
 
 export class SaleFirebaseRepository
-  implements AddSaleRepository, WatchSalesRepository
+  implements AddSaleRepository, WatchSalesRepository, UpdateSaleRepository
 {
   async add(params: AddSaleRepository.Params): Promise<void> {
     await addDoc(collection(db, 'sales').withConverter(saleConverter), {
@@ -41,9 +43,7 @@ export class SaleFirebaseRepository
         const saleId = snapshot.id
 
         const productSnapshot = await getDoc(
-          doc(db, 'products', sale.productId).withConverter(
-            productConverter
-          )
+          doc(db, 'products', sale.productId).withConverter(productConverter)
         )
         const productId = productSnapshot.id
         const product = productSnapshot.data()
@@ -86,10 +86,12 @@ export class SaleFirebaseRepository
               image: category!.image as string | undefined,
             },
           },
-          customer: customer ? {
-            id: customerId as string,
-            ...customer,
-          } : undefined,
+          customer: customer
+            ? {
+                id: customerId as string,
+                ...customer,
+              }
+            : undefined,
           user: {
             id: userId,
             ...user!,
@@ -102,5 +104,12 @@ export class SaleFirebaseRepository
     })
 
     return unsubscribe
+  }
+
+  async update(
+    saleId: string,
+    data: UpdateSaleRepository.Params
+  ): Promise<void> {
+    await updateDoc(doc(db, 'sales', saleId).withConverter(saleConverter), data)
   }
 }
