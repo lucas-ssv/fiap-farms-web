@@ -1,5 +1,5 @@
 export interface UpdateSale {
-  execute: (params: UpdateSale.Params) => Promise<void>
+  execute: (saleId: string, data: UpdateSale.Params) => Promise<void>
 }
 
 export namespace UpdateSale {
