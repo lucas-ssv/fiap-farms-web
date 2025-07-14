@@ -153,7 +153,7 @@ describe('GoalFirebaseRepository', () => {
 
   //     const onChangeMock = jest.fn()
 
-  //     const sut = new SaleFirebaseRepository()
+  //     const sut = new GoalFirebaseRepository()
   //     const unsubscribe = sut.watchAll(onChangeMock)
 
   //     expect(unsubscribe).toBe(unsubscribeMock)
