@@ -1,7 +1,14 @@
-import { addDoc, collection } from 'firebase/firestore'
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  updateDoc,
+} from 'firebase/firestore'
 
-import { mockAddSaleParams } from '@tests/data/mocks/sale/mocks'
+import { mockAddSaleParams } from '@tests/data/usecases/sale/mocks'
 import { SaleFirebaseRepository } from '@/infra/repositories/firebase/sale'
+import type { UpdateSaleRepository } from '@/data/contracts/sale'
 
 jest.useFakeTimers()
 
@@ -95,33 +102,33 @@ describe('SaleFirebaseRepository', () => {
     })
   })
 
-  // describe('update()', () => {
-  //   it('should update a category on success', async () => {
-  //     const mockedCollectionWithConverter = 'mockedCollectionWithConverter'
-  //     const withConverterMock = jest
-  //       .fn()
-  //       .mockReturnValue(mockedCollectionWithConverter)
-  //     ;(doc as jest.Mock).mockReturnValue({
-  //       withConverter: withConverterMock,
-  //     })
-  //     const sut = new CategoryFirebaseRepository()
-  //     const data = {
-  //       image: 'any_image',
-  //     }
+  describe('update()', () => {
+    it('should update a sale on success', async () => {
+      const mockedCollectionWithConverter = 'mockedCollectionWithConverter'
+      const withConverterMock = jest
+        .fn()
+        .mockReturnValue(mockedCollectionWithConverter)
+      ;(doc as jest.Mock).mockReturnValue({
+        withConverter: withConverterMock,
+      })
+      const sut = new SaleFirebaseRepository()
+      const data: UpdateSaleRepository.Params = {
+        status: 'completed',
+      }
 
-  //     await sut.update('any_category_id', data)
+      await sut.update('any_sale_id', data)
 
-  //     expect(updateDoc).toHaveBeenCalledWith(
-  //       mockedCollectionWithConverter,
-  //       data
-  //     )
-  //   })
-  // })
+      expect(updateDoc).toHaveBeenCalledWith(
+        mockedCollectionWithConverter,
+        data
+      )
+    })
+  })
 
   // describe('watchAll()', () => {
-  //   it('should call onChange with all categories', async () => {
+  //   it('should call onChange with all sales', async () => {
   //     const docMock = {
-  //       id: 'any_category_id',
+  //       id: 'any_sale_id',
   //       data: () => ({
   //         name: 'any_name',
   //         description: 'any_description',
@@ -154,7 +161,7 @@ describe('SaleFirebaseRepository', () => {
 
   //     const onChangeMock = jest.fn()
 
-  //     const sut = new CategoryFirebaseRepository()
+  //     const sut = new SaleFirebaseRepository()
   //     const unsubscribe = sut.watchAll(onChangeMock)
 
   //     expect(unsubscribe).toBe(unsubscribeMock)
@@ -162,20 +169,20 @@ describe('SaleFirebaseRepository', () => {
   //   })
   // })
 
-  // describe('remove()', () => {
-  //   it('should remove a category on success', async () => {
-  //     const mockedCollectionWithConverter = 'mockedCollectionWithConverter'
-  //     const withConverterMock = jest
-  //       .fn()
-  //       .mockReturnValue(mockedCollectionWithConverter)
-  //     ;(doc as jest.Mock).mockReturnValue({
-  //       withConverter: withConverterMock,
-  //     })
-  //     const sut = new CategoryFirebaseRepository()
+  describe('remove()', () => {
+    it('should remove a sale on success', async () => {
+      const mockedCollectionWithConverter = 'mockedCollectionWithConverter'
+      const withConverterMock = jest
+        .fn()
+        .mockReturnValue(mockedCollectionWithConverter)
+      ;(doc as jest.Mock).mockReturnValue({
+        withConverter: withConverterMock,
+      })
+      const sut = new SaleFirebaseRepository()
 
-  //     await sut.remove('any_category_id')
+      await sut.remove('any_sale_id')
 
-  //     expect(deleteDoc).toHaveBeenCalledWith(mockedCollectionWithConverter)
-  //   })
-  // });
+      expect(deleteDoc).toHaveBeenCalledWith(mockedCollectionWithConverter)
+    })
+  })
 })
