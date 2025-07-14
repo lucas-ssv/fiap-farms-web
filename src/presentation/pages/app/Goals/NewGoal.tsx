@@ -10,7 +10,6 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  Input,
   Select,
   SelectContent,
   SelectItem,
@@ -20,6 +19,13 @@ import {
   Textarea,
 } from '@/presentation/components/ui'
 import { InputDate } from '@/presentation/components'
+import type { AddGoal } from '@/domain/usecases/goal'
+import { toast } from 'sonner'
+import { Loader2Icon } from 'lucide-react'
+import type { LoadProducts } from '@/domain/usecases/product'
+import { useCallback, useEffect, useState } from 'react'
+import type { ProductModel } from '@/domain/models/product'
+import MoneyInput from '@/presentation/components/money-input'
 
 type NewGoalFormData = z.infer<typeof schema>
 
@@ -37,7 +43,7 @@ const schema = z
       .min(1, 'O valor alvo deve ser maior que zero'),
     currentValue: z
       .number('O valor atual deve ser um número')
-      .min(1, 'O valor atual não pode ser negativo'),
+      .min(0, 'O valor atual não pode ser negativo'),
     startDate: z
       .date('A data de início deve ser uma data válida')
       .refine((date) => date <= new Date(), {
@@ -54,7 +60,12 @@ const schema = z
     message: 'O valor alvo deve ser maior ao valor atual',
   })
 
-export function NewGoal() {
+type Props = {
+  loadProducts: LoadProducts
+  addGoal: AddGoal
+}
+
+export function NewGoal({ loadProducts, addGoal }: Props) {
   const form = useForm<NewGoalFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -68,10 +79,30 @@ export function NewGoal() {
       deadline: new Date(new Date().setDate(new Date().getDate() + 30)),
     },
   })
+  const [products, setProducts] = useState<ProductModel[]>([])
 
-  const onSubmit = (data: NewGoalFormData) => {
-    console.log('Form submitted:', data)
+  const onSubmit = async (data: NewGoalFormData) => {
+    try {
+      await addGoal.execute(data)
+      toast.success('Meta adicionada com sucesso!')
+      form.reset()
+    } catch (error) {
+      toast.error('Erro ao adicionar meta. Tente novamente mais tarde.')
+    }
   }
+
+  const fetchProducts = useCallback(async () => {
+    try {
+      const products = await loadProducts.execute()
+      setProducts(products)
+    } catch (error) {
+      toast.error('Erro ao carregar produtos. Tente novamente mais tarde.')
+    }
+  }, [loadProducts])
+
+  useEffect(() => {
+    fetchProducts()
+  }, [fetchProducts])
 
   return (
     <main>
@@ -84,7 +115,7 @@ export function NewGoal() {
       <Separator />
       <Form {...form}>
         <form
-          id="new-product-form"
+          id="new-goal-form"
           onSubmit={form.handleSubmit(onSubmit)}
           className="grid grid-cols-12 gap-4 mt-6 px-4 lg:px-6"
         >
@@ -94,10 +125,7 @@ export function NewGoal() {
             render={({ field }) => (
               <FormItem className="col-span-12 md:col-span-6">
                 <FormLabel>Produto</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Selecione o produto" />
@@ -105,9 +133,11 @@ export function NewGoal() {
                   </FormControl>
                   <FormMessage />
                   <SelectContent>
-                    <SelectItem value="light">Light</SelectItem>
-                    <SelectItem value="dark">Dark</SelectItem>
-                    <SelectItem value="system">System</SelectItem>
+                    {products.map((product) => (
+                      <SelectItem key={product.id} value={product.id}>
+                        {product.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </FormItem>
@@ -119,10 +149,7 @@ export function NewGoal() {
             render={({ field }) => (
               <FormItem className="col-span-12 md:col-span-6">
                 <FormLabel>Tipo de meta</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Selecione o tipo de meta" />
@@ -158,15 +185,12 @@ export function NewGoal() {
             name="targetValue"
             render={() => (
               <FormItem className="col-span-12 md:col-span-6">
-                <FormLabel>Valor alvo</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="R$ 500,00"
-                    {...form.register('targetValue', { valueAsNumber: true })}
-                  />
-                </FormControl>
-                <FormMessage />
+                <MoneyInput
+                  form={form}
+                  label="Valor alvo"
+                  name="targetValue"
+                  placeholder="R$ 500,00"
+                />
               </FormItem>
             )}
           />
@@ -175,15 +199,12 @@ export function NewGoal() {
             name="currentValue"
             render={() => (
               <FormItem className="col-span-12 md:col-span-6">
-                <FormLabel>Valor atual</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="R$ 0,00"
-                    {...form.register('currentValue', { valueAsNumber: true })}
-                  />
-                </FormControl>
-                <FormMessage />
+                <MoneyInput
+                  form={form}
+                  label="Valor atual"
+                  name="currentValue"
+                  placeholder="R$ 0,00"
+                />
               </FormItem>
             )}
           />
@@ -220,7 +241,14 @@ export function NewGoal() {
             )}
           />
           <div className="col-span-12">
-            <Button className="w-full md:w-auto" form="new-product-form">
+            <Button
+              className="w-full cursor-pointer md:w-auto"
+              form="new-goal-form"
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting && (
+                <Loader2Icon className="animate-spin" />
+              )}
               Adicionar meta
             </Button>
           </div>
