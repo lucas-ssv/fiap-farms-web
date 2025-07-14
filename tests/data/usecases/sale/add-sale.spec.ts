@@ -1,6 +1,6 @@
 import { AddSaleImpl } from '@/data/usecases/sale'
 import { AddSaleRepositoryMock } from '@tests/data/mocks/sale'
-import { mockAddSaleParams } from '@tests/data/mocks/sale/mocks'
+import { mockAddSaleParams } from '@tests/data/usecases/sale/mocks'
 
 type SutTypes = {
   sut: AddSaleImpl

@@ -1,6 +1,6 @@
 import { addDoc, collection, doc, updateDoc } from 'firebase/firestore'
 
-import { mockAddSaleParams } from '@tests/data/mocks/sale/mocks'
+import { mockAddSaleParams } from '@tests/data/usecases/sale/mocks'
 import { SaleFirebaseRepository } from '@/infra/repositories/firebase/sale'
 import type { UpdateSaleRepository } from '@/data/contracts/sale'
 
