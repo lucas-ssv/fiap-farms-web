@@ -1,6 +1,7 @@
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   onSnapshot,
@@ -12,6 +13,7 @@ import { saleConverter } from './converters'
 import { db } from '@/main/config/firebase'
 import type {
   AddSaleRepository,
+  RemoveSaleRepository,
   UpdateSaleRepository,
   WatchSalesRepository,
 } from '@/data/contracts/sale'
@@ -22,7 +24,11 @@ import { customerConverter, type Customer } from '../customer/converters'
 import { userConverter } from '../account/converters'
 
 export class SaleFirebaseRepository
-  implements AddSaleRepository, WatchSalesRepository, UpdateSaleRepository
+  implements
+    AddSaleRepository,
+    WatchSalesRepository,
+    UpdateSaleRepository,
+    RemoveSaleRepository
 {
   async add(params: AddSaleRepository.Params): Promise<void> {
     await addDoc(collection(db, 'sales').withConverter(saleConverter), {
@@ -111,5 +117,9 @@ export class SaleFirebaseRepository
     data: UpdateSaleRepository.Params
   ): Promise<void> {
     await updateDoc(doc(db, 'sales', saleId).withConverter(saleConverter), data)
+  }
+
+  async remove(saleId: string): Promise<void> {
+    await deleteDoc(doc(db, 'sales', saleId).withConverter(saleConverter))
   }
 }
