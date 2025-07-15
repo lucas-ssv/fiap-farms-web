@@ -32,10 +32,15 @@ import { InputDate } from '@/presentation/components'
 import type { ProductionModel } from '@/domain/models/production'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import type { LoadProducts } from '@/domain/usecases/product'
+import { useCallback, useEffect, useState } from 'react'
+import { toast } from 'sonner'
+import type { ProductModel } from '@/domain/models/product'
 
 const schema = z.object({
   productId: z.string().optional(),
   status: z.enum(['in_production', 'completed']).optional(),
+  quantity: z.number().optional(),
   quantityProduced: z.number().optional(),
   unit: z.string().optional(),
   startDate: z.date().optional(),
@@ -57,21 +62,24 @@ type UpdateProductionFormData = z.infer<typeof schema>
 
 type Props = {
   item: ProductionModel
+  loadProducts: LoadProducts
 }
 
-export function TableCellViewerProductions({ item }: Props) {
+export function TableCellViewerProductions({ item, loadProducts }: Props) {
   const isMobile = useIsMobile()
   const form = useForm<UpdateProductionFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       productId: item.product.id,
       status: item.status,
+      quantity: item.quantity,
       quantityProduced: item.quantityProduced,
       unit: item.unit,
       startDate: (item.startDate as any).toDate(),
       harvestDate: (item.harvestDate as any).toDate(),
     },
   })
+  const [products, setProducts] = useState<ProductModel[]>([])
   const percentageConcluded = Math.round(
     (item.quantityProduced / item.quantity) * 100
   )
@@ -92,6 +100,19 @@ export function TableCellViewerProductions({ item }: Props) {
   const handleUpdateProduction = async (data: UpdateProductionFormData) => {
     console.log('Updating production with data:', data)
   }
+
+  const fetchProducts = useCallback(async () => {
+    try {
+      const products = await loadProducts.execute()
+      setProducts(products)
+    } catch (error) {
+      toast.error('Erro ao carregar produtos. Tente novamente mais tarde.')
+    }
+  }, [loadProducts])
+
+  useEffect(() => {
+    fetchProducts()
+  }, [fetchProducts])
 
   return (
     <Drawer direction={isMobile ? 'bottom' : 'right'}>
@@ -191,7 +212,11 @@ export function TableCellViewerProductions({ item }: Props) {
                         </FormControl>
                         <FormMessage />
                         <SelectContent>
-                          <SelectItem value="product1">Produto 1</SelectItem>
+                          {products.map((product) => (
+                            <SelectItem key={product.id} value={product.id}>
+                              {product.name}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </FormItem>
@@ -252,30 +277,51 @@ export function TableCellViewerProductions({ item }: Props) {
                 <div className="flex flex-col gap-3">
                   <FormField
                     control={form.control}
-                    name="unit"
-                    render={({ field }) => (
-                      <FormItem className="col-span-12 xl:col-span-6">
-                        <FormLabel>Unidade</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Selecione a unidade" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <FormMessage />
-                          <SelectContent>
-                            <SelectItem value="kg">kg</SelectItem>
-                            <SelectItem value="unit">Unidade</SelectItem>
-                          </SelectContent>
-                        </Select>
+                    name="quantity"
+                    render={() => (
+                      <FormItem className="col-span-12 md:col-span-6 xl:col-span-3">
+                        <FormLabel>Quantidade a produzir</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="0"
+                            {...form.register('quantity', {
+                              valueAsNumber: true,
+                            })}
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                 </div>
+              </div>
+              <div className="flex flex-col gap-3">
+                <FormField
+                  control={form.control}
+                  name="unit"
+                  render={({ field }) => (
+                    <FormItem className="col-span-12 xl:col-span-6">
+                      <FormLabel>Unidade</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Selecione a unidade" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <FormMessage />
+                        <SelectContent>
+                          <SelectItem value="kg">kg</SelectItem>
+                          <SelectItem value="unit">Unidade</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-3">
@@ -332,14 +378,14 @@ export function TableCellViewerProductions({ item }: Props) {
             {form.formState.isSubmitting && (
               <Loader2Icon className="animate-spin" />
             )}
-            Atualizar meta
+            Atualizar produção
           </Button>
           <Button
             className="cursor-pointer"
             variant="destructive"
             onClick={() => {}}
           >
-            Excluir meta
+            Excluir produção
           </Button>
         </DrawerFooter>
       </DrawerContent>

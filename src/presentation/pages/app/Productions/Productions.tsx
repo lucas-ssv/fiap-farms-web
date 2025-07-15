@@ -47,10 +47,11 @@ import { TableCellViewerProductions } from './components'
 import type { ProductionModel } from '@/domain/models/production'
 import type { WatchProductions } from '@/domain/usecases/production'
 import { Timestamp } from 'firebase/firestore'
+import type { LoadProducts } from '@/domain/usecases/product'
 
 type Production = ProductionModel
 
-const columns = (): ColumnDef<Production>[] => {
+const columns = (loadProducts: LoadProducts): ColumnDef<Production>[] => {
   return [
     {
       accessorKey: 'id',
@@ -72,7 +73,12 @@ const columns = (): ColumnDef<Production>[] => {
         )
       },
       cell: ({ row }) => {
-        return <TableCellViewerProductions item={row.original} />
+        return (
+          <TableCellViewerProductions
+            item={row.original}
+            loadProducts={loadProducts}
+          />
+        )
       },
     },
     {
@@ -188,9 +194,10 @@ const columns = (): ColumnDef<Production>[] => {
 
 type Props = {
   watchProductions: WatchProductions
+  loadProducts: LoadProducts
 }
 
-export function Productions({ watchProductions }: Props) {
+export function Productions({ watchProductions, loadProducts }: Props) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -203,7 +210,7 @@ export function Productions({ watchProductions }: Props) {
 
   const table = useReactTable({
     data: productions,
-    columns: columns(),
+    columns: columns(loadProducts),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -244,7 +251,7 @@ export function Productions({ watchProductions }: Props) {
       <div className="grid gap-4">
         <div>
           <Label htmlFor="rows-per-page" className="text-sm font-medium">
-            Filtrar produtos
+            Filtrar produções
           </Label>
           <Input
             placeholder="Filtrar produções..."
