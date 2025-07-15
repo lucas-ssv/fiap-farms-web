@@ -23,6 +23,7 @@ import { Loader2Icon } from 'lucide-react'
 import type { LoadProducts } from '@/domain/usecases/product'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import type { AddProduction } from '@/domain/usecases/production'
 
 type NewProductionFormData = z.infer<typeof schema>
 
@@ -46,9 +47,10 @@ const schema = z.object({
 
 type Props = {
   loadProducts: LoadProducts
+  addProduction: AddProduction
 }
 
-export function NewProduction({ loadProducts }: Props) {
+export function NewProduction({ loadProducts, addProduction }: Props) {
   const form = useForm<NewProductionFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -65,7 +67,13 @@ export function NewProduction({ loadProducts }: Props) {
   const [products, setProducts] = useState<LoadProducts.Result>([])
 
   const onSubmit = async (data: NewProductionFormData) => {
-    console.log('Form data submitted:', data)
+    try {
+      await addProduction.execute(data)
+      toast.success('Produção adicionada com sucesso!')
+      form.reset()
+    } catch (error) {
+      toast.error('Erro ao adicionar produção. Tente novamente mais tarde.')
+    }
   }
 
   const fetchProducts = useCallback(async () => {
