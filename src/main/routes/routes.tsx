@@ -5,7 +5,10 @@ import { Dashboard } from '@/presentation/pages/app'
 import { AppLayout, AuthLayout } from '@/presentation/pages/_layouts'
 import { ProtectedRoute } from './ProtectedRoute'
 import { GuestRoute } from './GuestRoute'
-import { Productions } from '@/presentation/pages/app/Productions'
+import {
+  NewProduction,
+  Productions,
+} from '@/presentation/pages/app/Productions'
 import {
   MakeCategories,
   MakeNewCategory,
@@ -77,6 +80,10 @@ export function Routes() {
             {
               path: '/productions',
               element: <Productions />,
+            },
+            {
+              path: '/productions/new',
+              element: <NewProduction />,
             },
           ],
         },
