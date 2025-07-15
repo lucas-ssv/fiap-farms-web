@@ -370,6 +370,7 @@ export function TableCellViewerSales({
             Atualizar venda
           </Button>
           <Button
+            className="cursor-pointer"
             variant="destructive"
             onClick={() => handleRemoveSale(item.id)}
           >

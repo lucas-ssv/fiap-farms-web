@@ -36,7 +36,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import type { LoadProducts } from '@/domain/usecases/product'
 import type { ProductModel } from '@/domain/models/product'
-import type { UpdateGoal } from '@/domain/usecases/goal'
+import type { RemoveGoal, UpdateGoal } from '@/domain/usecases/goal'
 import { Loader2Icon } from 'lucide-react'
 
 const chartConfig = {
@@ -88,12 +88,14 @@ type Props = {
   item: GoalModel
   loadProducts: LoadProducts
   updateGoal: UpdateGoal
+  removeGoal: RemoveGoal
 }
 
 export function TableCellViewerGoals({
   item,
   loadProducts,
   updateGoal,
+  removeGoal,
 }: Props) {
   const isMobile = useIsMobile()
   const form = useForm<UpdateGoalFormData>({
@@ -134,6 +136,15 @@ export function TableCellViewerGoals({
       toast.success('Meta atualizada com sucesso!')
     } catch (error) {
       toast.error('Erro ao atualizar a meta. Tente novamente.')
+    }
+  }
+
+  const handleRemoveGoal = async (goalId: string) => {
+    try {
+      await removeGoal.execute(goalId)
+      toast.success('Meta removida com sucesso!')
+    } catch (error) {
+      toast.error('Erro ao remover a meta. Tente novamente.')
     }
   }
 
@@ -433,6 +444,7 @@ export function TableCellViewerGoals({
         <DrawerFooter>
           <Button
             form="form-update"
+            className="cursor-pointer"
             onClick={form.handleSubmit(handleUpdateGoal)}
             disabled={form.formState.isSubmitting}
           >
@@ -441,7 +453,13 @@ export function TableCellViewerGoals({
             )}
             Atualizar meta
           </Button>
-          <Button variant="destructive">Excluir meta</Button>
+          <Button
+            className="cursor-pointer"
+            variant="destructive"
+            onClick={() => handleRemoveGoal(item.id)}
+          >
+            Excluir meta
+          </Button>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

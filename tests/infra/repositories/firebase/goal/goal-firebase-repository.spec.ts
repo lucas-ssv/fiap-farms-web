@@ -1,7 +1,13 @@
 import type { UpdateGoalRepository } from '@/data/contracts/goal'
 import { GoalFirebaseRepository } from '@/infra/repositories/firebase/goal'
 import { mockAddGoalParams } from '@tests/data/usecases/goal/mocks'
-import { addDoc, collection, doc, updateDoc } from 'firebase/firestore'
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  updateDoc,
+} from 'firebase/firestore'
 
 jest.useFakeTimers()
 
@@ -162,20 +168,20 @@ describe('GoalFirebaseRepository', () => {
   //   })
   // })
 
-  // describe('remove()', () => {
-  //   it('should remove a sale on success', async () => {
-  //     const mockedCollectionWithConverter = 'mockedCollectionWithConverter'
-  //     const withConverterMock = jest
-  //       .fn()
-  //       .mockReturnValue(mockedCollectionWithConverter)
-  //     ;(doc as jest.Mock).mockReturnValue({
-  //       withConverter: withConverterMock,
-  //     })
-  //     const sut = new SaleFirebaseRepository()
+  describe('remove()', () => {
+    it('should remove a goal on success', async () => {
+      const mockedCollectionWithConverter = 'mockedCollectionWithConverter'
+      const withConverterMock = jest
+        .fn()
+        .mockReturnValue(mockedCollectionWithConverter)
+      ;(doc as jest.Mock).mockReturnValue({
+        withConverter: withConverterMock,
+      })
+      const sut = new GoalFirebaseRepository()
 
-  //     await sut.remove('any_sale_id')
+      await sut.remove('any_goal_id')
 
-  //     expect(deleteDoc).toHaveBeenCalledWith(mockedCollectionWithConverter)
-  //   })
-  // })
+      expect(deleteDoc).toHaveBeenCalledWith(mockedCollectionWithConverter)
+    })
+  })
 })

@@ -45,7 +45,7 @@ import {
 } from '@/presentation/components/ui'
 import { TableCellViewerGoals } from './components'
 import type { GoalModel } from '@/domain/models/goal'
-import type { UpdateGoal, WatchGoals } from '@/domain/usecases/goal'
+import type { RemoveGoal, UpdateGoal, WatchGoals } from '@/domain/usecases/goal'
 import { Timestamp } from 'firebase/firestore'
 import type { LoadProducts } from '@/domain/usecases/product'
 
@@ -53,7 +53,8 @@ type Goal = GoalModel
 
 const columns = (
   loadProducts: LoadProducts,
-  updateGoal: UpdateGoal
+  updateGoal: UpdateGoal,
+  removeGoal: RemoveGoal
 ): ColumnDef<Goal>[] => {
   return [
     {
@@ -81,6 +82,7 @@ const columns = (
             item={row.original}
             loadProducts={loadProducts}
             updateGoal={updateGoal}
+            removeGoal={removeGoal}
           />
         )
       },
@@ -214,7 +216,7 @@ const columns = (
     {
       id: 'actions',
       enableHiding: false,
-      cell: () => {
+      cell: ({ row }) => {
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -224,7 +226,12 @@ const columns = (
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-32">
-              <DropdownMenuItem variant="destructive">Remover</DropdownMenuItem>
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={async () => removeGoal.execute(row.original.id)}
+              >
+                Remover
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         )
@@ -237,9 +244,15 @@ type Props = {
   watchGoals: WatchGoals
   loadProducts: LoadProducts
   updateGoal: UpdateGoal
+  removeGoal: RemoveGoal
 }
 
-export function Goals({ watchGoals, loadProducts, updateGoal }: Props) {
+export function Goals({
+  watchGoals,
+  loadProducts,
+  updateGoal,
+  removeGoal,
+}: Props) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -252,7 +265,7 @@ export function Goals({ watchGoals, loadProducts, updateGoal }: Props) {
 
   const table = useReactTable({
     data: goals,
-    columns: columns(loadProducts, updateGoal),
+    columns: columns(loadProducts, updateGoal, removeGoal),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
