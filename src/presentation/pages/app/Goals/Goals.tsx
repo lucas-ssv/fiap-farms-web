@@ -46,10 +46,11 @@ import { TableCellViewerGoals } from './components'
 import type { GoalModel } from '@/domain/models/goal'
 import type { WatchGoals } from '@/domain/usecases/goal'
 import { Timestamp } from 'firebase/firestore'
+import type { LoadProducts } from '@/domain/usecases/product'
 
 type Goal = GoalModel
 
-const columns = (): ColumnDef<Goal>[] => {
+const columns = (loadProducts: LoadProducts): ColumnDef<Goal>[] => {
   return [
     {
       accessorKey: 'id',
@@ -71,7 +72,12 @@ const columns = (): ColumnDef<Goal>[] => {
         )
       },
       cell: ({ row }) => {
-        return <TableCellViewerGoals item={row.original} />
+        return (
+          <TableCellViewerGoals
+            item={row.original}
+            loadProducts={loadProducts}
+          />
+        )
       },
     },
     {
@@ -210,9 +216,10 @@ const columns = (): ColumnDef<Goal>[] => {
 
 type Props = {
   watchGoals: WatchGoals
+  loadProducts: LoadProducts
 }
 
-export function Goals({ watchGoals }: Props) {
+export function Goals({ watchGoals, loadProducts }: Props) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -225,7 +232,7 @@ export function Goals({ watchGoals }: Props) {
 
   const table = useReactTable({
     data: goals,
-    columns: columns(),
+    columns: columns(loadProducts),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),

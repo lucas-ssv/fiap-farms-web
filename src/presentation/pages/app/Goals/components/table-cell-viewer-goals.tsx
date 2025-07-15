@@ -7,7 +7,6 @@ import {
   ChartTooltipContent,
   Drawer,
   DrawerContent,
-  DrawerDescription,
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
@@ -29,11 +28,14 @@ import {
 } from '@/presentation/components/ui'
 import { InputDate } from '@/presentation/components'
 import { Label, PolarRadiusAxis, RadialBar, RadialBarChart } from 'recharts'
-import { TrendingUp } from 'lucide-react'
 import type { GoalModel } from '@/domain/models/goal'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import MoneyInput from '@/presentation/components/money-input'
+import { useCallback, useEffect, useState } from 'react'
+import { toast } from 'sonner'
+import type { LoadProducts } from '@/domain/usecases/product'
+import type { ProductModel } from '@/domain/models/product'
 
 const chartConfig = {
   concluded: {
@@ -82,9 +84,10 @@ type UpdateGoalFormData = z.infer<typeof schema>
 
 type Props = {
   item: GoalModel
+  loadProducts: LoadProducts
 }
 
-export function TableCellViewerGoals({ item }: Props) {
+export function TableCellViewerGoals({ item, loadProducts }: Props) {
   const isMobile = useIsMobile()
   const form = useForm<UpdateGoalFormData>({
     resolver: zodResolver(schema),
@@ -99,6 +102,7 @@ export function TableCellViewerGoals({ item }: Props) {
       deadline: (item.deadline as any).toDate(),
     },
   })
+  const [products, setProducts] = useState<ProductModel[]>([])
   const chartData = [
     {
       concluida: item.currentValue
@@ -120,6 +124,19 @@ export function TableCellViewerGoals({ item }: Props) {
     console.log('Updating goal with data:', data)
   }
 
+  const fetchProducts = useCallback(async () => {
+    try {
+      const products = await loadProducts.execute()
+      setProducts(products)
+    } catch (error) {
+      toast.error('Erro ao carregar produtos. Tente novamente mais tarde.')
+    }
+  }, [loadProducts])
+
+  useEffect(() => {
+    fetchProducts()
+  }, [fetchProducts])
+
   return (
     <Drawer direction={isMobile ? 'bottom' : 'right'}>
       <DrawerTrigger asChild>
@@ -130,9 +147,6 @@ export function TableCellViewerGoals({ item }: Props) {
       <DrawerContent>
         <DrawerHeader className="gap-1">
           <DrawerTitle>{item.product.name}</DrawerTitle>
-          <DrawerDescription>
-            Lucro unitário nos últimos 6 meses
-          </DrawerDescription>
         </DrawerHeader>
         <div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
           {!isMobile && (
@@ -199,18 +213,6 @@ export function TableCellViewerGoals({ item }: Props) {
                 </RadialBarChart>
               </ChartContainer>
               <Separator />
-              <div className="grid gap-2">
-                <div className="flex gap-2 leading-none font-medium">
-                  Tendência de alta de 5,2% neste mês
-                  <TrendingUp className="size-4" />
-                </div>
-                <div className="text-muted-foreground">
-                  Showing total visitors for the last 6 months. This is just
-                  some random text to test the layout. It spans multiple lines
-                  and should wrap around.
-                </div>
-              </div>
-              <Separator />
             </>
           )}
           <Form {...form}>
@@ -233,8 +235,11 @@ export function TableCellViewerGoals({ item }: Props) {
                         </FormControl>
                         <FormMessage />
                         <SelectContent>
-                          <SelectItem value="kg">KG</SelectItem>
-                          <SelectItem value="unit">Unidade</SelectItem>
+                          {products.map((product) => (
+                            <SelectItem key={product.id} value={product.id}>
+                              {product.name}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </FormItem>
