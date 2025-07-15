@@ -6,15 +6,18 @@ import {
   ChartTooltip,
   ChartTooltipContent,
   Drawer,
-  DrawerClose,
   DrawerContent,
-  DrawerDescription,
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
   Input,
-  Label,
   Select,
   SelectContent,
   SelectItem,
@@ -23,41 +26,20 @@ import {
   Separator,
   type ChartConfig,
 } from '@/presentation/components/ui'
-import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
-import { TrendingUp } from 'lucide-react'
+import { Label, PolarRadiusAxis, RadialBar, RadialBarChart } from 'recharts'
+import { Loader2Icon } from 'lucide-react'
 import { InputDate } from '@/presentation/components'
+import type { ProductionModel } from '@/domain/models/production'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 
 const schema = z.object({
-  product: z.object({
-    id: z.string(),
-    name: z.string(),
-    price: z.number(),
-    cost: z.number(),
-    category: z.string(),
-    stock: z.number(),
-    minStock: z.number(),
-    maxStock: z.number(),
-    unit: z.string(),
-    description: z.string(),
-    image: z.url(),
-    createdAt: z.date(),
-    updatedAt: z.date(),
-  }),
-  farm: z.object({
-    id: z.string(),
-    name: z.string(),
-    location: z.string(),
-    size: z.number(),
-    unit: z.string(),
-    description: z.string(),
-    createdAt: z.date(),
-    updatedAt: z.date(),
-  }),
-  status: z.enum(['in_production', 'completed', 'cancelled']),
-  quantityProduced: z.number(),
-  unit: z.string(),
-  startDate: z.date(),
-  harvestDate: z.date(),
+  productId: z.string().optional(),
+  status: z.enum(['in_production', 'completed']).optional(),
+  quantityProduced: z.number().optional(),
+  unit: z.string().optional(),
+  startDate: z.date().optional(),
+  harvestDate: z.date().optional(),
 })
 
 const chartData = [
@@ -79,12 +61,30 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function TableCellViewerProductions({
-  item,
-}: {
-  item: z.infer<typeof schema>
-}) {
+type UpdateProductionFormData = z.infer<typeof schema>
+
+type Props = {
+  item: ProductionModel
+}
+
+export function TableCellViewerProductions({ item }: Props) {
   const isMobile = useIsMobile()
+  const form = useForm<UpdateProductionFormData>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      productId: item.product.id,
+      status: item.status,
+      quantityProduced: item.quantityProduced,
+      unit: item.unit,
+      startDate: (item.startDate as any).toDate(),
+      harvestDate: (item.harvestDate as any).toDate(),
+    },
+  })
+
+  const handleUpdateProduction = async (data: UpdateProductionFormData) => {
+    console.log('Updating production with data:', data)
+  }
+
   return (
     <Drawer direction={isMobile ? 'bottom' : 'right'}>
       <DrawerTrigger asChild>
@@ -95,192 +95,244 @@ export function TableCellViewerProductions({
       <DrawerContent>
         <DrawerHeader className="gap-1">
           <DrawerTitle>{item.product.name}</DrawerTitle>
-          <DrawerDescription>
-            Lucro unitário nos últimos 6 meses
-          </DrawerDescription>
         </DrawerHeader>
         <div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
           {!isMobile && (
             <>
               <ChartContainer config={chartConfig}>
-                <AreaChart
-                  accessibilityLayer
+                <RadialBarChart
                   data={chartData}
-                  margin={{
-                    left: 0,
-                    right: 10,
-                  }}
+                  endAngle={180}
+                  innerRadius={80}
+                  outerRadius={130}
                 >
-                  <CartesianGrid vertical={false} />
-                  <XAxis
-                    dataKey="month"
-                    tickLine={false}
-                    axisLine={false}
-                    tickMargin={8}
-                    tickFormatter={(value) => value.slice(0, 3)}
-                    hide
-                  />
                   <ChartTooltip
                     cursor={false}
-                    content={<ChartTooltipContent indicator="dot" />}
+                    content={<ChartTooltipContent hideLabel />}
                   />
-                  <Area
-                    dataKey="mobile"
-                    type="natural"
-                    fill="var(--color-mobile)"
-                    fillOpacity={0.6}
-                    stroke="var(--color-mobile)"
+                  <PolarRadiusAxis
+                    tick={false}
+                    tickLine={false}
+                    axisLine={false}
+                  >
+                    <Label
+                      content={({ viewBox }) => {
+                        if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
+                          return (
+                            <text
+                              x={viewBox.cx}
+                              y={viewBox.cy}
+                              textAnchor="middle"
+                            >
+                              <tspan
+                                x={viewBox.cx}
+                                y={(viewBox.cy || 0) - 16}
+                                className="fill-foreground text-2xl font-bold"
+                              >
+                                100%
+                              </tspan>
+                              <tspan
+                                x={viewBox.cx}
+                                y={(viewBox.cy || 0) + 4}
+                                className="fill-muted-foreground"
+                              >
+                                Concluída
+                              </tspan>
+                            </text>
+                          )
+                        }
+                      }}
+                    />
+                  </PolarRadiusAxis>
+                  <RadialBar
+                    dataKey="faltante"
+                    fill="var(--muted)"
                     stackId="a"
+                    cornerRadius={5}
+                    className="stroke-transparent stroke-2"
                   />
-                  <Area
-                    dataKey="desktop"
-                    type="natural"
-                    fill="var(--color-desktop)"
-                    fillOpacity={0.4}
-                    stroke="var(--color-desktop)"
+                  <RadialBar
+                    dataKey="concluida"
                     stackId="a"
+                    cornerRadius={5}
+                    fill="var(--chart-2)"
+                    className="stroke-transparent stroke-2"
                   />
-                </AreaChart>
+                </RadialBarChart>
               </ChartContainer>
-              <Separator />
-              <div className="grid gap-2">
-                <div className="flex gap-2 leading-none font-medium">
-                  Tendência de alta de 5,2% neste mês
-                  <TrendingUp className="size-4" />
-                </div>
-                <div className="text-muted-foreground">
-                  Showing total visitors for the last 6 months. This is just
-                  some random text to test the layout. It spans multiple lines
-                  and should wrap around.
-                </div>
-              </div>
               <Separator />
             </>
           )}
-          <form className="flex flex-col gap-4">
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="product">Nome</Label>
-              <Select defaultValue={item.product.id}>
-                <SelectTrigger id="product" className="w-full">
-                  <SelectValue placeholder="Selecione o produto" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Category A">Categoria A</SelectItem>
-                  <SelectItem value="Executive Summary">
-                    Executive Summary
-                  </SelectItem>
-                  <SelectItem value="Technical Approach">
-                    Technical Approach
-                  </SelectItem>
-                  <SelectItem value="Design">Design</SelectItem>
-                  <SelectItem value="Capabilities">Capabilities</SelectItem>
-                  <SelectItem value="Focus Documents">
-                    Focus Documents
-                  </SelectItem>
-                  <SelectItem value="Narrative">Narrative</SelectItem>
-                  <SelectItem value="Cover Page">Cover Page</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="product">Nome</Label>
-              <Select defaultValue={item.farm.id}>
-                <SelectTrigger id="farm" className="w-full">
-                  <SelectValue placeholder="Selecione a fazenda" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Category A">Categoria A</SelectItem>
-                  <SelectItem value="Executive Summary">
-                    Executive Summary
-                  </SelectItem>
-                  <SelectItem value="Technical Approach">
-                    Technical Approach
-                  </SelectItem>
-                  <SelectItem value="Design">Design</SelectItem>
-                  <SelectItem value="Capabilities">Capabilities</SelectItem>
-                  <SelectItem value="Focus Documents">
-                    Focus Documents
-                  </SelectItem>
-                  <SelectItem value="Narrative">Narrative</SelectItem>
-                  <SelectItem value="Cover Page">Cover Page</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+          <Form {...form}>
+            <form id="form-update" className="flex flex-col gap-4">
               <div className="flex flex-col gap-3">
-                <Label htmlFor="status">Status da produção</Label>
-                <Select defaultValue={item.status}>
-                  <SelectTrigger id="status" className="w-full">
-                    <SelectValue placeholder="Selecione o status atual" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Category A">Categoria A</SelectItem>
-                    <SelectItem value="Executive Summary">
-                      Executive Summary
-                    </SelectItem>
-                    <SelectItem value="Technical Approach">
-                      Technical Approach
-                    </SelectItem>
-                    <SelectItem value="Design">Design</SelectItem>
-                    <SelectItem value="Capabilities">Capabilities</SelectItem>
-                    <SelectItem value="Focus Documents">
-                      Focus Documents
-                    </SelectItem>
-                    <SelectItem value="Narrative">Narrative</SelectItem>
-                    <SelectItem value="Cover Page">Cover Page</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="quantityProduced">Quantidade produzida</Label>
-                <Input
-                  type="number"
-                  id="quantityProduced"
-                  defaultValue={item.quantityProduced}
+                <FormField
+                  control={form.control}
+                  name="productId"
+                  render={({ field }) => (
+                    <FormItem className="col-span-12 md:col-span-6 xl:col-span-3">
+                      <FormLabel>Produto</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Selecione o produto" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <FormMessage />
+                        <SelectContent>
+                          <SelectItem value="product1">Produto 1</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
                 />
               </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-3">
-                <Label htmlFor="unit">Unidade</Label>
-                <Select defaultValue={item.unit}>
-                  <SelectTrigger id="unit" className="w-full">
-                    <SelectValue placeholder="Selecione a unidade" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Category A">Categoria A</SelectItem>
-                    <SelectItem value="Executive Summary">
-                      Executive Summary
-                    </SelectItem>
-                    <SelectItem value="Technical Approach">
-                      Technical Approach
-                    </SelectItem>
-                    <SelectItem value="Design">Design</SelectItem>
-                    <SelectItem value="Capabilities">Capabilities</SelectItem>
-                    <SelectItem value="Focus Documents">
-                      Focus Documents
-                    </SelectItem>
-                    <SelectItem value="Narrative">Narrative</SelectItem>
-                    <SelectItem value="Cover Page">Cover Page</SelectItem>
-                  </SelectContent>
-                </Select>
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem className="col-span-12 xl:col-span-6">
+                      <FormLabel>Status</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Selecione o produto" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <FormMessage />
+                        <SelectContent>
+                          <SelectItem value="in_production">
+                            Em produção
+                          </SelectItem>
+                          <SelectItem value="completed">Concluída</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
-              <div className="flex flex-col gap-3">
-                <InputDate label="Data de início" />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-3">
+                  <FormField
+                    control={form.control}
+                    name="quantityProduced"
+                    render={() => (
+                      <FormItem className="col-span-12 md:col-span-6 xl:col-span-3">
+                        <FormLabel>Quantidade produzida</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="0"
+                            {...form.register('quantityProduced', {
+                              valueAsNumber: true,
+                            })}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="flex flex-col gap-3">
+                  <FormField
+                    control={form.control}
+                    name="unit"
+                    render={({ field }) => (
+                      <FormItem className="col-span-12 xl:col-span-6">
+                        <FormLabel>Unidade</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Selecione a unidade" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <FormMessage />
+                          <SelectContent>
+                            <SelectItem value="kg">kg</SelectItem>
+                            <SelectItem value="unit">Unidade</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
-              <div className="flex flex-col gap-3">
-                <InputDate label="Data da colheita (prevista)" />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-3">
+                  <FormField
+                    control={form.control}
+                    name="startDate"
+                    render={({ field }) => (
+                      <FormItem className="col-span-12 md:col-span-6 xl:col-span-3">
+                        <InputDate
+                          value={
+                            field.value ? new Date(field.value) : undefined
+                          }
+                          label="Data de início"
+                          onChange={(date) => {
+                            field.onChange(date ? date : '')
+                          }}
+                        />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="flex flex-col gap-3">
+                  <FormField
+                    control={form.control}
+                    name="harvestDate"
+                    render={({ field }) => (
+                      <FormItem className="col-span-12 md:col-span-6 xl:col-span-3">
+                        <InputDate
+                          value={
+                            field.value ? new Date(field.value) : undefined
+                          }
+                          label="Data de colheita"
+                          onChange={(date) => {
+                            field.onChange(date ? date : '')
+                          }}
+                        />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
-            </div>
-          </form>
+            </form>
+          </Form>
         </div>
         <DrawerFooter>
-          <DrawerClose asChild>
-            <Button>Atualizar produto</Button>
-          </DrawerClose>
-          <DrawerClose asChild>
-            <Button variant="destructive">Excluir produto</Button>
-          </DrawerClose>
+          <Button
+            form="form-update"
+            className="cursor-pointer"
+            onClick={form.handleSubmit(handleUpdateProduction)}
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting && (
+              <Loader2Icon className="animate-spin" />
+            )}
+            Atualizar meta
+          </Button>
+          <Button
+            className="cursor-pointer"
+            variant="destructive"
+            onClick={() => {}}
+          >
+            Excluir meta
+          </Button>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
