@@ -1,6 +1,8 @@
+import type { ProductModel } from '@/domain/models/product'
+
 export interface ProductionModel {
   id: string
-  productId: string
+  product: ProductModel
   status: 'in_production' | 'completed'
   quantityProduced: number
   unit: string
