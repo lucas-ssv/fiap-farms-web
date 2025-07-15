@@ -1,6 +1,7 @@
+import type { UpdateGoalRepository } from '@/data/contracts/goal'
 import { GoalFirebaseRepository } from '@/infra/repositories/firebase/goal'
 import { mockAddGoalParams } from '@tests/data/usecases/goal/mocks'
-import { addDoc, collection } from 'firebase/firestore'
+import { addDoc, collection, doc, updateDoc } from 'firebase/firestore'
 
 jest.useFakeTimers()
 
@@ -94,28 +95,28 @@ describe('GoalFirebaseRepository', () => {
     })
   })
 
-  // describe('update()', () => {
-  //   it('should update a sale on success', async () => {
-  //     const mockedCollectionWithConverter = 'mockedCollectionWithConverter'
-  //     const withConverterMock = jest
-  //       .fn()
-  //       .mockReturnValue(mockedCollectionWithConverter)
-  //     ;(doc as jest.Mock).mockReturnValue({
-  //       withConverter: withConverterMock,
-  //     })
-  //     const sut = new SaleFirebaseRepository()
-  //     const data: UpdateSaleRepository.Params = {
-  //       status: 'completed',
-  //     }
+  describe('update()', () => {
+    it('should update a goal on success', async () => {
+      const mockedCollectionWithConverter = 'mockedCollectionWithConverter'
+      const withConverterMock = jest
+        .fn()
+        .mockReturnValue(mockedCollectionWithConverter)
+      ;(doc as jest.Mock).mockReturnValue({
+        withConverter: withConverterMock,
+      })
+      const sut = new GoalFirebaseRepository()
+      const data: UpdateGoalRepository.Params = {
+        type: 'production',
+      }
 
-  //     await sut.update('any_sale_id', data)
+      await sut.update('any_goal_id', data)
 
-  //     expect(updateDoc).toHaveBeenCalledWith(
-  //       mockedCollectionWithConverter,
-  //       data
-  //     )
-  //   })
-  // })
+      expect(updateDoc).toHaveBeenCalledWith(
+        mockedCollectionWithConverter,
+        data
+      )
+    })
+  })
 
   // describe('watchAll()', () => {
   //   it('should call onChange with all sales', async () => {

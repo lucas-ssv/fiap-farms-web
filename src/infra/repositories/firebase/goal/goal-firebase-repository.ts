@@ -6,11 +6,13 @@ import {
   onSnapshot,
   query,
   Timestamp,
+  updateDoc,
 } from 'firebase/firestore'
 import { goalConverter } from './converters'
 import { db } from '@/main/config/firebase'
 import type {
   AddGoalRepository,
+  UpdateGoalRepository,
   WatchGoalsRepository,
 } from '@/data/contracts/goal'
 import { productConverter } from '../product/converters'
@@ -18,7 +20,7 @@ import type { GoalModel } from '@/domain/models/goal'
 import { categoryConverter } from '../category/converters'
 
 export class GoalFirebaseRepository
-  implements AddGoalRepository, WatchGoalsRepository
+  implements AddGoalRepository, WatchGoalsRepository, UpdateGoalRepository
 {
   async add(params: AddGoalRepository.Params): Promise<void> {
     await addDoc(collection(db, 'goals').withConverter(goalConverter), {
@@ -73,5 +75,12 @@ export class GoalFirebaseRepository
     })
 
     return unsubscribe
+  }
+
+  async update(
+    goalId: string,
+    data: UpdateGoalRepository.Params
+  ): Promise<void> {
+    await updateDoc(doc(db, 'goals', goalId).withConverter(goalConverter), data)
   }
 }
