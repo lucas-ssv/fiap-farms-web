@@ -42,22 +42,14 @@ const schema = z.object({
   harvestDate: z.date().optional(),
 })
 
-const chartData = [
-  { month: 'January', desktop: 186 },
-  { month: 'February', desktop: 305 },
-  { month: 'March', desktop: 237 },
-  { month: 'April', desktop: 73 },
-  { month: 'May', desktop: 209 },
-  { month: 'June', desktop: 214 },
-]
 const chartConfig = {
-  desktop: {
-    label: 'Desktop',
-    color: 'var(--primary)',
+  concluded: {
+    label: 'Concluída',
+    color: 'var(--chart-1)',
   },
-  mobile: {
-    label: 'Mobile',
-    color: 'var(--primary)',
+  missing: {
+    label: 'Faltante',
+    color: 'var(--chart-2)',
   },
 } satisfies ChartConfig
 
@@ -80,6 +72,22 @@ export function TableCellViewerProductions({ item }: Props) {
       harvestDate: (item.harvestDate as any).toDate(),
     },
   })
+  const percentageConcluded = Math.round(
+    (item.quantityProduced / item.quantity) * 100
+  )
+  const chartData = [
+    {
+      concluida: item.quantityProduced
+        ? ((item.quantityProduced / item.quantity) * 100).toFixed(2)
+        : '0.00',
+      faltante: item.quantity
+        ? (
+            ((item.quantity - item.quantityProduced) / item.quantity) *
+            100
+          ).toFixed(2)
+        : 100,
+    },
+  ]
 
   const handleUpdateProduction = async (data: UpdateProductionFormData) => {
     console.log('Updating production with data:', data)
@@ -129,7 +137,7 @@ export function TableCellViewerProductions({ item }: Props) {
                                 y={(viewBox.cy || 0) - 16}
                                 className="fill-foreground text-2xl font-bold"
                               >
-                                100%
+                                {percentageConcluded}%
                               </tspan>
                               <tspan
                                 x={viewBox.cx}

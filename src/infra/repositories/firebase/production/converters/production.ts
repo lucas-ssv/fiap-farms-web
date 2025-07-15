@@ -11,6 +11,7 @@ export const productionConverter: FirestoreDataConverter<Production> = {
     return {
       productId: production.productId,
       status: production.status,
+      quantity: production.quantity,
       quantityProduced: production.quantityProduced,
       unit: production.unit,
       startDate: production.startDate,

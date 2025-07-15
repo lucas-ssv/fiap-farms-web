@@ -4,6 +4,7 @@ export interface ProductionModel {
   id: string
   product: ProductModel
   status: 'in_production' | 'completed'
+  quantity: number
   quantityProduced: number
   unit: string
   startDate: Date

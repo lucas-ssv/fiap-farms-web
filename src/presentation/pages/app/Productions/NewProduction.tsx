@@ -30,9 +30,10 @@ type NewProductionFormData = z.infer<typeof schema>
 const schema = z.object({
   productId: z.string().min(1, 'Produto é obrigatório'),
   status: z.enum(['in_production', 'completed'], 'Status é obrigatório'),
-  quantityProduced: z
-    .number('Quantidade produzida deve ser um número')
-    .min(1, 'Quantidade produzida deve ser maior que zero'),
+  quantity: z
+    .number('Quantidade deve ser um número')
+    .min(1, 'Quantidade a produzir deve ser maior que zero'),
+  quantityProduced: z.number('Quantidade produzida deve ser um número'),
   unit: z.string().min(1, 'Unidade é obrigatória'),
   startDate: z
     .date()
@@ -56,6 +57,7 @@ export function NewProduction({ loadProducts, addProduction }: Props) {
     defaultValues: {
       productId: '',
       status: 'in_production',
+      quantity: 0,
       quantityProduced: 0,
       unit: '',
       startDate: new Date(),
@@ -153,7 +155,7 @@ export function NewProduction({ loadProducts, addProduction }: Props) {
             control={form.control}
             name="quantityProduced"
             render={() => (
-              <FormItem className="col-span-12 md:col-span-6">
+              <FormItem className="col-span-12 lg:col-span-4">
                 <FormLabel>Quantidade produzida</FormLabel>
                 <FormControl>
                   <Input
@@ -170,9 +172,28 @@ export function NewProduction({ loadProducts, addProduction }: Props) {
           />
           <FormField
             control={form.control}
+            name="quantity"
+            render={() => (
+              <FormItem className="col-span-12 lg:col-span-4">
+                <FormLabel>Quantidade a produzir</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="100"
+                    {...form.register('quantity', {
+                      valueAsNumber: true,
+                    })}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
             name="unit"
             render={({ field }) => (
-              <FormItem className="col-span-12 md:col-span-6">
+              <FormItem className="col-span-12 lg:col-span-4">
                 <FormLabel>Unidade de medida</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>

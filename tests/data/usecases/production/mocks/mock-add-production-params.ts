@@ -2,6 +2,7 @@ import type { AddProduction } from '@/domain/usecases/production'
 
 export const mockAddProductionParams = (): AddProduction.Params => ({
   productId: 'any_product_id',
+  quantity: 100,
   quantityProduced: 100,
   status: 'in_production',
   unit: 'kg',

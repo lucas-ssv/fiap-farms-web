@@ -103,6 +103,16 @@ const columns = (): ColumnDef<Production>[] => {
       },
     },
     {
+      accessorKey: 'quantity',
+      header: () => {
+        return <p>Quantidade</p>
+      },
+      cell: ({ row }) => {
+        const quantity = row.getValue('quantity') as number
+        return <span className="font-medium">{quantity}</span>
+      },
+    },
+    {
       accessorKey: 'quantityProduced',
       header: () => {
         return <p>Quantidade Produzida</p>
