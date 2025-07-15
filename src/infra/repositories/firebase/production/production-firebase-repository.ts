@@ -1,9 +1,25 @@
-import { addDoc, collection, Timestamp } from 'firebase/firestore'
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  onSnapshot,
+  query,
+  Timestamp,
+} from 'firebase/firestore'
 import { db } from '@/main/config/firebase'
-import type { AddProductionRepository } from '@/data/contracts/production'
+import type {
+  AddProductionRepository,
+  WatchProductionsRepository,
+} from '@/data/contracts/production'
 import { productionConverter } from './converters'
+import type { ProductionModel } from '@/domain/models/production'
+import { productConverter } from '../product/converters'
+import { categoryConverter } from '../category/converters'
 
-export class ProductionFirebaseRepository implements AddProductionRepository {
+export class ProductionFirebaseRepository
+  implements AddProductionRepository, WatchProductionsRepository
+{
   async add(params: AddProductionRepository.Params): Promise<void> {
     await addDoc(
       collection(db, 'productions').withConverter(productionConverter),
@@ -13,5 +29,58 @@ export class ProductionFirebaseRepository implements AddProductionRepository {
         updatedAt: Timestamp.now(),
       }
     )
+  }
+
+  watchAll(
+    onChange: WatchProductionsRepository.Params
+  ): WatchProductionsRepository.Result {
+    const q = query(
+      collection(db, 'productions').withConverter(productionConverter)
+    )
+
+    const unsubscribe = onSnapshot(q, async (querySnapshot) => {
+      const productions: ProductionModel[] = []
+
+      for (const snapshot of querySnapshot.docs) {
+        const production = snapshot.data()
+        const productionId = snapshot.id
+
+        const productSnapshot = await getDoc(
+          doc(db, 'products', production.productId).withConverter(
+            productConverter
+          )
+        )
+
+        const product = productSnapshot.data()
+        const productId = productSnapshot.id
+
+        const categorySnapshot = await getDoc(
+          doc(db, 'categories', product!.categoryId).withConverter(
+            categoryConverter
+          )
+        )
+        const categoryId = categorySnapshot.id
+        const category = categorySnapshot.data()
+
+        productions.push({
+          id: productionId,
+          product: {
+            id: productId,
+            ...product!,
+            image: product!.image as string | undefined,
+            category: {
+              id: categoryId,
+              ...category!,
+              image: category!.image as string | undefined,
+            },
+          },
+          ...production,
+        })
+      }
+
+      onChange(productions)
+    })
+
+    return unsubscribe
   }
 }
