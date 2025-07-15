@@ -45,13 +45,19 @@ import {
 } from '@/presentation/components/ui'
 import { TableCellViewerProductions } from './components'
 import type { ProductionModel } from '@/domain/models/production'
-import type { WatchProductions } from '@/domain/usecases/production'
+import type {
+  UpdateProduction,
+  WatchProductions,
+} from '@/domain/usecases/production'
 import { Timestamp } from 'firebase/firestore'
 import type { LoadProducts } from '@/domain/usecases/product'
 
 type Production = ProductionModel
 
-const columns = (loadProducts: LoadProducts): ColumnDef<Production>[] => {
+const columns = (
+  loadProducts: LoadProducts,
+  updateProduction: UpdateProduction
+): ColumnDef<Production>[] => {
   return [
     {
       accessorKey: 'id',
@@ -77,6 +83,7 @@ const columns = (loadProducts: LoadProducts): ColumnDef<Production>[] => {
           <TableCellViewerProductions
             item={row.original}
             loadProducts={loadProducts}
+            updateProduction={updateProduction}
           />
         )
       },
@@ -195,9 +202,14 @@ const columns = (loadProducts: LoadProducts): ColumnDef<Production>[] => {
 type Props = {
   watchProductions: WatchProductions
   loadProducts: LoadProducts
+  updateProduction: UpdateProduction
 }
 
-export function Productions({ watchProductions, loadProducts }: Props) {
+export function Productions({
+  watchProductions,
+  loadProducts,
+  updateProduction,
+}: Props) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -210,7 +222,7 @@ export function Productions({ watchProductions, loadProducts }: Props) {
 
   const table = useReactTable({
     data: productions,
-    columns: columns(loadProducts),
+    columns: columns(loadProducts, updateProduction),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),

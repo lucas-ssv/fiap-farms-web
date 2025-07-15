@@ -1,5 +1,8 @@
 import { LoadProductsImpl } from '@/data/usecases/product'
-import { WatchProductionsImpl } from '@/data/usecases/production'
+import {
+  UpdateProductionImpl,
+  WatchProductionsImpl,
+} from '@/data/usecases/production'
 import { ProductFirebaseRepository } from '@/infra/repositories/firebase/product'
 import { ProductionFirebaseRepository } from '@/infra/repositories/firebase/production'
 import { Productions } from '@/presentation/pages/app/Productions'
@@ -11,10 +14,14 @@ export function MakeProductions() {
   )
   const productFirebaseRepository = new ProductFirebaseRepository()
   const loadProducts = new LoadProductsImpl(productFirebaseRepository)
+  const updateProduction = new UpdateProductionImpl(
+    productionFirebaseRepository
+  )
   return (
     <Productions
       watchProductions={watchProductions}
       loadProducts={loadProducts}
+      updateProduction={updateProduction}
     />
   )
 }

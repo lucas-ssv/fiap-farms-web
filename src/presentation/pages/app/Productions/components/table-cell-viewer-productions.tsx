@@ -36,6 +36,7 @@ import type { LoadProducts } from '@/domain/usecases/product'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import type { ProductModel } from '@/domain/models/product'
+import type { UpdateProduction } from '@/domain/usecases/production'
 
 const schema = z.object({
   productId: z.string().optional(),
@@ -63,9 +64,14 @@ type UpdateProductionFormData = z.infer<typeof schema>
 type Props = {
   item: ProductionModel
   loadProducts: LoadProducts
+  updateProduction: UpdateProduction
 }
 
-export function TableCellViewerProductions({ item, loadProducts }: Props) {
+export function TableCellViewerProductions({
+  item,
+  loadProducts,
+  updateProduction,
+}: Props) {
   const isMobile = useIsMobile()
   const form = useForm<UpdateProductionFormData>({
     resolver: zodResolver(schema),
@@ -98,7 +104,12 @@ export function TableCellViewerProductions({ item, loadProducts }: Props) {
   ]
 
   const handleUpdateProduction = async (data: UpdateProductionFormData) => {
-    console.log('Updating production with data:', data)
+    try {
+      await updateProduction.execute(item.id, data)
+      toast.success('Produção atualizada com sucesso!')
+    } catch (error) {
+      toast.error('Erro ao atualizar a produção. Tente novamente.')
+    }
   }
 
   const fetchProducts = useCallback(async () => {
