@@ -6,10 +6,12 @@ import {
   onSnapshot,
   query,
   Timestamp,
+  updateDoc,
 } from 'firebase/firestore'
 import { db } from '@/main/config/firebase'
 import type {
   AddProductionRepository,
+  UpdateProductionRepository,
   WatchProductionsRepository,
 } from '@/data/contracts/production'
 import { productionConverter } from './converters'
@@ -18,7 +20,10 @@ import { productConverter } from '../product/converters'
 import { categoryConverter } from '../category/converters'
 
 export class ProductionFirebaseRepository
-  implements AddProductionRepository, WatchProductionsRepository
+  implements
+    AddProductionRepository,
+    WatchProductionsRepository,
+    UpdateProductionRepository
 {
   async add(params: AddProductionRepository.Params): Promise<void> {
     await addDoc(
@@ -82,5 +87,15 @@ export class ProductionFirebaseRepository
     })
 
     return unsubscribe
+  }
+
+  async update(
+    productionId: string,
+    data: UpdateProductionRepository.Params
+  ): Promise<void> {
+    await updateDoc(
+      doc(db, 'productions', productionId).withConverter(productConverter),
+      data
+    )
   }
 }

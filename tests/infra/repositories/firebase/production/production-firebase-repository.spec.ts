@@ -1,6 +1,7 @@
+import type { UpdateProductionRepository } from '@/data/contracts/production'
 import { ProductionFirebaseRepository } from '@/infra/repositories/firebase/production'
 import { mockAddProductionParams } from '@tests/data/usecases/production/mocks'
-import { addDoc, collection } from 'firebase/firestore'
+import { addDoc, collection, doc, updateDoc } from 'firebase/firestore'
 
 jest.useFakeTimers()
 
@@ -94,28 +95,28 @@ describe('ProductionFirebaseRepository', () => {
     })
   })
 
-  // describe('update()', () => {
-  //   it('should update a goal on success', async () => {
-  //     const mockedCollectionWithConverter = 'mockedCollectionWithConverter'
-  //     const withConverterMock = jest
-  //       .fn()
-  //       .mockReturnValue(mockedCollectionWithConverter)
-  //     ;(doc as jest.Mock).mockReturnValue({
-  //       withConverter: withConverterMock,
-  //     })
-  //     const sut = new GoalFirebaseRepository()
-  //     const data: UpdateGoalRepository.Params = {
-  //       type: 'production',
-  //     }
+  describe('update()', () => {
+    it('should update a production on success', async () => {
+      const mockedCollectionWithConverter = 'mockedCollectionWithConverter'
+      const withConverterMock = jest
+        .fn()
+        .mockReturnValue(mockedCollectionWithConverter)
+      ;(doc as jest.Mock).mockReturnValue({
+        withConverter: withConverterMock,
+      })
+      const sut = new ProductionFirebaseRepository()
+      const data: UpdateProductionRepository.Params = {
+        status: 'completed',
+      }
 
-  //     await sut.update('any_goal_id', data)
+      await sut.update('any_production_id', data)
 
-  //     expect(updateDoc).toHaveBeenCalledWith(
-  //       mockedCollectionWithConverter,
-  //       data
-  //     )
-  //   })
-  // })
+      expect(updateDoc).toHaveBeenCalledWith(
+        mockedCollectionWithConverter,
+        data
+      )
+    })
+  })
 
   // describe('watchAll()', () => {
   //   it('should call onChange with all sales', async () => {
