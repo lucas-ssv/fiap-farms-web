@@ -15,6 +15,7 @@ import {
   ArrowUpDown,
   ChevronLeft,
   ChevronRight,
+  Loader2Icon,
   MoreHorizontal,
 } from 'lucide-react'
 
@@ -23,7 +24,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/presentation/components/ui/dropdown-menu'
 import {
@@ -35,6 +35,7 @@ import {
   TableRow,
 } from '@/presentation/components/ui/table'
 import {
+  Input,
   Label,
   Select,
   SelectContent,
@@ -43,165 +44,215 @@ import {
   SelectValue,
 } from '@/presentation/components/ui'
 import { TableCellViewerGoals } from './components'
+import type { GoalModel } from '@/domain/models/goal'
+import type { RemoveGoal, UpdateGoal, WatchGoals } from '@/domain/usecases/goal'
+import { Timestamp } from 'firebase/firestore'
+import type { LoadProducts } from '@/domain/usecases/product'
 
-const data: Goal[] = [
-  {
-    id: '1',
-    product: {
-      id: 'p1',
-      name: 'Produto A',
-      description: 'Descrição do Produto A',
-      price: '100.00',
-      category: {
-        id: 'c1',
-        name: 'Categoria 1',
+type Goal = GoalModel
+
+const columns = (
+  loadProducts: LoadProducts,
+  updateGoal: UpdateGoal,
+  removeGoal: RemoveGoal
+): ColumnDef<Goal>[] => {
+  return [
+    {
+      accessorKey: 'id',
+      header: () => {
+        return <p>ID</p>
       },
     },
-    description: 'Meta de vendas do Produto A',
-    type: 'sales',
-    status: 'pending',
-    targetValue: 1000,
-    currentValue: 500,
-    startDate: new Date('2023-01-01'),
-    deadLine: new Date('2023-12-31'),
-  },
-  {
-    id: '2',
-    product: {
-      id: 'p2',
-      name: 'Produto B',
-      description: 'Descrição do Produto B',
-      price: '200.00',
-      category: {
-        id: 'c2',
-        name: 'Categoria 2',
+    {
+      accessorKey: 'product.name',
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Produto
+            <ArrowUpDown />
+          </Button>
+        )
+      },
+      cell: ({ row }) => {
+        return (
+          <TableCellViewerGoals
+            item={row.original}
+            loadProducts={loadProducts}
+            updateGoal={updateGoal}
+            removeGoal={removeGoal}
+          />
+        )
       },
     },
-    description: 'Meta de produção do Produto B',
-    type: 'production',
-    status: 'completed',
-    targetValue: 2000,
-    currentValue: 1500,
-    startDate: new Date('2023-02-01'),
-    deadLine: new Date('2023-11-30'),
-  },
-]
+    {
+      accessorKey: 'description',
+      header: () => <p>Descrição</p>,
+    },
+    {
+      accessorKey: 'type',
+      header: () => <p>Tipo da meta</p>,
+      cell: ({ row }) => {
+        const type = row.original.type
+        return (
+          <span
+            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+              type === 'sales'
+                ? 'bg-blue-100 text-blue-800'
+                : type === 'production'
+                ? 'bg-purple-100 text-purple-800'
+                : 'bg-gray-100 text-gray-800'
+            }`}
+          >
+            {type === 'sales'
+              ? 'Vendas'
+              : type === 'production'
+              ? 'Produção'
+              : 'Outro'}
+          </span>
+        )
+      },
+    },
+    {
+      accessorKey: 'targetValue',
+      header: () => <p>Valor alvo</p>,
+      cell: ({ row }) => {
+        const targetValue = row.original.targetValue
+        const type = row.original.type
 
-type Goal = {
-  id: string
-  product: {
-    id: string
-    name: string
-    description?: string
-    price: string
-    category: {
-      id: string
-      name: string
-    }
-  }
-  description?: string
-  type: 'sales' | 'production'
-  status: 'pending' | 'completed' | 'canceled'
-  targetValue: number
-  currentValue: number
-  startDate: Date
-  deadLine: Date
+        return (
+          <span className="font-medium">
+            {type === 'sales'
+              ? targetValue.toLocaleString('pt-BR', {
+                  style: 'currency',
+                  currency: 'BRL',
+                })
+              : targetValue.toLocaleString('pt-BR', {
+                  style: 'decimal',
+                  minimumFractionDigits: 0,
+                })}
+          </span>
+        )
+      },
+    },
+    {
+      accessorKey: 'currentValue',
+      header: () => <p>Valor atual</p>,
+      cell: ({ row }) => {
+        const currentValue = row.original.currentValue
+        const type = row.original.type
+
+        return (
+          <span className="font-medium">
+            {type === 'sales'
+              ? currentValue.toLocaleString('pt-BR', {
+                  style: 'currency',
+                  currency: 'BRL',
+                })
+              : currentValue.toLocaleString('pt-BR', {
+                  style: 'decimal',
+                  minimumFractionDigits: 0,
+                })}
+          </span>
+        )
+      },
+    },
+    {
+      accessorKey: 'startDate',
+      header: () => <p>Início</p>,
+      cell: ({ row }) => {
+        const startDate = row.original.startDate
+        return (
+          <span className="font-medium">
+            {startDate instanceof Timestamp
+              ? startDate.toDate().toLocaleDateString('pt-BR')
+              : ''}
+          </span>
+        )
+      },
+    },
+    {
+      accessorKey: 'deadline',
+      header: () => <p>Prazo</p>,
+      cell: ({ row }) => {
+        const deadline = row.original.deadline
+        return (
+          <span className="font-medium">
+            {deadline instanceof Timestamp
+              ? deadline.toDate().toLocaleDateString('pt-BR')
+              : ''}
+          </span>
+        )
+      },
+    },
+    {
+      accessorKey: 'status',
+      header: () => <p>Status</p>,
+      cell: ({ row }) => {
+        const status = row.original.status
+        return (
+          <span
+            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+              status === 'in_progress'
+                ? 'bg-yellow-100 text-yellow-800'
+                : status === 'done' || status === 'active'
+                ? 'bg-green-100 text-green-800'
+                : 'bg-red-100 text-red-800'
+            }`}
+          >
+            {status === 'in_progress'
+              ? 'Em progresso'
+              : status === 'done'
+              ? 'Concluída'
+              : status === 'active'
+              ? 'Ativa'
+              : 'Cancelada'}
+          </span>
+        )
+      },
+    },
+    {
+      id: 'actions',
+      enableHiding: false,
+      cell: ({ row }) => {
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-32">
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={async () => removeGoal.execute(row.original.id)}
+              >
+                Remover
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )
+      },
+    },
+  ]
 }
 
-const columns: ColumnDef<Goal>[] = [
-  {
-    accessorKey: 'id',
-    header: () => {
-      return <p>ID</p>
-    },
-  },
-  {
-    accessorKey: 'product.name',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          Produto
-          <ArrowUpDown />
-        </Button>
-      )
-    },
-    cell: ({ row }) => {
-      return <TableCellViewerGoals item={row.original} />
-    },
-  },
-  {
-    accessorKey: 'description',
-    header: () => <p>Descrição</p>,
-  },
-  {
-    accessorKey: 'type',
-    header: () => <p>Tipo da meta</p>,
-  },
-  {
-    accessorKey: 'targetValue',
-    header: () => <p>Valor alvo</p>,
-  },
-  {
-    accessorKey: 'currentValue',
-    header: () => <p>Valor atual</p>,
-  },
-  {
-    accessorKey: 'startDate',
-    header: () => <p>Início</p>,
-  },
-  {
-    accessorKey: 'deadLine',
-    header: () => <p>Prazo</p>,
-  },
-  {
-    accessorKey: 'status',
-    header: () => <p>Status</p>,
-    cell: ({ row }) => {
-      const status = row.original.status
-      return (
-        <span
-          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-            status === 'pending'
-              ? 'bg-yellow-100 text-yellow-800'
-              : status === 'completed'
-              ? 'bg-green-100 text-green-800'
-              : 'bg-red-100 text-red-800'
-          }`}
-        >
-          {status.charAt(0).toUpperCase() + status.slice(1)}
-        </span>
-      )
-    },
-  },
-  {
-    id: 'actions',
-    enableHiding: false,
-    cell: () => {
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-32">
-            <DropdownMenuItem>Edit</DropdownMenuItem>
-            <DropdownMenuItem>Make a copy</DropdownMenuItem>
-            <DropdownMenuItem>Favorite</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
-    },
-  },
-]
+type Props = {
+  watchGoals: WatchGoals
+  loadProducts: LoadProducts
+  updateGoal: UpdateGoal
+  removeGoal: RemoveGoal
+}
 
-export function Goals() {
+export function Goals({
+  watchGoals,
+  loadProducts,
+  updateGoal,
+  removeGoal,
+}: Props) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -209,10 +260,12 @@ export function Goals() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
+  const [goals, setGoals] = React.useState<Goal[]>([])
+  const [isLoading, setIsLoading] = React.useState(true)
 
   const table = useReactTable({
-    data,
-    columns,
+    data: goals,
+    columns: columns(loadProducts, updateGoal, removeGoal),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -229,23 +282,40 @@ export function Goals() {
     },
   })
 
+  React.useEffect(() => {
+    const unsubscribe = watchGoals.execute((goals) => {
+      setGoals(goals)
+      setIsLoading(false)
+    })
+
+    return () => {
+      unsubscribe()
+    }
+  }, [watchGoals])
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full">
+        <Loader2Icon className="animate-spin" />
+      </div>
+    )
+  }
+
   return (
     <div className="@container/card mx-4 mt-4 lg:mx-6">
       <div className="grid gap-4">
         <div>
           <Label htmlFor="rows-per-page" className="text-sm font-medium">
-            Filtrar status
+            Filtrar meta
           </Label>
-          <Select>
-            <SelectTrigger className="w-full mt-2">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="light">Light</SelectItem>
-              <SelectItem value="dark">Dark</SelectItem>
-              <SelectItem value="system">System</SelectItem>
-            </SelectContent>
-          </Select>
+          <Input
+            placeholder="Filtrar metas..."
+            value={(table.getColumn('id')?.getFilterValue() as string) ?? ''}
+            onChange={(event) =>
+              table.getColumn('id')?.setFilterValue(event.target.value)
+            }
+            className="max-w mt-2"
+          />
         </div>
       </div>
       <div className="rounded-md border mt-4">

@@ -5,7 +5,6 @@ import { Dashboard } from '@/presentation/pages/app'
 import { AppLayout, AuthLayout } from '@/presentation/pages/_layouts'
 import { ProtectedRoute } from './ProtectedRoute'
 import { GuestRoute } from './GuestRoute'
-import { Goals, NewGoal } from '@/presentation/pages/app/Goals'
 import { Productions } from '@/presentation/pages/app/Productions'
 import {
   MakeCategories,
@@ -19,6 +18,7 @@ import {
   MakeNewSale,
   MakeSales,
 } from '@/main/factories/pages/app/Sales'
+import { MakeGoals, MakeNewGoal } from '@/main/factories/pages/app/Goals'
 
 export function Routes() {
   const router = createBrowserRouter([
@@ -68,11 +68,11 @@ export function Routes() {
             },
             {
               path: '/goals',
-              element: <Goals />,
+              element: <MakeGoals />,
             },
             {
               path: '/goals/new',
-              element: <NewGoal />,
+              element: <MakeNewGoal />,
             },
             {
               path: '/productions',
