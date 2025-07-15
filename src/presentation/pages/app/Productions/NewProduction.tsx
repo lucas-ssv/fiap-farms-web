@@ -20,6 +20,9 @@ import {
 } from '@/presentation/components/ui'
 import { InputDate } from '@/presentation/components'
 import { Loader2Icon } from 'lucide-react'
+import type { LoadProducts } from '@/domain/usecases/product'
+import { useCallback, useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 type NewProductionFormData = z.infer<typeof schema>
 
@@ -41,7 +44,11 @@ const schema = z.object({
     .refine((date) => date > new Date(), 'Data de colheita deve ser no futuro'),
 })
 
-export function NewProduction() {
+type Props = {
+  loadProducts: LoadProducts
+}
+
+export function NewProduction({ loadProducts }: Props) {
   const form = useForm<NewProductionFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -55,10 +62,24 @@ export function NewProduction() {
       ),
     },
   })
+  const [products, setProducts] = useState<LoadProducts.Result>([])
 
   const onSubmit = async (data: NewProductionFormData) => {
     console.log('Form data submitted:', data)
   }
+
+  const fetchProducts = useCallback(async () => {
+    try {
+      const products = await loadProducts.execute()
+      setProducts(products)
+    } catch (error) {
+      toast.error('Erro ao carregar produtos. Tente novamente mais tarde.')
+    }
+  }, [loadProducts])
+
+  useEffect(() => {
+    fetchProducts()
+  }, [fetchProducts])
 
   return (
     <main>
@@ -89,9 +110,11 @@ export function NewProduction() {
                   </FormControl>
                   <FormMessage />
                   <SelectContent>
-                    <SelectItem value="product1">Produto 1</SelectItem>
-                    <SelectItem value="product2">Produto 2</SelectItem>
-                    <SelectItem value="product3">Produto 3</SelectItem>
+                    {products.map((product) => (
+                      <SelectItem key={product.id} value={product.id}>
+                        {product.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </FormItem>
