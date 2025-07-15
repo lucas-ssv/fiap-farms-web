@@ -10,6 +10,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  Input,
   Select,
   SelectContent,
   SelectItem,
@@ -80,6 +81,7 @@ export function NewGoal({ loadProducts, addGoal }: Props) {
     },
   })
   const [products, setProducts] = useState<ProductModel[]>([])
+  const type = form.watch('type')
 
   const onSubmit = async (data: NewGoalFormData) => {
     try {
@@ -185,12 +187,28 @@ export function NewGoal({ loadProducts, addGoal }: Props) {
             name="targetValue"
             render={() => (
               <FormItem className="col-span-12 md:col-span-6">
-                <MoneyInput
-                  form={form}
-                  label="Valor alvo"
-                  name="targetValue"
-                  placeholder="R$ 500,00"
-                />
+                {type === 'sales' ? (
+                  <MoneyInput
+                    form={form}
+                    label="Valor alvo"
+                    name="targetValue"
+                    placeholder="R$ 500,00"
+                  />
+                ) : (
+                  <>
+                    <FormLabel>Valor alvo</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="1000"
+                        {...form.register('targetValue', {
+                          valueAsNumber: true,
+                        })}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </>
+                )}
               </FormItem>
             )}
           />
@@ -199,12 +217,28 @@ export function NewGoal({ loadProducts, addGoal }: Props) {
             name="currentValue"
             render={() => (
               <FormItem className="col-span-12 md:col-span-6">
-                <MoneyInput
-                  form={form}
-                  label="Valor atual"
-                  name="currentValue"
-                  placeholder="R$ 0,00"
-                />
+                {type === 'sales' ? (
+                  <MoneyInput
+                    form={form}
+                    label="Valor atual"
+                    name="currentValue"
+                    placeholder="R$ 0,00"
+                  />
+                ) : (
+                  <>
+                    <FormLabel>Valor atual</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="0"
+                        {...form.register('currentValue', {
+                          valueAsNumber: true,
+                        })}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </>
+                )}
               </FormItem>
             )}
           />

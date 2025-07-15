@@ -110,6 +110,7 @@ export function TableCellViewerGoals({
     },
   })
   const [products, setProducts] = useState<ProductModel[]>([])
+  const type = form.watch('type')
   const chartData = [
     {
       concluida: item.currentValue
@@ -278,20 +279,52 @@ export function TableCellViewerGoals({
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-3">
-                  <MoneyInput
-                    form={form}
-                    label="Valor atual"
-                    name="currentValue"
-                    placeholder="R$ 100,00"
-                  />
+                  {type === 'sales' ? (
+                    <MoneyInput
+                      form={form}
+                      label="Valor alvo"
+                      name="targetValue"
+                      placeholder="R$ 0,00"
+                    />
+                  ) : (
+                    <>
+                      <FormLabel>Valor alvo</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="1000"
+                          {...form.register('targetValue', {
+                            valueAsNumber: true,
+                          })}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </>
+                  )}
                 </div>
                 <div className="flex flex-col gap-3">
-                  <MoneyInput
-                    form={form}
-                    label="Valor alvo"
-                    name="targetValue"
-                    placeholder="R$ 0,00"
-                  />
+                  {type === 'sales' ? (
+                    <MoneyInput
+                      form={form}
+                      label="Valor atual"
+                      name="currentValue"
+                      placeholder="R$ 100,00"
+                    />
+                  ) : (
+                    <>
+                      <FormLabel>Valor atual</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="0"
+                          {...form.register('currentValue', {
+                            valueAsNumber: true,
+                          })}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </>
+                  )}
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">

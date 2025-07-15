@@ -118,12 +118,19 @@ const columns = (
       header: () => <p>Valor alvo</p>,
       cell: ({ row }) => {
         const targetValue = row.original.targetValue
+        const type = row.original.type
+
         return (
           <span className="font-medium">
-            {targetValue.toLocaleString('pt-BR', {
-              style: 'currency',
-              currency: 'BRL',
-            })}
+            {type === 'sales'
+              ? targetValue.toLocaleString('pt-BR', {
+                  style: 'currency',
+                  currency: 'BRL',
+                })
+              : targetValue.toLocaleString('pt-BR', {
+                  style: 'decimal',
+                  minimumFractionDigits: 0,
+                })}
           </span>
         )
       },
@@ -133,12 +140,19 @@ const columns = (
       header: () => <p>Valor atual</p>,
       cell: ({ row }) => {
         const currentValue = row.original.currentValue
+        const type = row.original.type
+
         return (
           <span className="font-medium">
-            {currentValue.toLocaleString('pt-BR', {
-              style: 'currency',
-              currency: 'BRL',
-            })}
+            {type === 'sales'
+              ? currentValue.toLocaleString('pt-BR', {
+                  style: 'currency',
+                  currency: 'BRL',
+                })
+              : currentValue.toLocaleString('pt-BR', {
+                  style: 'decimal',
+                  minimumFractionDigits: 0,
+                })}
           </span>
         )
       },
