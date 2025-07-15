@@ -1,4 +1,4 @@
-import { WatchGoalsImpl } from '@/data/usecases/goal'
+import { UpdateGoalImpl, WatchGoalsImpl } from '@/data/usecases/goal'
 import { LoadProductsImpl } from '@/data/usecases/product'
 import { GoalFirebaseRepository } from '@/infra/repositories/firebase/goal'
 import { ProductFirebaseRepository } from '@/infra/repositories/firebase/product'
@@ -9,5 +9,12 @@ export function MakeGoals() {
   const watchGoals = new WatchGoalsImpl(goalFirebaseRepository)
   const productFirebaseRepository = new ProductFirebaseRepository()
   const loadProducts = new LoadProductsImpl(productFirebaseRepository)
-  return <Goals watchGoals={watchGoals} loadProducts={loadProducts} />
+  const updateGoal = new UpdateGoalImpl(goalFirebaseRepository)
+  return (
+    <Goals
+      watchGoals={watchGoals}
+      loadProducts={loadProducts}
+      updateGoal={updateGoal}
+    />
+  )
 }

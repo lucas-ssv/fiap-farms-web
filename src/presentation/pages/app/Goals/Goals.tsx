@@ -35,6 +35,7 @@ import {
   TableRow,
 } from '@/presentation/components/ui/table'
 import {
+  Input,
   Label,
   Select,
   SelectContent,
@@ -44,13 +45,16 @@ import {
 } from '@/presentation/components/ui'
 import { TableCellViewerGoals } from './components'
 import type { GoalModel } from '@/domain/models/goal'
-import type { WatchGoals } from '@/domain/usecases/goal'
+import type { UpdateGoal, WatchGoals } from '@/domain/usecases/goal'
 import { Timestamp } from 'firebase/firestore'
 import type { LoadProducts } from '@/domain/usecases/product'
 
 type Goal = GoalModel
 
-const columns = (loadProducts: LoadProducts): ColumnDef<Goal>[] => {
+const columns = (
+  loadProducts: LoadProducts,
+  updateGoal: UpdateGoal
+): ColumnDef<Goal>[] => {
   return [
     {
       accessorKey: 'id',
@@ -76,6 +80,7 @@ const columns = (loadProducts: LoadProducts): ColumnDef<Goal>[] => {
           <TableCellViewerGoals
             item={row.original}
             loadProducts={loadProducts}
+            updateGoal={updateGoal}
           />
         )
       },
@@ -217,9 +222,10 @@ const columns = (loadProducts: LoadProducts): ColumnDef<Goal>[] => {
 type Props = {
   watchGoals: WatchGoals
   loadProducts: LoadProducts
+  updateGoal: UpdateGoal
 }
 
-export function Goals({ watchGoals, loadProducts }: Props) {
+export function Goals({ watchGoals, loadProducts, updateGoal }: Props) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -232,7 +238,7 @@ export function Goals({ watchGoals, loadProducts }: Props) {
 
   const table = useReactTable({
     data: goals,
-    columns: columns(loadProducts),
+    columns: columns(loadProducts, updateGoal),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -273,18 +279,16 @@ export function Goals({ watchGoals, loadProducts }: Props) {
       <div className="grid gap-4">
         <div>
           <Label htmlFor="rows-per-page" className="text-sm font-medium">
-            Filtrar status
+            Filtrar meta
           </Label>
-          <Select>
-            <SelectTrigger className="w-full mt-2">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="light">Light</SelectItem>
-              <SelectItem value="dark">Dark</SelectItem>
-              <SelectItem value="system">System</SelectItem>
-            </SelectContent>
-          </Select>
+          <Input
+            placeholder="Filtrar metas..."
+            value={(table.getColumn('id')?.getFilterValue() as string) ?? ''}
+            onChange={(event) =>
+              table.getColumn('id')?.setFilterValue(event.target.value)
+            }
+            className="max-w mt-2"
+          />
         </div>
       </div>
       <div className="rounded-md border mt-4">

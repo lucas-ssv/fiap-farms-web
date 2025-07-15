@@ -36,6 +36,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import type { LoadProducts } from '@/domain/usecases/product'
 import type { ProductModel } from '@/domain/models/product'
+import type { UpdateGoal } from '@/domain/usecases/goal'
+import { Loader2Icon } from 'lucide-react'
 
 const chartConfig = {
   concluded: {
@@ -73,7 +75,7 @@ const schema = z
     (data) =>
       data.targetValue &&
       data.currentValue &&
-      data.targetValue > data.currentValue,
+      data.targetValue >= data.currentValue,
     {
       path: ['currentValue'],
       message: 'O valor alvo deve ser maior ao valor atual',
@@ -85,9 +87,14 @@ type UpdateGoalFormData = z.infer<typeof schema>
 type Props = {
   item: GoalModel
   loadProducts: LoadProducts
+  updateGoal: UpdateGoal
 }
 
-export function TableCellViewerGoals({ item, loadProducts }: Props) {
+export function TableCellViewerGoals({
+  item,
+  loadProducts,
+  updateGoal,
+}: Props) {
   const isMobile = useIsMobile()
   const form = useForm<UpdateGoalFormData>({
     resolver: zodResolver(schema),
@@ -121,7 +128,12 @@ export function TableCellViewerGoals({ item, loadProducts }: Props) {
     : '0.00'
 
   const handleUpdateGoal = async (data: UpdateGoalFormData) => {
-    console.log('Updating goal with data:', data)
+    try {
+      await updateGoal.execute(item.id, data)
+      toast.success('Meta atualizada com sucesso!')
+    } catch (error) {
+      toast.error('Erro ao atualizar a meta. Tente novamente.')
+    }
   }
 
   const fetchProducts = useCallback(async () => {
@@ -391,6 +403,9 @@ export function TableCellViewerGoals({ item, loadProducts }: Props) {
             onClick={form.handleSubmit(handleUpdateGoal)}
             disabled={form.formState.isSubmitting}
           >
+            {form.formState.isSubmitting && (
+              <Loader2Icon className="animate-spin" />
+            )}
             Atualizar meta
           </Button>
           <Button variant="destructive">Excluir meta</Button>
