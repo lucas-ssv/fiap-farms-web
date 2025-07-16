@@ -6,28 +6,33 @@ import {
 } from '@tests/data/mocks/product'
 import { mockAddProductParams } from './mocks'
 import { UploadServiceMock } from '@tests/data/mocks/services'
+import { AddStockMovementRepositoryMock } from '@tests/data/mocks/stock-movement'
 
 type SutTypes = {
   sut: AddProduct
   addProductRepositoryMock: AddProductRepositoryMock
   uploadServiceMock: UploadServiceMock
   updateProductRepositoryMock: UpdateProductRepositoryMock
+  addStockMovementRepositoryMock: AddStockMovementRepositoryMock
 }
 
 const makeSut = (): SutTypes => {
   const addProductRepositoryMock = new AddProductRepositoryMock()
   const uploadServiceMock = new UploadServiceMock()
   const updateProductRepositoryMock = new UpdateProductRepositoryMock()
+  const addStockMovementRepositoryMock = new AddStockMovementRepositoryMock()
   const sut = new AddProductImpl(
     addProductRepositoryMock,
     uploadServiceMock,
-    updateProductRepositoryMock
+    updateProductRepositoryMock,
+    addStockMovementRepositoryMock
   )
   return {
     sut,
     addProductRepositoryMock,
     uploadServiceMock,
     updateProductRepositoryMock,
+    addStockMovementRepositoryMock,
   }
 }
 
@@ -77,6 +82,23 @@ describe('AddProduct usecase', () => {
     })
   })
 
+  it('should call AddStockMovementRepository with correct values', async () => {
+    const { sut, addStockMovementRepositoryMock } = makeSut()
+    const addSpy = jest.spyOn(addStockMovementRepositoryMock, 'add')
+    const params = mockAddProductParams()
+
+    await sut.execute(params)
+
+    expect(addSpy).toHaveBeenCalledWith({
+      productId: 'any_product_id',
+      userId: 'any_user_id',
+      type: 'input',
+      quantity: params.stock,
+      date: expect.any(Date),
+      reason: 'Produto adicionado',
+    })
+  })
+
   it('should throw if AddProductRepository throws', async () => {
     const { sut, addProductRepositoryMock } = makeSut()
     jest.spyOn(addProductRepositoryMock, 'add').mockImplementationOnce(() => {
@@ -103,6 +125,19 @@ describe('AddProduct usecase', () => {
     const { sut, updateProductRepositoryMock } = makeSut()
     jest
       .spyOn(updateProductRepositoryMock, 'update')
+      .mockImplementationOnce(() => {
+        throw new Error()
+      })
+
+    const promise = sut.execute(mockAddProductParams())
+
+    await expect(promise).rejects.toThrow()
+  })
+
+  it('should throw if AddStockMovementRepository throws', async () => {
+    const { sut, addStockMovementRepositoryMock } = makeSut()
+    jest
+      .spyOn(addStockMovementRepositoryMock, 'add')
       .mockImplementationOnce(() => {
         throw new Error()
       })

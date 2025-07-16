@@ -3,21 +3,25 @@ import type {
   UpdateProductRepository,
 } from '@/data/contracts/product'
 import type { UploadService } from '@/data/contracts/services'
+import type { AddStockMovementRepository } from '@/data/contracts/stock-movement'
 import type { AddProduct } from '@/domain/usecases/product'
 
 export class AddProductImpl implements AddProduct {
   private addProductRepository: AddProductRepository
   private uploadService: UploadService
   private updateProductRepository: UpdateProductRepository
+  private addStockMovementRepository: AddStockMovementRepository
 
   constructor(
     addProductRepository: AddProductRepository,
     uploadService: UploadService,
-    updateProductRepository: UpdateProductRepository
+    updateProductRepository: UpdateProductRepository,
+    addStockMovementRepository: AddStockMovementRepository
   ) {
     this.addProductRepository = addProductRepository
     this.uploadService = uploadService
     this.updateProductRepository = updateProductRepository
+    this.addStockMovementRepository = addStockMovementRepository
   }
 
   async execute(data: AddProduct.Params): Promise<void> {
@@ -29,5 +33,13 @@ export class AddProductImpl implements AddProduct {
         image: url,
       })
     }
+    await this.addStockMovementRepository.add({
+      productId,
+      userId: data.userId,
+      type: 'input',
+      quantity: data.stock,
+      date: new Date(),
+      reason: 'Produto adicionado',
+    })
   }
 }
