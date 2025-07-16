@@ -8,6 +8,7 @@ export namespace AddProduct {
     price: number
     cost: number
     categoryId: string
+    userId: string
     stock: number
     minStock?: number
     maxStock?: number

@@ -5,6 +5,7 @@ export const mockAddProductParams = (): AddProduct.Params => {
     name: 'any_name',
     price: 100,
     cost: 50,
+    userId: 'any_user_id',
     categoryId: 'any_category_id',
     stock: 10,
     minStock: 5,

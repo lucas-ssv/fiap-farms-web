@@ -7,6 +7,7 @@ import {
 } from '@/data/usecases/product'
 import { CategoryFirebaseRepository } from '@/infra/repositories/firebase/category'
 import { ProductFirebaseRepository } from '@/infra/repositories/firebase/product'
+import { StockMovementFirebaseRepository } from '@/infra/repositories/firebase/stock-movement'
 import { UploadFirebaseService } from '@/infra/services/firebase'
 import { Products } from '@/presentation/pages/app/Products'
 
@@ -20,7 +21,11 @@ export function MakeProducts() {
     uploadService,
     productFirebaseRepository
   )
-  const removeProduct = new RemoveProductImpl(productFirebaseRepository)
+  const stockMovementFirebaseRepository = new StockMovementFirebaseRepository()
+  const removeProduct = new RemoveProductImpl(
+    productFirebaseRepository,
+    stockMovementFirebaseRepository
+  )
   const watchProducts = new WatchProductsImpl(productFirebaseRepository)
   return (
     <Products

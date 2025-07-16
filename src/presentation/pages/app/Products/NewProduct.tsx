@@ -24,27 +24,35 @@ import { toast } from 'sonner'
 import { Loader2Icon } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { LoadCategories } from '@/domain/usecases/category'
+import { useAuth } from '@/presentation/contexts'
 
 type NewProductFormData = z.infer<typeof schema>
 
-const schema = z.object({
-  name: z.string().min(1, 'O nome é obrigatório'),
-  unit: z.string().min(1, 'A unidade de medida é obrigatória'),
-  categoryId: z.string().min(1, 'A categoria é obrigatória'),
-  stock: z
-    .number('Campo obrigatório')
-    .min(0, 'O estoque não pode ser negativo'),
-  minStock: z
-    .number('Campo obrigatório')
-    .min(0, 'O estoque mínimo não pode ser negativo'),
-  maxStock: z
-    .number('Campo obrigatório')
-    .min(0, 'O estoque máximo não pode ser negativo'),
-  description: z.string().optional(),
-  image: z.file().optional(),
-  price: z.number('Campo obrigatório').min(0, 'O preço não pode ser negativo'),
-  cost: z.number('Campo obrigatório').min(0, 'O custo não pode ser negativo'),
-})
+const schema = z
+  .object({
+    name: z.string().min(1, 'O nome é obrigatório'),
+    unit: z.string().min(1, 'A unidade de medida é obrigatória'),
+    categoryId: z.string().min(1, 'A categoria é obrigatória'),
+    stock: z
+      .number('Campo obrigatório')
+      .min(0, 'O estoque não pode ser negativo'),
+    minStock: z
+      .number('Campo obrigatório')
+      .min(0, 'O estoque mínimo não pode ser negativo'),
+    maxStock: z
+      .number('Campo obrigatório')
+      .min(0, 'O estoque máximo não pode ser negativo'),
+    description: z.string().optional(),
+    image: z.file().optional(),
+    price: z
+      .number('Campo obrigatório')
+      .min(0, 'O preço não pode ser negativo'),
+    cost: z.number('Campo obrigatório').min(0, 'O custo não pode ser negativo'),
+  })
+  .refine((data) => data.minStock <= data.maxStock, {
+    message: 'O estoque mínimo não pode ser maior que o estoque máximo',
+    path: ['minStock'],
+  })
 
 type Props = {
   addProduct: AddProduct
@@ -52,6 +60,7 @@ type Props = {
 }
 
 export function NewProduct({ addProduct, loadCategories }: Props) {
+  const { user } = useAuth()
   const form = useForm<NewProductFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -67,7 +76,10 @@ export function NewProduct({ addProduct, loadCategories }: Props) {
 
   const onSubmit = async (data: NewProductFormData) => {
     try {
-      await addProduct.execute(data)
+      await addProduct.execute({
+        userId: user!.id,
+        ...data,
+      })
       toast.success('Produto adicionado com sucesso!')
       form.reset()
       if (fileInputRef.current) {

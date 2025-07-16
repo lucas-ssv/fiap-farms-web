@@ -5,7 +5,7 @@ export interface AddProduction {
 export namespace AddProduction {
   export type Params = {
     productId: string
-    status: 'in_production' | 'completed'
+    status: 'waiting' | 'in_production' | 'harvested'
     quantity: number
     quantityProduced: number
     unit: string
