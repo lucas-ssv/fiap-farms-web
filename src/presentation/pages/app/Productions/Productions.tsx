@@ -46,6 +46,7 @@ import {
 import { TableCellViewerProductions } from './components'
 import type { ProductionModel } from '@/domain/models/production'
 import type {
+  RemoveProduction,
   UpdateProduction,
   WatchProductions,
 } from '@/domain/usecases/production'
@@ -56,7 +57,8 @@ type Production = ProductionModel
 
 const columns = (
   loadProducts: LoadProducts,
-  updateProduction: UpdateProduction
+  updateProduction: UpdateProduction,
+  removeProduction: RemoveProduction
 ): ColumnDef<Production>[] => {
   return [
     {
@@ -84,6 +86,7 @@ const columns = (
             item={row.original}
             loadProducts={loadProducts}
             updateProduction={updateProduction}
+            removeProduction={removeProduction}
           />
         )
       },
@@ -180,7 +183,7 @@ const columns = (
     {
       id: 'actions',
       enableHiding: false,
-      cell: () => {
+      cell: ({ row }) => {
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -190,7 +193,12 @@ const columns = (
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-32">
-              <DropdownMenuItem variant="destructive">Remover</DropdownMenuItem>
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={async () => removeProduction.execute(row.original.id)}
+              >
+                Remover
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         )
@@ -203,12 +211,14 @@ type Props = {
   watchProductions: WatchProductions
   loadProducts: LoadProducts
   updateProduction: UpdateProduction
+  removeProduction: RemoveProduction
 }
 
 export function Productions({
   watchProductions,
   loadProducts,
   updateProduction,
+  removeProduction,
 }: Props) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -222,7 +232,7 @@ export function Productions({
 
   const table = useReactTable({
     data: productions,
-    columns: columns(loadProducts, updateProduction),
+    columns: columns(loadProducts, updateProduction, removeProduction),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -318,7 +328,7 @@ export function Productions({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  Nenhum produto encontrado.
+                  Nenhuma produção encontrada.
                 </TableCell>
               </TableRow>
             )}

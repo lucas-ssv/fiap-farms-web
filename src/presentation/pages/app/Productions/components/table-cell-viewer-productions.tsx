@@ -36,7 +36,10 @@ import type { LoadProducts } from '@/domain/usecases/product'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import type { ProductModel } from '@/domain/models/product'
-import type { UpdateProduction } from '@/domain/usecases/production'
+import type {
+  RemoveProduction,
+  UpdateProduction,
+} from '@/domain/usecases/production'
 
 const schema = z.object({
   productId: z.string().optional(),
@@ -65,12 +68,14 @@ type Props = {
   item: ProductionModel
   loadProducts: LoadProducts
   updateProduction: UpdateProduction
+  removeProduction: RemoveProduction
 }
 
 export function TableCellViewerProductions({
   item,
   loadProducts,
   updateProduction,
+  removeProduction,
 }: Props) {
   const isMobile = useIsMobile()
   const form = useForm<UpdateProductionFormData>({
@@ -109,6 +114,15 @@ export function TableCellViewerProductions({
       toast.success('Produção atualizada com sucesso!')
     } catch (error) {
       toast.error('Erro ao atualizar a produção. Tente novamente.')
+    }
+  }
+
+  const handleRemoveProduction = async (productionId: string) => {
+    try {
+      await removeProduction.execute(productionId)
+      toast.success('Produção removida com sucesso!')
+    } catch (error) {
+      toast.error('Erro ao remover a produção. Tente novamente.')
     }
   }
 
@@ -394,7 +408,7 @@ export function TableCellViewerProductions({
           <Button
             className="cursor-pointer"
             variant="destructive"
-            onClick={() => {}}
+            onClick={() => handleRemoveProduction(item.id)}
           >
             Excluir produção
           </Button>
