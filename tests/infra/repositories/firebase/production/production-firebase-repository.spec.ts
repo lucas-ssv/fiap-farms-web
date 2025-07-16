@@ -1,7 +1,13 @@
 import type { UpdateProductionRepository } from '@/data/contracts/production'
 import { ProductionFirebaseRepository } from '@/infra/repositories/firebase/production'
 import { mockAddProductionParams } from '@tests/data/usecases/production/mocks'
-import { addDoc, collection, doc, updateDoc } from 'firebase/firestore'
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  updateDoc,
+} from 'firebase/firestore'
 
 jest.useFakeTimers()
 
@@ -162,20 +168,20 @@ describe('ProductionFirebaseRepository', () => {
   //   })
   // })
 
-  // describe('remove()', () => {
-  //   it('should remove a goal on success', async () => {
-  //     const mockedCollectionWithConverter = 'mockedCollectionWithConverter'
-  //     const withConverterMock = jest
-  //       .fn()
-  //       .mockReturnValue(mockedCollectionWithConverter)
-  //     ;(doc as jest.Mock).mockReturnValue({
-  //       withConverter: withConverterMock,
-  //     })
-  //     const sut = new GoalFirebaseRepository()
+  describe('remove()', () => {
+    it('should remove a production on success', async () => {
+      const mockedCollectionWithConverter = 'mockedCollectionWithConverter'
+      const withConverterMock = jest
+        .fn()
+        .mockReturnValue(mockedCollectionWithConverter)
+      ;(doc as jest.Mock).mockReturnValue({
+        withConverter: withConverterMock,
+      })
+      const sut = new ProductionFirebaseRepository()
 
-  //     await sut.remove('any_goal_id')
+      await sut.remove('any_production_id')
 
-  //     expect(deleteDoc).toHaveBeenCalledWith(mockedCollectionWithConverter)
-  //   })
-  // })
+      expect(deleteDoc).toHaveBeenCalledWith(mockedCollectionWithConverter)
+    })
+  })
 })

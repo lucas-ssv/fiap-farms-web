@@ -1,6 +1,7 @@
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   onSnapshot,
@@ -11,6 +12,7 @@ import {
 import { db } from '@/main/config/firebase'
 import type {
   AddProductionRepository,
+  RemoveProductionRepository,
   UpdateProductionRepository,
   WatchProductionsRepository,
 } from '@/data/contracts/production'
@@ -23,7 +25,8 @@ export class ProductionFirebaseRepository
   implements
     AddProductionRepository,
     WatchProductionsRepository,
-    UpdateProductionRepository
+    UpdateProductionRepository,
+    RemoveProductionRepository
 {
   async add(params: AddProductionRepository.Params): Promise<void> {
     await addDoc(
@@ -96,6 +99,12 @@ export class ProductionFirebaseRepository
     await updateDoc(
       doc(db, 'productions', productionId).withConverter(productConverter),
       data
+    )
+  }
+
+  async remove(productionId: string): Promise<void> {
+    await deleteDoc(
+      doc(db, 'productions', productionId).withConverter(productionConverter)
     )
   }
 }
