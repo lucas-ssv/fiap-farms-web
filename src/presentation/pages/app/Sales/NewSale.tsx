@@ -111,7 +111,7 @@ export function NewSale({ addSale, loadProducts, loadCustomers }: Props) {
       const customers = await loadCustomers.execute()
       setCustomers(customers)
     } catch (error) {
-      toast.error('Erro ao carregar produtos. Tente novamente mais tarde.')
+      toast.error('Erro ao carregar clientes. Tente novamente mais tarde.')
     }
   }, [loadCustomers])
 
@@ -390,7 +390,7 @@ export function NewSale({ addSale, loadProducts, loadCustomers }: Props) {
               {form.formState.isSubmitting && (
                 <Loader2Icon className="animate-spin" />
               )}
-              Adicionar produto
+              Adicionar venda
             </Button>
           </div>
         </form>
