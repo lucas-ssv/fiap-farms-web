@@ -1,6 +1,6 @@
 import { StockMovementFirebaseRepository } from '@/infra/repositories/firebase/stock-movement'
 import { mockAddStockMovementParams } from '@tests/data/usecases/stock-movement/mocks'
-import { addDoc, collection } from 'firebase/firestore'
+import { addDoc, collection, deleteDoc, getDocs } from 'firebase/firestore'
 
 jest.useFakeTimers()
 
@@ -17,6 +17,7 @@ jest.mock('firebase/firestore', () => ({
   addDoc: jest.fn().mockResolvedValue({ id: 'any_category_id' }),
   collection: jest.fn(),
   query: jest.fn(),
+  where: jest.fn(),
   onSnapshot: jest.fn().mockImplementation((_, callback) => {
     callback({
       docs: [
@@ -91,6 +92,34 @@ describe('GoalFirebaseRepository', () => {
         createdAt: 'any_timestamp',
         updatedAt: 'any_timestamp',
       })
+    })
+  })
+
+  describe('removeByProductId', () => {
+    it('should remove a stock movement by product id on success', async () => {
+      const mockedCollectionWithConverter = 'mockedCollectionWithConverter'
+      const withConverterMock = jest
+        .fn()
+        .mockReturnValue(mockedCollectionWithConverter)
+      ;(collection as jest.Mock).mockReturnValue({
+        withConverter: withConverterMock,
+      })
+      const querySnapshotMock = {
+        forEach: jest.fn(),
+      }
+      ;(getDocs as jest.Mock).mockResolvedValue(querySnapshotMock)
+
+      querySnapshotMock.forEach.mockImplementation((callback: any) => {
+        callback({
+          ref: 'any_doc_ref',
+        })
+      })
+
+      const sut = new StockMovementFirebaseRepository()
+
+      await sut.removeByProductId('any_product_id')
+
+      expect(deleteDoc).toHaveBeenCalledWith('any_doc_ref')
     })
   })
 
