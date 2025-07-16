@@ -1,0 +1,32 @@
+import { LoadProductsImpl } from '@/data/usecases/product'
+import {
+  RemoveProductionImpl,
+  UpdateProductionImpl,
+  WatchProductionsImpl,
+} from '@/data/usecases/production'
+import { ProductFirebaseRepository } from '@/infra/repositories/firebase/product'
+import { ProductionFirebaseRepository } from '@/infra/repositories/firebase/production'
+import { Productions } from '@/presentation/pages/app/Productions'
+
+export function MakeProductions() {
+  const productionFirebaseRepository = new ProductionFirebaseRepository()
+  const watchProductions = new WatchProductionsImpl(
+    productionFirebaseRepository
+  )
+  const productFirebaseRepository = new ProductFirebaseRepository()
+  const loadProducts = new LoadProductsImpl(productFirebaseRepository)
+  const updateProduction = new UpdateProductionImpl(
+    productionFirebaseRepository
+  )
+  const removeProduction = new RemoveProductionImpl(
+    productionFirebaseRepository
+  )
+  return (
+    <Productions
+      watchProductions={watchProductions}
+      loadProducts={loadProducts}
+      updateProduction={updateProduction}
+      removeProduction={removeProduction}
+    />
+  )
+}

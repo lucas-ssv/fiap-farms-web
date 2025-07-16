@@ -142,7 +142,7 @@ const data = {
         },
         {
           title: 'Nova produção',
-          url: '#',
+          url: '/productions/new',
           icon: Plus,
         },
       ],
