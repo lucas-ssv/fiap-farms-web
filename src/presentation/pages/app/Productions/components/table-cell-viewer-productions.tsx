@@ -43,7 +43,7 @@ import type {
 
 const schema = z.object({
   productId: z.string().optional(),
-  status: z.enum(['in_production', 'completed']).optional(),
+  status: z.enum(['in_production', 'harvested', 'waiting']).optional(),
   quantity: z.number().optional(),
   quantityProduced: z.number().optional(),
   unit: z.string().optional(),

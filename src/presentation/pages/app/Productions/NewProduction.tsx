@@ -29,7 +29,10 @@ type NewProductionFormData = z.infer<typeof schema>
 
 const schema = z.object({
   productId: z.string().min(1, 'Produto é obrigatório'),
-  status: z.enum(['in_production', 'completed'], 'Status é obrigatório'),
+  status: z.enum(
+    ['waiting', 'in_production', 'harvested'],
+    'Status é obrigatório'
+  ),
   quantity: z
     .number('Quantidade deve ser um número')
     .min(1, 'Quantidade a produzir deve ser maior que zero'),
@@ -144,8 +147,9 @@ export function NewProduction({ loadProducts, addProduction }: Props) {
                   </FormControl>
                   <FormMessage />
                   <SelectContent>
+                    <SelectItem value="waiting">Aguardando</SelectItem>
                     <SelectItem value="in_production">Em produção</SelectItem>
-                    <SelectItem value="completed">Concluído</SelectItem>
+                    <SelectItem value="harvested">Colhido</SelectItem>
                   </SelectContent>
                 </Select>
               </FormItem>

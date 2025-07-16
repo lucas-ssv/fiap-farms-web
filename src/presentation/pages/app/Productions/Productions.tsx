@@ -110,10 +110,16 @@ const columns = (
             className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
               status === 'in_production'
                 ? 'bg-yellow-100 text-yellow-800'
+                : status === 'waiting'
+                ? 'bg-blue-100 text-blue-800'
                 : 'bg-green-100 text-green-800'
             }`}
           >
-            {status === 'in_production' ? 'Em progresso' : 'Concluído'}
+            {status === 'in_production'
+              ? 'Em produção'
+              : status === 'waiting'
+              ? 'Aguardando'
+              : 'Já colhido'}
           </span>
         )
       },
