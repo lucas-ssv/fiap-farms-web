@@ -1,3 +1,4 @@
+import type { AddAlertRepository } from '@/data/contracts/alert'
 import type {
   LoadGoalsByUserIdRepository,
   UpdateGoalRepository,
@@ -11,17 +12,20 @@ export class AddSaleImpl implements AddSale {
   private updateStockMovementRepository: UpdateStockMovementRepository
   private loadGoalsByUserIdRepository: LoadGoalsByUserIdRepository
   private updateGoalRepository: UpdateGoalRepository
+  private addAlertRepository: AddAlertRepository
 
   constructor(
     addSaleRepository: AddSaleRepository,
     updateStockMovementRepository: UpdateStockMovementRepository,
     loadGoalsByUserIdRepository: LoadGoalsByUserIdRepository,
-    updateGoalRepository: UpdateGoalRepository
+    updateGoalRepository: UpdateGoalRepository,
+    addAlertRepository: AddAlertRepository
   ) {
     this.addSaleRepository = addSaleRepository
     this.updateStockMovementRepository = updateStockMovementRepository
     this.loadGoalsByUserIdRepository = loadGoalsByUserIdRepository
     this.updateGoalRepository = updateGoalRepository
+    this.addAlertRepository = addAlertRepository
   }
 
   async execute(params: AddSale.Params): Promise<void> {
@@ -38,9 +42,21 @@ export class AddSaleImpl implements AddSale {
 
     for (const goal of goalsByProductId) {
       const newCurrentValue = goal.currentValue + params.quantity
+      const goalAchieved = newCurrentValue >= goal.targetValue
+
       await this.updateGoalRepository.update(goal.id, {
         currentValue: newCurrentValue,
       })
+
+      if (goalAchieved) {
+        await this.addAlertRepository.add({
+          userId: params.userId,
+          productId: params.productId,
+          type: 'sales',
+          message: `Goal achieved for product ${params.productId}`,
+          read: false,
+        })
+      }
     }
   }
 }

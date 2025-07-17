@@ -1,4 +1,5 @@
 import { AddSaleImpl } from '@/data/usecases/sale'
+import { AddAlertRepositoryMock } from '@tests/data/mocks/alert'
 import {
   LoadGoalsByUserIdRepositoryMock,
   UpdateGoalRepositoryMock,
@@ -13,6 +14,7 @@ type SutTypes = {
   updateStockMovementRepositoryMock: UpdateStockMovementRepositoryMock
   loadGoalsByUserIdRepositoryMock: LoadGoalsByUserIdRepositoryMock
   updateGoalRepositoryMock: UpdateGoalRepositoryMock
+  addAlertRepositoryMock: AddAlertRepositoryMock
 }
 
 const makeSut = (): SutTypes => {
@@ -21,11 +23,13 @@ const makeSut = (): SutTypes => {
     new UpdateStockMovementRepositoryMock()
   const loadGoalsByUserIdRepositoryMock = new LoadGoalsByUserIdRepositoryMock()
   const updateGoalRepositoryMock = new UpdateGoalRepositoryMock()
+  const addAlertRepositoryMock = new AddAlertRepositoryMock()
   const sut = new AddSaleImpl(
     addSaleRepositoryMock,
     updateStockMovementRepositoryMock,
     loadGoalsByUserIdRepositoryMock,
-    updateGoalRepositoryMock
+    updateGoalRepositoryMock,
+    addAlertRepositoryMock
   )
   return {
     sut,
@@ -33,6 +37,7 @@ const makeSut = (): SutTypes => {
     updateStockMovementRepositoryMock,
     loadGoalsByUserIdRepositoryMock,
     updateGoalRepositoryMock,
+    addAlertRepositoryMock,
   }
 }
 
@@ -84,6 +89,23 @@ describe('AddSale usecase', () => {
     })
   })
 
+  it('should call AddAlertRepository if there is a achieved goal', async () => {
+    const { sut, addAlertRepositoryMock } = makeSut()
+    const addSpy = jest.spyOn(addAlertRepositoryMock, 'add')
+    const params = mockAddSaleParams()
+    params.quantity = 100 // Assuming this quantity will achieve the goal
+
+    await sut.execute(params)
+
+    expect(addSpy).toHaveBeenCalledWith({
+      userId: params.userId,
+      productId: params.productId,
+      type: 'sales',
+      message: `Goal achieved for product ${params.productId}`,
+      read: false,
+    })
+  })
+
   it('should throw if AddSaleRepository throws', async () => {
     const { sut, addSaleRepositoryMock } = makeSut()
     jest
@@ -124,6 +146,19 @@ describe('AddSale usecase', () => {
       .mockRejectedValueOnce(new Error('any_error'))
 
     const promise = sut.execute(mockAddSaleParams())
+
+    await expect(promise).rejects.toThrow(new Error('any_error'))
+  })
+
+  it('should throw if AddAlertRepository throws', async () => {
+    const { sut, addAlertRepositoryMock } = makeSut()
+    jest
+      .spyOn(addAlertRepositoryMock, 'add')
+      .mockRejectedValueOnce(new Error('any_error'))
+    const params = mockAddSaleParams()
+    params.quantity = 100 // Assuming this quantity will achieve the goal
+
+    const promise = sut.execute(params)
 
     await expect(promise).rejects.toThrow(new Error('any_error'))
   })
