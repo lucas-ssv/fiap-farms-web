@@ -89,6 +89,21 @@ describe('AddSale usecase', () => {
     })
   })
 
+  it('should call UpdateGoalRepository with status done if goal is achieved', async () => {
+    const { sut, updateGoalRepositoryMock } = makeSut()
+    const updateSpy = jest.spyOn(updateGoalRepositoryMock, 'update')
+    const params = mockAddSaleParams()
+    params.quantity = 100 // Assuming this quantity will achieve the goal
+    const newCurrentValue = params.quantity + 100 // Assuming initial current value is 100
+
+    await sut.execute(params)
+
+    expect(updateSpy).toHaveBeenCalledWith('goal1', {
+      currentValue: newCurrentValue,
+      status: 'done',
+    })
+  })
+
   it('should call AddAlertRepository if there is a achieved goal', async () => {
     const { sut, addAlertRepositoryMock } = makeSut()
     const addSpy = jest.spyOn(addAlertRepositoryMock, 'add')

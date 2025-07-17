@@ -43,10 +43,15 @@ export class AddSaleImpl implements AddSale {
     for (const goal of goalsByProductId) {
       const newCurrentValue = goal.currentValue + params.quantity
       const goalAchieved = newCurrentValue >= goal.targetValue
-
-      await this.updateGoalRepository.update(goal.id, {
+      const updatedGoalData: UpdateGoalRepository.Params = {
         currentValue: newCurrentValue,
-      })
+      }
+
+      if (goalAchieved) {
+        updatedGoalData.status = 'done'
+      }
+
+      await this.updateGoalRepository.update(goal.id, updatedGoalData)
 
       if (goalAchieved) {
         await this.addAlertRepository.add({
