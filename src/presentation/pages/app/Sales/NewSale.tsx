@@ -28,6 +28,7 @@ import type { LoadCustomers } from '@/domain/usecases/customer'
 import type { AddSale } from '@/domain/usecases/sale'
 import { useAuth } from '@/presentation/contexts'
 import { Loader2Icon } from 'lucide-react'
+import type { ProductModel } from '@/domain/models/product'
 
 type NewProductFormData = z.infer<typeof schema>
 
@@ -79,6 +80,8 @@ export function NewSale({ addSale, loadProducts, loadCustomers }: Props) {
   })
   const [products, setProducts] = useState<LoadProducts.Result>([])
   const [customers, setCustomers] = useState<LoadCustomers.Result>([])
+  const [product, setProduct] = useState<ProductModel | undefined>(undefined)
+
   const quantity = useWatch({ control: form.control, name: 'quantity' })
   const unitPrice = useWatch({ control: form.control, name: 'unitPrice' })
   const discount = useWatch({ control: form.control, name: 'discount' })
@@ -86,6 +89,11 @@ export function NewSale({ addSale, loadProducts, loadCustomers }: Props) {
 
   const onSubmit = async (data: NewProductFormData) => {
     try {
+      if (data.quantity > product!.stock) {
+        toast.warning('Quantidade maior que o estoque disponível.')
+        return
+      }
+
       await addSale.execute({
         userId: user!.id,
         ...data,
@@ -152,6 +160,7 @@ export function NewSale({ addSale, loadProducts, loadCustomers }: Props) {
           shouldTouch: false,
           shouldValidate: false,
         })
+        setProduct(product)
       }
     }
   }, [productId, products, form])
@@ -222,7 +231,14 @@ export function NewSale({ addSale, loadProducts, loadCustomers }: Props) {
             name="quantity"
             render={() => (
               <FormItem className="col-span-12 md:col-span-6 xl:col-span-3">
-                <FormLabel>Quantidade</FormLabel>
+                <FormLabel>
+                  Quantidade
+                  {product && (
+                    <span className="text-red-500">
+                      Max. estoque ({product.stock})
+                    </span>
+                  )}
+                </FormLabel>
                 <FormControl>
                   <Input
                     type="number"
@@ -248,8 +264,11 @@ export function NewSale({ addSale, loadProducts, loadCustomers }: Props) {
                   </FormControl>
                   <FormMessage />
                   <SelectContent>
-                    <SelectItem value="kg">KG</SelectItem>
-                    <SelectItem value="unit">Unidade</SelectItem>
+                    {product && (
+                      <SelectItem value={product.unit}>
+                        {product.unit}
+                      </SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
               </FormItem>
