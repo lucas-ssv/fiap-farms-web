@@ -26,6 +26,7 @@ import {
   SidebarRail,
 } from '@/presentation/components/ui/sidebar'
 import { Link } from 'react-router'
+import type { Logout } from '@/domain/usecases/account'
 
 const data = {
   navMain: [
@@ -122,7 +123,11 @@ const data = {
   ],
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+type Props = React.ComponentProps<typeof Sidebar> & {
+  logout: Logout
+}
+
+export function AppSidebar({ logout, ...props }: Props) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -146,7 +151,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser />
+        <NavUser logout={logout} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

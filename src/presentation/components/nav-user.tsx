@@ -19,10 +19,25 @@ import {
   useSidebar,
 } from '@/presentation/components/ui/sidebar'
 import { useAuth } from '../contexts'
+import type { Logout } from '@/domain/usecases/account'
+import { toast } from 'sonner'
 
-export function NavUser() {
+type Props = {
+  logout: Logout
+}
+
+export function NavUser({ logout }: Props) {
   const { isMobile } = useSidebar()
-  const { user } = useAuth()
+  const { user, logoutUser } = useAuth()
+
+  const handleLogout = async () => {
+    try {
+      await logout.execute()
+      logoutUser()
+    } catch (error) {
+      toast.error('Erro ao fazer logout')
+    }
+  }
 
   return (
     <SidebarMenu>
@@ -74,7 +89,7 @@ export function NavUser() {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOut />
               Log out
             </DropdownMenuItem>
