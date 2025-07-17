@@ -124,7 +124,7 @@ describe('GoalFirebaseRepository', () => {
   })
 
   // describe('update()', () => {
-  //   it('should update a goal on success', async () => {
+  //   it('should update a stock movement on success', async () => {
   //     const mockedCollectionWithConverter = 'mockedCollectionWithConverter'
   //     const withConverterMock = jest
   //       .fn()
@@ -132,16 +132,15 @@ describe('GoalFirebaseRepository', () => {
   //     ;(doc as jest.Mock).mockReturnValue({
   //       withConverter: withConverterMock,
   //     })
-  //     const sut = new GoalFirebaseRepository()
-  //     const data: UpdateGoalRepository.Params = {
-  //       type: 'production',
-  //     }
+  //     const sut = new StockMovementFirebaseRepository()
 
-  //     await sut.update('any_goal_id', data)
+  //     await sut.update('output', 'any_product_id', 10)
 
   //     expect(updateDoc).toHaveBeenCalledWith(
   //       mockedCollectionWithConverter,
-  //       data
+  //       'output',
+  //       'any_product_id',
+  //       10
   //     )
   //   })
   // })
