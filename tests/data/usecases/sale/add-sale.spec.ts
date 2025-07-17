@@ -1,5 +1,8 @@
 import { AddSaleImpl } from '@/data/usecases/sale'
-import { LoadGoalsByUserIdRepositoryMock } from '@tests/data/mocks/goal'
+import {
+  LoadGoalsByUserIdRepositoryMock,
+  UpdateGoalRepositoryMock,
+} from '@tests/data/mocks/goal'
 import { AddSaleRepositoryMock } from '@tests/data/mocks/sale'
 import { UpdateStockMovementRepositoryMock } from '@tests/data/mocks/stock-movement'
 import { mockAddSaleParams } from '@tests/data/usecases/sale/mocks'
@@ -9,6 +12,7 @@ type SutTypes = {
   addSaleRepositoryMock: AddSaleRepositoryMock
   updateStockMovementRepositoryMock: UpdateStockMovementRepositoryMock
   loadGoalsByUserIdRepositoryMock: LoadGoalsByUserIdRepositoryMock
+  updateGoalRepositoryMock: UpdateGoalRepositoryMock
 }
 
 const makeSut = (): SutTypes => {
@@ -16,16 +20,19 @@ const makeSut = (): SutTypes => {
   const updateStockMovementRepositoryMock =
     new UpdateStockMovementRepositoryMock()
   const loadGoalsByUserIdRepositoryMock = new LoadGoalsByUserIdRepositoryMock()
+  const updateGoalRepositoryMock = new UpdateGoalRepositoryMock()
   const sut = new AddSaleImpl(
     addSaleRepositoryMock,
     updateStockMovementRepositoryMock,
-    loadGoalsByUserIdRepositoryMock
+    loadGoalsByUserIdRepositoryMock,
+    updateGoalRepositoryMock
   )
   return {
     sut,
     addSaleRepositoryMock,
     updateStockMovementRepositoryMock,
     loadGoalsByUserIdRepositoryMock,
+    updateGoalRepositoryMock,
   }
 }
 
@@ -64,6 +71,19 @@ describe('AddSale usecase', () => {
     expect(loadSpy).toHaveBeenCalledWith(params.userId)
   })
 
+  it('should call UpdateGoalRepository if there are goals with user id provided', async () => {
+    const { sut, updateGoalRepositoryMock } = makeSut()
+    const updateSpy = jest.spyOn(updateGoalRepositoryMock, 'update')
+    const params = mockAddSaleParams()
+    const newCurrentValue = params.quantity + 100 // Assuming initial current value is 100
+
+    await sut.execute(params)
+
+    expect(updateSpy).toHaveBeenCalledWith('goal1', {
+      currentValue: newCurrentValue,
+    })
+  })
+
   it('should throw if AddSaleRepository throws', async () => {
     const { sut, addSaleRepositoryMock } = makeSut()
     jest
@@ -90,6 +110,17 @@ describe('AddSale usecase', () => {
     const { sut, loadGoalsByUserIdRepositoryMock } = makeSut()
     jest
       .spyOn(loadGoalsByUserIdRepositoryMock, 'loadAll')
+      .mockRejectedValueOnce(new Error('any_error'))
+
+    const promise = sut.execute(mockAddSaleParams())
+
+    await expect(promise).rejects.toThrow(new Error('any_error'))
+  })
+
+  it('should throw if UpdateGoalRepository throws', async () => {
+    const { sut, updateGoalRepositoryMock } = makeSut()
+    jest
+      .spyOn(updateGoalRepositoryMock, 'update')
       .mockRejectedValueOnce(new Error('any_error'))
 
     const promise = sut.execute(mockAddSaleParams())

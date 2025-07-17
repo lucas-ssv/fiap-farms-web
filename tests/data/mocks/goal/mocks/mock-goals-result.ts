@@ -11,7 +11,7 @@ export const mockGoalsResult = (): GoalModel[] => {
         username: 'user_one',
       },
       product: {
-        id: '1',
+        id: 'any_product_id',
         name: 'Product 1',
         price: 100,
         cost: 50,

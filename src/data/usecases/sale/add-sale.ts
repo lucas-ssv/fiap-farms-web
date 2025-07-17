@@ -1,4 +1,7 @@
-import type { LoadGoalsByUserIdRepository } from '@/data/contracts/goal'
+import type {
+  LoadGoalsByUserIdRepository,
+  UpdateGoalRepository,
+} from '@/data/contracts/goal'
 import type { AddSaleRepository } from '@/data/contracts/sale'
 import type { UpdateStockMovementRepository } from '@/data/contracts/stock-movement'
 import type { AddSale } from '@/domain/usecases/sale'
@@ -7,15 +10,18 @@ export class AddSaleImpl implements AddSale {
   private addSaleRepository: AddSaleRepository
   private updateStockMovementRepository: UpdateStockMovementRepository
   private loadGoalsByUserIdRepository: LoadGoalsByUserIdRepository
+  private updateGoalRepository: UpdateGoalRepository
 
   constructor(
     addSaleRepository: AddSaleRepository,
     updateStockMovementRepository: UpdateStockMovementRepository,
-    loadGoalsByUserIdRepository: LoadGoalsByUserIdRepository
+    loadGoalsByUserIdRepository: LoadGoalsByUserIdRepository,
+    updateGoalRepository: UpdateGoalRepository
   ) {
     this.addSaleRepository = addSaleRepository
     this.updateStockMovementRepository = updateStockMovementRepository
     this.loadGoalsByUserIdRepository = loadGoalsByUserIdRepository
+    this.updateGoalRepository = updateGoalRepository
   }
 
   async execute(params: AddSale.Params): Promise<void> {
@@ -25,6 +31,16 @@ export class AddSaleImpl implements AddSale {
       params.productId,
       params.quantity
     )
-    await this.loadGoalsByUserIdRepository.loadAll(params.userId)
+    const goals = await this.loadGoalsByUserIdRepository.loadAll(params.userId)
+    const goalsByProductId = goals.filter(
+      (goal) => goal.product.id === params.productId && goal.type === 'sales'
+    )
+
+    for (const goal of goalsByProductId) {
+      const newCurrentValue = goal.currentValue + params.quantity
+      await this.updateGoalRepository.update(goal.id, {
+        currentValue: newCurrentValue,
+      })
+    }
   }
 }
