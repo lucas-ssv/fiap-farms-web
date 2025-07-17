@@ -12,6 +12,7 @@ export namespace UpdateProduction {
     status?: 'in_production' | 'waiting' | 'harvested'
     quantity?: number
     quantityProduced?: number
+    lastQuantity?: number
     unit?: string
     startDate?: Date
     harvestDate?: Date

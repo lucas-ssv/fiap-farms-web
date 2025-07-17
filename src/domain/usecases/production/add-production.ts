@@ -9,6 +9,7 @@ export namespace AddProduction {
     status: 'waiting' | 'in_production' | 'harvested'
     quantity: number
     quantityProduced: number
+    lastQuantity?: number
     unit: string
     startDate: Date
     harvestDate: Date

@@ -78,6 +78,7 @@ export function NewProduction({ loadProducts, addProduction }: Props) {
       await addProduction.execute({
         ...data,
         userId: user!.id,
+        lastQuantity: data.quantityProduced,
       })
       toast.success('Produção adicionada com sucesso!')
       form.reset()

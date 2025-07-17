@@ -40,6 +40,7 @@ import type {
   RemoveProduction,
   UpdateProduction,
 } from '@/domain/usecases/production'
+import { useAuth } from '@/presentation/contexts'
 
 const schema = z.object({
   productId: z.string().optional(),
@@ -77,6 +78,7 @@ export function TableCellViewerProductions({
   updateProduction,
   removeProduction,
 }: Props) {
+  const { user } = useAuth()
   const isMobile = useIsMobile()
   const form = useForm<UpdateProductionFormData>({
     resolver: zodResolver(schema),
@@ -110,7 +112,11 @@ export function TableCellViewerProductions({
 
   const handleUpdateProduction = async (data: UpdateProductionFormData) => {
     try {
-      await updateProduction.execute(item.id, data)
+      await updateProduction.execute(item.id, {
+        ...data,
+        userId: user?.id,
+        lastQuantity: data.quantityProduced,
+      })
       toast.success('Produção atualizada com sucesso!')
     } catch (error) {
       toast.error('Erro ao atualizar a produção. Tente novamente.')

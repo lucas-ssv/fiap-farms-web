@@ -1,18 +1,35 @@
 import { UpdateProductionImpl } from '@/data/usecases/production'
 import type { UpdateProduction } from '@/domain/usecases/production'
+import { AddAlertRepositoryMock } from '@tests/data/mocks/alert/mock-add-alert-repository'
+import { LoadGoalsByUserIdRepositoryMock } from '@tests/data/mocks/goal/mock-load-goals-by-user-id-repository'
+import { UpdateGoalRepositoryMock } from '@tests/data/mocks/goal/mock-update-goal-repository'
 import { UpdateProductionRepositoryMock } from '@tests/data/mocks/production'
 
 type SutTypes = {
   sut: UpdateProduction
   updateProductionRepositoryMock: UpdateProductionRepositoryMock
+  loadGoalsByUserIdRepositoryMock: LoadGoalsByUserIdRepositoryMock
+  updateGoalRepositoryMock: UpdateGoalRepositoryMock
+  addAlertRepositoryMock: AddAlertRepositoryMock
 }
 
 const makeSut = (): SutTypes => {
   const updateProductionRepositoryMock = new UpdateProductionRepositoryMock()
-  const sut = new UpdateProductionImpl(updateProductionRepositoryMock)
+  const loadGoalsByUserIdRepositoryMock = new LoadGoalsByUserIdRepositoryMock()
+  const updateGoalRepositoryMock = new UpdateGoalRepositoryMock()
+  const addAlertRepositoryMock = new AddAlertRepositoryMock()
+  const sut = new UpdateProductionImpl(
+    updateProductionRepositoryMock,
+    loadGoalsByUserIdRepositoryMock,
+    updateGoalRepositoryMock,
+    addAlertRepositoryMock
+  )
   return {
     sut,
     updateProductionRepositoryMock,
+    loadGoalsByUserIdRepositoryMock,
+    updateGoalRepositoryMock,
+    addAlertRepositoryMock,
   }
 }
 
