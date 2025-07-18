@@ -8,9 +8,11 @@ export interface UpdateProduction {
 export namespace UpdateProduction {
   export type Params = {
     productId?: string
+    userId?: string
     status?: 'in_production' | 'waiting' | 'harvested'
     quantity?: number
     quantityProduced?: number
+    lastQuantity?: number
     unit?: string
     startDate?: Date
     harvestDate?: Date

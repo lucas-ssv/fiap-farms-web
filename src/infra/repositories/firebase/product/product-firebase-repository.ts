@@ -13,6 +13,7 @@ import {
 
 import type {
   AddProductRepository,
+  LoadByProductIdRepository,
   LoadProductsRepository,
   RemoveProductRepository,
   UpdateProductRepository,
@@ -27,6 +28,7 @@ export class ProductFirebaseRepository
     AddProductRepository,
     UpdateProductRepository,
     LoadProductsRepository,
+    LoadByProductIdRepository,
     WatchProductsRepository,
     RemoveProductRepository
 {
@@ -101,6 +103,49 @@ export class ProductFirebaseRepository
       })
     }
     return products
+  }
+
+  async loadByProductId(
+    productId: string
+  ): Promise<LoadByProductIdRepository.Result> {
+    const productRef = doc(db, 'products', productId).withConverter(
+      productConverter
+    )
+    const productSnapshot = await getDoc(productRef)
+
+    const product = productSnapshot.data()
+    const categoryRef = doc(
+      db,
+      'categories',
+      product!.categoryId
+    ).withConverter(loadCategoriesConverter)
+
+    const categorySnapshot = await getDoc(categoryRef)
+    const category = categorySnapshot.data() as any
+    const categoryId = categorySnapshot.id
+
+    return {
+      id: productSnapshot.id,
+      name: product!.name,
+      price: product!.price,
+      cost: product!.cost,
+      stock: product!.stock,
+      minStock: product!.minStock,
+      maxStock: product!.maxStock,
+      unit: product!.unit,
+      description: product!.description,
+      image: product!.image as string | undefined,
+      createdAt: product!.createdAt,
+      updatedAt: product!.updatedAt,
+      category: {
+        id: categoryId,
+        name: category.name,
+        description: category.description,
+        image: category.image as string | undefined,
+        createdAt: category.createdAt,
+        updatedAt: category.updatedAt,
+      },
+    }
   }
 
   watchAll(

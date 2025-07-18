@@ -16,6 +16,7 @@ type AuthProviderProps = PropsWithChildren & {
 
 type AuthContextProps = {
   user: Omit<UserModel, 'password'> | null
+  logoutUser: () => void
 }
 
 const AuthContext = createContext<AuthContextProps>({} as AuthContextProps)
@@ -26,6 +27,10 @@ export function AuthProvider({
 }: AuthProviderProps) {
   const [user, setUser] = useState<Omit<UserModel, 'password'> | null>(null)
   const [loading, setLoading] = useState(true)
+
+  const logoutUser = () => {
+    setUser(null)
+  }
 
   useEffect(() => {
     const unsubscribe = observeAndLoadAccountByEmail.execute((user) => {
@@ -44,7 +49,9 @@ export function AuthProvider({
   }
 
   return (
-    <AuthContext.Provider value={{ user }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ user, logoutUser }}>
+      {children}
+    </AuthContext.Provider>
   )
 }
 

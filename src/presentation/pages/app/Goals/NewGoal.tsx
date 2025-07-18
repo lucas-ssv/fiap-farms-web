@@ -27,6 +27,7 @@ import type { LoadProducts } from '@/domain/usecases/product'
 import { useCallback, useEffect, useState } from 'react'
 import type { ProductModel } from '@/domain/models/product'
 import MoneyInput from '@/presentation/components/money-input'
+import { useAuth } from '@/presentation/contexts'
 
 type NewGoalFormData = z.infer<typeof schema>
 
@@ -67,6 +68,7 @@ type Props = {
 }
 
 export function NewGoal({ loadProducts, addGoal }: Props) {
+  const { user } = useAuth()
   const form = useForm<NewGoalFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -85,7 +87,10 @@ export function NewGoal({ loadProducts, addGoal }: Props) {
 
   const onSubmit = async (data: NewGoalFormData) => {
     try {
-      await addGoal.execute(data)
+      await addGoal.execute({
+        ...data,
+        userId: user!.id,
+      })
       toast.success('Meta adicionada com sucesso!')
       form.reset()
     } catch (error) {

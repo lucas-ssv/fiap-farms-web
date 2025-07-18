@@ -1,16 +1,10 @@
 import * as React from 'react'
 import {
-  AudioWaveform,
-  BanknoteArrowDown,
   ChartArea,
   ChartLine,
-  CircleAlert,
   CircleDollarSign,
   CircleGauge,
-  Command,
   Eye,
-  GalleryVerticalEnd,
-  Layers,
   LayoutList,
   List,
   Plus,
@@ -32,30 +26,9 @@ import {
   SidebarRail,
 } from '@/presentation/components/ui/sidebar'
 import { Link } from 'react-router'
+import type { Logout } from '@/domain/usecases/account'
 
 const data = {
-  user: {
-    name: 'shadcn',
-    email: 'm@example.com',
-    avatar: '/avatars/shadcn.jpg',
-  },
-  teams: [
-    {
-      name: 'Acme Inc',
-      logo: GalleryVerticalEnd,
-      plan: 'Enterprise',
-    },
-    {
-      name: 'Acme Corp.',
-      logo: AudioWaveform,
-      plan: 'Startup',
-    },
-    {
-      name: 'Evil Corp.',
-      logo: Command,
-      plan: 'Free',
-    },
-  ],
   navMain: [
     {
       title: 'Produtos',
@@ -147,53 +120,18 @@ const data = {
         },
       ],
     },
-    {
-      title: 'Estoque',
-      url: '#',
-      icon: Layers,
-      items: [
-        {
-          title: 'Movimentações de estoque',
-          url: '#',
-          icon: Eye,
-        },
-        {
-          title: 'Nova entrada/saída de estoque',
-          url: '#',
-          icon: Plus,
-        },
-        {
-          title: 'Alertas de estoque',
-          url: '#',
-          icon: CircleAlert,
-        },
-      ],
-    },
-    {
-      title: 'Despesas',
-      url: '#',
-      icon: BanknoteArrowDown,
-      items: [
-        {
-          title: 'Ver despesas',
-          url: '#',
-          icon: Eye,
-        },
-        {
-          title: 'Nova despesa',
-          url: '#',
-          icon: Plus,
-        },
-      ],
-    },
   ],
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+type Props = React.ComponentProps<typeof Sidebar> & {
+  logout: Logout
+}
+
+export function AppSidebar({ logout, ...props }: Props) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        <TeamSwitcher />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -213,7 +151,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser logout={logout} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

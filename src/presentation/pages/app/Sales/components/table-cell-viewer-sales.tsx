@@ -15,7 +15,6 @@ import {
   FormLabel,
   FormMessage,
   Input,
-  Label,
   Select,
   SelectContent,
   SelectItem,
@@ -94,6 +93,7 @@ export function TableCellViewerSales({
 
   const handleUpdateSale = async () => {
     const data = form.getValues()
+    console.log('Updating sale with data:', data)
 
     try {
       await updateSale.execute(item.id, data)
@@ -324,19 +324,6 @@ export function TableCellViewerSales({
                 </div>
               </div>
               <div className="flex flex-col gap-3">
-                <Label htmlFor="status">Status</Label>
-                <Select defaultValue={item.status}>
-                  <SelectTrigger id="category" className="w-full">
-                    <SelectValue placeholder="Selecione o status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pending">Pendente</SelectItem>
-                    <SelectItem value="completed">Concluída</SelectItem>
-                    <SelectItem value="cancelled">Cancelada</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-col gap-3">
                 <FormField
                   control={form.control}
                   name="saleDate"
@@ -345,9 +332,7 @@ export function TableCellViewerSales({
                       <InputDate
                         value={field.value ? new Date(field.value) : undefined}
                         label="Data da venda"
-                        onChange={(date) => {
-                          field.onChange(date ? date.toISOString() : '')
-                        }}
+                        onChange={field.onChange}
                       />
                       <FormMessage />
                     </FormItem>

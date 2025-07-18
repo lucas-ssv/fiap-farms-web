@@ -24,6 +24,7 @@ import type { LoadProducts } from '@/domain/usecases/product'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import type { AddProduction } from '@/domain/usecases/production'
+import { useAuth } from '@/presentation/contexts'
 
 type NewProductionFormData = z.infer<typeof schema>
 
@@ -55,6 +56,7 @@ type Props = {
 }
 
 export function NewProduction({ loadProducts, addProduction }: Props) {
+  const { user } = useAuth()
   const form = useForm<NewProductionFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -73,7 +75,11 @@ export function NewProduction({ loadProducts, addProduction }: Props) {
 
   const onSubmit = async (data: NewProductionFormData) => {
     try {
-      await addProduction.execute(data)
+      await addProduction.execute({
+        ...data,
+        userId: user!.id,
+        lastQuantity: data.quantityProduced,
+      })
       toast.success('Produção adicionada com sucesso!')
       form.reset()
     } catch (error) {

@@ -10,6 +10,7 @@ export const goalConverter: FirestoreDataConverter<Goal> = {
   toFirestore: (goal: Goal): DocumentData => {
     return {
       productId: goal.productId,
+      userId: goal.userId,
       description: goal.description,
       type: goal.type,
       status: goal.status,

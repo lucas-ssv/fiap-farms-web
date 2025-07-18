@@ -13,6 +13,7 @@ export const productionConverter: FirestoreDataConverter<Production> = {
       status: production.status,
       quantity: production.quantity,
       quantityProduced: production.quantityProduced,
+      lastQuantity: production.lastQuantity,
       unit: production.unit,
       startDate: production.startDate,
       harvestDate: production.harvestDate,
