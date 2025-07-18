@@ -115,7 +115,7 @@ export function AppLayout({ logout, watchAlerts, updateAlert }: Props) {
                       <div className="grid gap-3 mt-4">
                         {alerts.map((alert) => (
                           <div key={alert.id}>
-                            <p className="text-muted-foreground text-sm">
+                            <div className="text-muted-foreground text-sm">
                               🎉 Meta de{' '}
                               {alert.type === 'sales' ? (
                                 <div className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-800">
@@ -128,7 +128,7 @@ export function AppLayout({ logout, watchAlerts, updateAlert }: Props) {
                               )}{' '}
                               atingida para o produto {alert.product.name}.
                               Parabéns! 🥳
-                            </p>
+                            </div>
                             <small className="text-neutral-400 text-xs">
                               {(alert.createdAt as any)
                                 .toDate()

@@ -10,28 +10,47 @@ import {
   CardTitle,
 } from '@/presentation/components/ui'
 
-export function SectionCards() {
+type Props = {
+  profitData: {
+    profit: number
+    percentage: number
+    isPositive: boolean
+  }
+}
+
+export function SectionCards({ profitData }: Props) {
+  console.log('Rendering SectionCards with profitData:', profitData)
   return (
     <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 md:grid-cols-2 lg:grid-cols-4">
       <Card className="@container/card">
         <CardHeader>
-          <CardDescription>Total Revenue</CardDescription>
+          <CardDescription>Lucro Total (mês atual)</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            $1,250.00
+            ${profitData.profit.toFixed(2)}
           </CardTitle>
           <CardAction>
             <Badge variant="outline">
-              <TrendingDown />
-              +12.5%
+              {profitData.isPositive ? <TrendingUp /> : <TrendingDown />}
+              {profitData.isPositive ? '+' : '-'}
+              {profitData.percentage.toFixed(1)}%
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Trending up this month <TrendingUp className="size-4" />
+            {profitData.isPositive
+              ? 'Lucro crescente este mês'
+              : 'Lucro em queda este mês'}{' '}
+            {profitData.isPositive ? (
+              <TrendingUp className="size-4" />
+            ) : (
+              <TrendingDown className="size-4" />
+            )}
           </div>
           <div className="text-muted-foreground">
-            Visitors for the last 6 months
+            {profitData.isPositive
+              ? 'Continue com o bom trabalho!'
+              : 'Revise suas despesas e vendas.'}
           </div>
         </CardFooter>
       </Card>

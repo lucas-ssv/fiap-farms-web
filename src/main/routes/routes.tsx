@@ -1,7 +1,6 @@
 import { createBrowserRouter, RouterProvider } from 'react-router'
 
 import { MakeLogin, MakeSignUp } from '@/main/factories/pages/auth'
-import { Dashboard } from '@/presentation/pages/app'
 import { AuthLayout } from '@/presentation/pages/_layouts'
 import { ProtectedRoute } from './ProtectedRoute'
 import { GuestRoute } from './GuestRoute'
@@ -23,6 +22,7 @@ import {
   MakeProductions,
 } from '@/main/factories/pages/app/Productions'
 import { MakeAppLayout } from '@/main/factories/pages/_layouts'
+import { MakeDashboard } from '@/main/factories/pages/app'
 
 export function Routes() {
   const router = createBrowserRouter([
@@ -36,7 +36,7 @@ export function Routes() {
           children: [
             {
               path: '/',
-              element: <Dashboard />,
+              element: <MakeDashboard />,
             },
             {
               path: '/products',
