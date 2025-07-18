@@ -56,7 +56,10 @@ export class UpdateProductionImpl implements UpdateProduction {
 
     const goals = await this.loadGoalsByUserIdRepository.loadAll(data.userId!)
     const goalsByProductId = goals.filter(
-      (goal) => goal.product.id === data.productId && goal.type === 'production'
+      (goal) =>
+        goal.product.id === data.productId &&
+        goal.type === 'production' &&
+        goal.status !== 'done'
     )
 
     for (const goal of goalsByProductId) {

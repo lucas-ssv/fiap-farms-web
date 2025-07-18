@@ -57,7 +57,10 @@ export class AddSaleImpl implements AddSale {
 
     const goals = await this.loadGoalsByUserIdRepository.loadAll(params.userId)
     const goalsByProductId = goals.filter(
-      (goal) => goal.product.id === params.productId && goal.type === 'sales'
+      (goal) =>
+        goal.product.id === params.productId &&
+        goal.type === 'sales' &&
+        goal.status !== 'done'
     )
 
     for (const goal of goalsByProductId) {
