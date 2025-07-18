@@ -74,7 +74,7 @@ export function Dashboard({ watchProducts, watchSales, watchGoals }: Props) {
     <main>
       <SectionCards sales={sales} products={products} goals={goals} />
       <div className="grid lg:grid-cols-[2fr_1fr] gap-4 px-6 mt-4">
-        <ProductProfitChart />
+        <ProductProfitChart products={products} sales={sales} />
         <PopularProductsChart />
       </div>
       <DataProductsTable />

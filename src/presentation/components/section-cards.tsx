@@ -112,7 +112,10 @@ export function SectionCards({ sales, products, goals }: Props) {
         <CardHeader>
           <CardDescription>Lucro Total (mês atual)</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            ${profitData.profit.toFixed(2)}
+            {new Intl.NumberFormat('en-US', {
+              style: 'currency',
+              currency: 'BRL',
+            }).format(profitData.profit)}
           </CardTitle>
           <CardAction>
             <Badge variant="outline">
