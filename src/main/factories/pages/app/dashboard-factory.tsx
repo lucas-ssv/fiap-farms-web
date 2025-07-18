@@ -1,5 +1,7 @@
+import { WatchGoalsImpl } from '@/data/usecases/goal'
 import { WatchProductsImpl } from '@/data/usecases/product'
 import { WatchSalesImpl } from '@/data/usecases/sale'
+import { GoalFirebaseRepository } from '@/infra/repositories/firebase/goal'
 import { ProductFirebaseRepository } from '@/infra/repositories/firebase/product'
 import { SaleFirebaseRepository } from '@/infra/repositories/firebase/sale'
 import { Dashboard } from '@/presentation/pages/app'
@@ -9,5 +11,13 @@ export function MakeDashboard() {
   const watchProducts = new WatchProductsImpl(productFirebaseRepository)
   const saleFirebaseRepository = new SaleFirebaseRepository()
   const watchSales = new WatchSalesImpl(saleFirebaseRepository)
-  return <Dashboard watchProducts={watchProducts} watchSales={watchSales} />
+  const goalFirebaseRepository = new GoalFirebaseRepository()
+  const watchGoals = new WatchGoalsImpl(goalFirebaseRepository)
+  return (
+    <Dashboard
+      watchProducts={watchProducts}
+      watchSales={watchSales}
+      watchGoals={watchGoals}
+    />
+  )
 }
