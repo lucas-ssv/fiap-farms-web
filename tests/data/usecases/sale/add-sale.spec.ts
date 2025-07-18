@@ -4,6 +4,10 @@ import {
   LoadGoalsByUserIdRepositoryMock,
   UpdateGoalRepositoryMock,
 } from '@tests/data/mocks/goal'
+import {
+  LoadByProductIdRepositoryMock,
+  UpdateProductRepositoryMock,
+} from '@tests/data/mocks/product'
 import { AddSaleRepositoryMock } from '@tests/data/mocks/sale'
 import { UpdateStockMovementRepositoryMock } from '@tests/data/mocks/stock-movement'
 import { mockAddSaleParams } from '@tests/data/usecases/sale/mocks'
@@ -24,12 +28,16 @@ const makeSut = (): SutTypes => {
   const loadGoalsByUserIdRepositoryMock = new LoadGoalsByUserIdRepositoryMock()
   const updateGoalRepositoryMock = new UpdateGoalRepositoryMock()
   const addAlertRepositoryMock = new AddAlertRepositoryMock()
+  const loadByProductIdRepositoryMock = new LoadByProductIdRepositoryMock()
+  const updateProductRepositoryMock = new UpdateProductRepositoryMock()
   const sut = new AddSaleImpl(
     addSaleRepositoryMock,
     updateStockMovementRepositoryMock,
     loadGoalsByUserIdRepositoryMock,
     updateGoalRepositoryMock,
-    addAlertRepositoryMock
+    addAlertRepositoryMock,
+    loadByProductIdRepositoryMock,
+    updateProductRepositoryMock
   )
   return {
     sut,

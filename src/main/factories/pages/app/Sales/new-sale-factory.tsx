@@ -23,7 +23,9 @@ export function MakeNewSale() {
     stockMovementFirebaseRepository,
     goalFirebaseRepository,
     goalFirebaseRepository,
-    alertFirebaseRepository
+    alertFirebaseRepository,
+    productFirebaseRepository,
+    productFirebaseRepository
   )
   return (
     <NewSale

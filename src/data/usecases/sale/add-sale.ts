@@ -3,6 +3,10 @@ import type {
   LoadGoalsByUserIdRepository,
   UpdateGoalRepository,
 } from '@/data/contracts/goal'
+import type {
+  LoadByProductIdRepository,
+  UpdateProductRepository,
+} from '@/data/contracts/product'
 import type { AddSaleRepository } from '@/data/contracts/sale'
 import type { UpdateStockMovementRepository } from '@/data/contracts/stock-movement'
 import type { AddSale } from '@/domain/usecases/sale'
@@ -13,19 +17,25 @@ export class AddSaleImpl implements AddSale {
   private loadGoalsByUserIdRepository: LoadGoalsByUserIdRepository
   private updateGoalRepository: UpdateGoalRepository
   private addAlertRepository: AddAlertRepository
+  private loadByProductIdRepository: LoadByProductIdRepository
+  private updateProductRepository: UpdateProductRepository
 
   constructor(
     addSaleRepository: AddSaleRepository,
     updateStockMovementRepository: UpdateStockMovementRepository,
     loadGoalsByUserIdRepository: LoadGoalsByUserIdRepository,
     updateGoalRepository: UpdateGoalRepository,
-    addAlertRepository: AddAlertRepository
+    addAlertRepository: AddAlertRepository,
+    loadByProductIdRepository: LoadByProductIdRepository,
+    updateProductRepository: UpdateProductRepository
   ) {
     this.addSaleRepository = addSaleRepository
     this.updateStockMovementRepository = updateStockMovementRepository
     this.loadGoalsByUserIdRepository = loadGoalsByUserIdRepository
     this.updateGoalRepository = updateGoalRepository
     this.addAlertRepository = addAlertRepository
+    this.loadByProductIdRepository = loadByProductIdRepository
+    this.updateProductRepository = updateProductRepository
   }
 
   async execute(params: AddSale.Params): Promise<void> {
@@ -35,6 +45,16 @@ export class AddSaleImpl implements AddSale {
       params.productId,
       params.quantity
     )
+    const product = await this.loadByProductIdRepository.loadByProductId(
+      params.productId
+    )
+    if (product) {
+      const updatedStock = product.stock - params.quantity
+      await this.updateProductRepository.update(params.productId, {
+        stock: updatedStock,
+      })
+    }
+
     const goals = await this.loadGoalsByUserIdRepository.loadAll(params.userId)
     const goalsByProductId = goals.filter(
       (goal) => goal.product.id === params.productId && goal.type === 'sales'

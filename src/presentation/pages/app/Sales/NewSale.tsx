@@ -100,6 +100,8 @@ export function NewSale({ addSale, loadProducts, loadCustomers }: Props) {
       })
       form.reset()
       toast.success('Venda efetuada com sucesso!')
+      fetchProducts()
+      setProduct(undefined)
     } catch (error) {
       toast.error('Erro ao efetuar venda. Tente novamente mais tarde.')
     }
@@ -266,7 +268,7 @@ export function NewSale({ addSale, loadProducts, loadCustomers }: Props) {
                   <SelectContent>
                     {product && (
                       <SelectItem value={product.unit}>
-                        {product.unit}
+                        {product.unit === 'kg' ? 'kg' : 'unidade'}
                       </SelectItem>
                     )}
                   </SelectContent>

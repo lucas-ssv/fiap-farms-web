@@ -94,6 +94,7 @@ export function TableCellViewerSales({
 
   const handleUpdateSale = async () => {
     const data = form.getValues()
+    console.log('Updating sale with data:', data)
 
     try {
       await updateSale.execute(item.id, data)
@@ -345,9 +346,7 @@ export function TableCellViewerSales({
                       <InputDate
                         value={field.value ? new Date(field.value) : undefined}
                         label="Data da venda"
-                        onChange={(date) => {
-                          field.onChange(date ? date.toISOString() : '')
-                        }}
+                        onChange={field.onChange}
                       />
                       <FormMessage />
                     </FormItem>
