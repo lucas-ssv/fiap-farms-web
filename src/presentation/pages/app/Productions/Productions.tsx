@@ -127,7 +127,7 @@ const columns = (
     {
       accessorKey: 'quantity',
       header: () => {
-        return <p>Quantidade</p>
+        return <p>Quantidade faltando</p>
       },
       cell: ({ row }) => {
         const quantity = row.getValue('quantity') as number
@@ -137,7 +137,11 @@ const columns = (
     {
       accessorKey: 'quantityProduced',
       header: () => {
-        return <p>Quantidade Produzida</p>
+        return <p>Quantidade produzida</p>
+      },
+      cell: ({ row }) => {
+        const quantityProduced = row.getValue('quantityProduced') as number
+        return <span className="font-medium">{quantityProduced}</span>
       },
     },
     {

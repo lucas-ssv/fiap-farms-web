@@ -88,12 +88,13 @@ describe('AddSale usecase', () => {
     const { sut, updateGoalRepositoryMock } = makeSut()
     const updateSpy = jest.spyOn(updateGoalRepositoryMock, 'update')
     const params = mockAddSaleParams()
-    const newCurrentValue = params.quantity + 100 // Assuming initial current value is 100
+    const newCurrentValue = params.quantity + 198 // Assuming initial current value is 198
 
     await sut.execute(params)
 
     expect(updateSpy).toHaveBeenCalledWith('goal1', {
       currentValue: newCurrentValue,
+      status: 'done',
     })
   })
 

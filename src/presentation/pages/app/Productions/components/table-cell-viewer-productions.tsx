@@ -115,7 +115,6 @@ export function TableCellViewerProductions({
       await updateProduction.execute(item.id, {
         ...data,
         userId: user?.id,
-        lastQuantity: data.quantityProduced,
       })
       toast.success('Produção atualizada com sucesso!')
     } catch (error) {
@@ -275,7 +274,8 @@ export function TableCellViewerProductions({
                           <SelectItem value="in_production">
                             Em produção
                           </SelectItem>
-                          <SelectItem value="completed">Concluída</SelectItem>
+                          <SelectItem value="harvested">Colhido</SelectItem>
+                          <SelectItem value="waiting">Aguardando</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />

@@ -23,7 +23,9 @@ export function MakeProductions() {
     productionFirebaseRepository,
     goalFirebaseRepository,
     goalFirebaseRepository,
-    alertFirebaseRepository
+    alertFirebaseRepository,
+    productFirebaseRepository,
+    productFirebaseRepository
   )
   const removeProduction = new RemoveProductionImpl(
     productionFirebaseRepository

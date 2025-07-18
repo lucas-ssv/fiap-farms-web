@@ -61,7 +61,7 @@ export class AddSaleImpl implements AddSale {
     )
 
     for (const goal of goalsByProductId) {
-      const newCurrentValue = goal.currentValue + params.quantity
+      const newCurrentValue = goal.currentValue + params.totalPrice
       const goalAchieved = newCurrentValue >= goal.targetValue
       const updatedGoalData: UpdateGoalRepository.Params = {
         currentValue: newCurrentValue,
