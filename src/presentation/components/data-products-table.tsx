@@ -134,7 +134,7 @@ export function DataProductsTable({ productions }: Props) {
   })
 
   return (
-    <Card className="@container/card mx-4 mt-4 lg:mx-6">
+    <Card className="@container/card">
       <CardHeader className="flex justify-between">
         <div className="flex flex-col space-y-1">
           <CardTitle>Produções</CardTitle>

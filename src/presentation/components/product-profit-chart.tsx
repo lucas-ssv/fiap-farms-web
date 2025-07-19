@@ -93,12 +93,12 @@ export function ProductProfitChart({ products, sales }: Props) {
               <linearGradient id="fillProfit" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
-                  stopColor="var(--color-profit)"
+                  stopColor="var(--chart-1)"
                   stopOpacity={1.0}
                 />
                 <stop
                   offset="95%"
-                  stopColor="var(--color-profit)"
+                  stopColor="var(--chart-1)"
                   stopOpacity={0.1}
                 />
               </linearGradient>
@@ -110,14 +110,14 @@ export function ProductProfitChart({ products, sales }: Props) {
               axisLine={false}
               tickMargin={8}
               minTickGap={32}
-              tickFormatter={(value) => value} // Mostra o nome do produto
+              tickFormatter={(value) => value}
             />
             <ChartTooltip
               cursor={false}
               defaultIndex={isMobile ? -1 : 0}
               content={
                 <ChartTooltipContent
-                  labelFormatter={(value) => value} // Mostra o nome do produto
+                  labelFormatter={(value) => value}
                   formatter={(value) => [
                     `R$ ${Number(value).toFixed(2)}`,
                     ' Lucro Líquido',
@@ -129,16 +129,9 @@ export function ProductProfitChart({ products, sales }: Props) {
             <Area
               dataKey="profit"
               type="natural"
-              fill="url(#fillMobile)"
-              stroke="var(--color-mobile)"
-              stackId="a"
-            />
-            <Area
-              dataKey="desktop"
-              type="natural"
-              fill="url(#fillDesktop)"
-              stroke="var(--color-desktop)"
-              stackId="a"
+              fill="url(#fillProfit)"
+              stroke="var(--chart-1)"
+              strokeWidth={2}
             />
           </AreaChart>
         </ChartContainer>

@@ -8,6 +8,7 @@ import type { WatchProductions } from '@/domain/usecases/production'
 import type { WatchSales } from '@/domain/usecases/sale'
 import {
   DataProductsTable,
+  ExpensesTypeChart,
   PopularProductsChart,
   ProductProfitChart,
   SectionCards,
@@ -93,7 +94,10 @@ export function Dashboard({
         <ProductProfitChart products={products} sales={sales} />
         <PopularProductsChart products={products} />
       </div>
-      <DataProductsTable productions={productions} />
+      <div className="grid lg:grid-cols-[2fr_1fr] gap-4 px-4 lg:px-6 mt-4">
+        <DataProductsTable productions={productions} />
+        <ExpensesTypeChart sales={sales} />
+      </div>
     </main>
   )
 }
