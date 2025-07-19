@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router'
+import { Outlet, useLocation } from 'react-router'
 
 import { AppSidebar } from '@/presentation/components'
 import {
@@ -21,7 +21,7 @@ import {
 import { Bell } from 'lucide-react'
 import type { Logout } from '@/domain/usecases/account'
 import type { UpdateAlert, WatchAlerts } from '@/domain/usecases/alert'
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import type { AlertModel } from '@/domain/models/alert'
 import { toast } from 'sonner'
 
@@ -66,6 +66,26 @@ export function AppLayout({ logout, watchAlerts, updateAlert }: Props) {
     return () => unsubscribe()
   }, [watchAlerts])
 
+  const location = useLocation()
+  const pathSegments = location.pathname.split('/').filter(Boolean)
+
+  // Função para transformar o segmento em texto amigável (português)
+  function segmentToLabel(segment: string) {
+    if (segment === 'dashboard') return 'Início'
+    if (segment === 'products') return 'Produtos'
+    if (segment === 'sales') return 'Vendas'
+    if (segment === 'customers') return 'Clientes'
+    if (segment === 'categories') return 'Categorias'
+    if (segment === 'productions') return 'Produções'
+    if (segment === 'alerts') return 'Notificações'
+    if (segment === 'goals') return 'Metas'
+    if (segment === 'stock_movements') return 'Movimentações de Estoque'
+    if (segment === 'users') return 'Usuários'
+    if (segment === 'new') return 'Novo'
+    // Adicione outros segmentos conforme necessário
+    return segment.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())
+  }
+
   return (
     <SidebarProvider>
       <AppSidebar logout={logout} />
@@ -79,15 +99,29 @@ export function AppLayout({ logout, watchAlerts, updateAlert }: Props) {
             />
             <Breadcrumb>
               <BreadcrumbList>
-                <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="#">
-                    Building Your Application
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-                </BreadcrumbItem>
+                {pathSegments.length === 0 ? (
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>Início</BreadcrumbPage>
+                  </BreadcrumbItem>
+                ) : (
+                  pathSegments.map((segment, idx) => {
+                    const href = '/' + pathSegments.slice(0, idx + 1).join('/')
+                    const label = segmentToLabel(segment)
+                    const isLast = idx === pathSegments.length - 1
+                    return isLast ? (
+                      <BreadcrumbItem key={href}>
+                        <BreadcrumbPage>{label}</BreadcrumbPage>
+                      </BreadcrumbItem>
+                    ) : (
+                      <Fragment key={href}>
+                        <BreadcrumbItem>
+                          <BreadcrumbLink href={href}>{label}</BreadcrumbLink>
+                        </BreadcrumbItem>
+                        <BreadcrumbSeparator />
+                      </Fragment>
+                    )
+                  })
+                )}
               </BreadcrumbList>
             </Breadcrumb>
           </div>
@@ -115,7 +149,7 @@ export function AppLayout({ logout, watchAlerts, updateAlert }: Props) {
                       <div className="grid gap-3 mt-4">
                         {alerts.map((alert) => (
                           <div key={alert.id}>
-                            <p className="text-muted-foreground text-sm">
+                            <div className="text-muted-foreground text-sm">
                               🎉 Meta de{' '}
                               {alert.type === 'sales' ? (
                                 <div className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-800">
@@ -128,7 +162,7 @@ export function AppLayout({ logout, watchAlerts, updateAlert }: Props) {
                               )}{' '}
                               atingida para o produto {alert.product.name}.
                               Parabéns! 🥳
-                            </p>
+                            </div>
                             <small className="text-neutral-400 text-xs">
                               {(alert.createdAt as any)
                                 .toDate()

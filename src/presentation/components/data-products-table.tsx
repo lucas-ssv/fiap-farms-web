@@ -1,5 +1,3 @@
-'use client'
-
 import * as React from 'react'
 import {
   type ColumnDef,
@@ -13,21 +11,9 @@ import {
   useReactTable,
   type VisibilityState,
 } from '@tanstack/react-table'
-import {
-  ArrowUpDown,
-  ChevronLeft,
-  ChevronRight,
-  MoreHorizontal,
-} from 'lucide-react'
+import { ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react'
 
 import { Button } from '@/presentation/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/presentation/components/ui/dropdown-menu'
 import { Input } from '@/presentation/components/ui/input'
 import {
   Table,
@@ -50,176 +36,76 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui'
-import { TableCellViewer } from './table-cell-viewer'
+import type { ProductionModel } from '@/domain/models/production'
+import type { Timestamp } from 'firebase/firestore'
 
-const data: Payment[] = [
-  {
-    id: 'm5gr84i9',
-    amount: 316,
-    status: 'success',
-    email: 'ken99@example.com',
-  },
-  {
-    id: '3u1reuv4',
-    amount: 242,
-    status: 'success',
-    email: 'Abe45@example.com',
-  },
-  {
-    id: 'derv1ws0',
-    amount: 837,
-    status: 'processing',
-    email: 'Monserrat44@example.com',
-  },
-  {
-    id: '5kma53ae',
-    amount: 874,
-    status: 'success',
-    email: 'Silas22@example.com',
-  },
-  {
-    id: 'bhqecj4p',
-    amount: 721,
-    status: 'failed',
-    email: 'carmella@example.com',
-  },
-  {
-    id: 'bhqecj4p',
-    amount: 721,
-    status: 'failed',
-    email: 'carmella@example.com',
-  },
-  {
-    id: 'bhqecj4p',
-    amount: 721,
-    status: 'failed',
-    email: 'carmella@example.com',
-  },
-  {
-    id: 'bhqecj4p',
-    amount: 721,
-    status: 'failed',
-    email: 'carmella@example.com',
-  },
-  {
-    id: 'bhqecj4p',
-    amount: 721,
-    status: 'failed',
-    email: 'carmella@example.com',
-  },
-  {
-    id: 'bhqecj4p',
-    amount: 721,
-    status: 'failed',
-    email: 'carmella@example.com',
-  },
-  {
-    id: 'bhqecj4p',
-    amount: 721,
-    status: 'failed',
-    email: 'carmella@example.com',
-  },
-  {
-    id: 'bhqecj4p',
-    amount: 721,
-    status: 'failed',
-    email: 'carmella@example.com',
-  },
-  {
-    id: 'bhqecj4p',
-    amount: 721,
-    status: 'failed',
-    email: 'carmella@example.com',
-  },
-  {
-    id: 'bhqecj4p',
-    amount: 721,
-    status: 'failed',
-    email: 'carmella@example.com',
-  },
-]
+export type Production = ProductionModel
 
-export type Payment = {
-  id: string
-  amount: number
-  status: 'pending' | 'processing' | 'success' | 'failed'
-  email: string
+function formatDate(date: Timestamp): string {
+  if (!date) return ''
+  const d = date.toDate()
+  return d.toLocaleDateString('pt-BR')
 }
 
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<Production>[] = [
+  {
+    accessorKey: 'product',
+    id: 'product',
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+      >
+        Produto
+        <ArrowUpDown />
+      </Button>
+    ),
+    cell: ({ row }) => <div>{row.original.product?.name ?? ''}</div>,
+    filterFn: (row, filterValue) => {
+      const productName = row.original.product?.name?.toLowerCase() ?? ''
+      return productName.includes(filterValue.toLowerCase())
+    },
+  },
   {
     accessorKey: 'status',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          Status
-          <ArrowUpDown />
-        </Button>
-      )
-    },
-    cell: ({ row }) => {
-      return <TableCellViewer item={row.original} />
-    },
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+      >
+        Status
+        <ArrowUpDown />
+      </Button>
+    ),
+    cell: ({ row }) => (
+      <div>
+        {row.original.status === 'harvested' ? (
+          <p className="text-green-500">Já colhido</p>
+        ) : row.original.status === 'in_production' ? (
+          <p className="text-purple-500">Em produção</p>
+        ) : (
+          <p className="text-yellow-500">Aguardando</p>
+        )}
+      </div>
+    ),
   },
   {
-    accessorKey: 'email',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          Email
-          <ArrowUpDown />
-        </Button>
-      )
-    },
-    cell: ({ row }) => <div className="lowercase">{row.getValue('email')}</div>,
+    accessorKey: 'startDate',
+    header: 'Início',
+    cell: ({ row }) => <div>{formatDate(row.original.startDate as any)}</div>,
   },
   {
-    accessorKey: 'amount',
-    header: () => <div className="text-right">Amount</div>,
-    cell: ({ row }) => {
-      const amount = parseFloat(row.getValue('amount'))
-
-      // Format the amount as a dollar amount
-      const formatted = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-      }).format(amount)
-
-      return <div className="text-right font-medium">{formatted}</div>
-    },
-  },
-  {
-    id: 'actions',
-    enableHiding: false,
-    cell: () => {
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-32">
-            <DropdownMenuItem>Edit</DropdownMenuItem>
-            <DropdownMenuItem>Make a copy</DropdownMenuItem>
-            <DropdownMenuItem>Favorite</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
-    },
+    accessorKey: 'harvestDate',
+    header: 'Previsão de colheita',
+    cell: ({ row }) => <div>{formatDate(row.original.harvestDate as any)}</div>,
   },
 ]
 
-export function DataProductsTable() {
+type Props = {
+  productions: ProductionModel[]
+}
+
+export function DataProductsTable({ productions }: Props) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -229,7 +115,7 @@ export function DataProductsTable() {
   const [rowSelection, setRowSelection] = React.useState({})
 
   const table = useReactTable({
-    data,
+    data: productions,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -248,24 +134,24 @@ export function DataProductsTable() {
   })
 
   return (
-    <Card className="@container/card mx-4 mt-4 lg:mx-6">
+    <Card className="@container/card">
       <CardHeader className="flex justify-between">
         <div className="flex flex-col space-y-1">
-          <CardTitle>Total Visitors</CardTitle>
+          <CardTitle>Produções</CardTitle>
           <CardDescription>
             <span className="hidden @[540px]/card:block">
-              Total for the last 3 months
+              Visão do que está aguardando, em produção ou já colhido
             </span>
-            <span className="@[540px]/card:hidden">Last 3 months</span>
+            <span className="@[540px]/card:hidden">Status das produções</span>
           </CardDescription>
         </div>
       </CardHeader>
       <CardContent className="px-2 sm:px-6">
         <Input
-          placeholder="Filter emails..."
-          value={(table.getColumn('email')?.getFilterValue() as string) ?? ''}
+          placeholder="Filtrar produtos"
+          value={(table.getColumn('product')?.getFilterValue() as string) ?? ''}
           onChange={(event) =>
-            table.getColumn('email')?.setFilterValue(event.target.value)
+            table.getColumn('product')?.setFilterValue(event.target.value)
           }
           className="max-w"
         />
@@ -313,7 +199,7 @@ export function DataProductsTable() {
                       colSpan={columns.length}
                       className="h-24 text-center"
                     >
-                      No results.
+                      Produto não encontrado.
                     </TableCell>
                   </TableRow>
                 )}

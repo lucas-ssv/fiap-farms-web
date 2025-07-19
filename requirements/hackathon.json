@@ -18,7 +18,7 @@
   ],
   "categories": [
     {
-      "id": 1,
+      "id": "1",
       "name": "Vegetable",
       "description": "Fresh and organic vegetables.",
       "image": "https://example.com/images/vegetable.jpg",
@@ -28,10 +28,10 @@
   ],
   "sales": [
     {
-      "id": 1,
-      "productId": 1,
-      "customerId": 1,
-      "userId": 1,
+      "id": "1",
+      "productId": "1",
+      "customerId": "1",
+      "userId": "1",
       "quantity": 10,
       "saleDate": "2023-10-01",
       "totalPrice": 9.9,
@@ -43,23 +43,11 @@
       "updatedAt": "2023-10-01T12:00:00Z"
     }
   ],
-  "expenses": [
-    {
-      "id": 1,
-      "productId": 1,
-      "type": "fertilizer",
-      "amount": 50.0,
-      "description": "Adubo para plantação de tomate",
-      "date": "2023-08-15",
-      "createdAt": "2023-01-01T10:00:00Z",
-      "updatedAt": "2023-10-01T12:00:00Z"
-    }
-  ],
   "alerts": [
     {
-      "id": 1,
+      "id": "1",
       "type": "low_stock",
-      "productId": 1,
+      "productId": "1",
       "message": "Tomato stock is below minimum threshold.",
       "date": "2023-10-03",
       "read": false
@@ -67,7 +55,7 @@
   ],
   "customers": [
     {
-      "id": 1,
+      "id": "1",
       "name": "John Doe",
       "email": "johndue@email.com",
       "phone": "123-456-7890",
@@ -84,9 +72,8 @@
   ],
   "productions": [
     {
-      "id": 1,
-      "productId": 1,
-      "farmId": 1,
+      "id": "1",
+      "productId": "1",
       "status": "in_production",
       "quantityProduced": 200,
       "unit": "kg",
@@ -96,23 +83,11 @@
       "updatedAt": "2023-10-01T12:00:00Z"
     }
   ],
-  "farms": [
-    {
-      "id": 1,
-      "name": "Green Valley Farm",
-      "location": "Springfield, USA",
-      "size": 50,
-      "unit": "hectares",
-      "description": "A large farm specializing in organic vegetables.",
-      "createdAt": "2023-01-01T10:00:00Z",
-      "updatedAt": "2023-10-01T12:00:00Z"
-    }
-  ],
   "stock_movements": [
     {
-      "id": 1,
-      "productId": 1,
-      "userId": 1,
+      "id": "1",
+      "productId": "1",
+      "userId": "1",
       "type": "input",
       "quantity": 50,
       "date": "2023-10-02",
@@ -123,8 +98,8 @@
   ],
   "goals": [
     {
-      "id": 1,
-      "productId": 1,
+      "id": "1",
+      "productId": "1",
       "description": "Aim to increase sales of tomatoes by 20% in the next quarter.",
       "type": "sales",
       "status": "active",
@@ -138,7 +113,7 @@
   ],
   "users": [
     {
-      "id": 1,
+      "id": "1",
       "username": "seller1",
       "password": "securepassword",
       "role": "seller",

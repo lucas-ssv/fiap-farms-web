@@ -1,6 +1,7 @@
 'use client'
 
 import { ChevronRight, type LucideIcon } from 'lucide-react'
+import * as React from 'react'
 
 import {
   Collapsible,
@@ -35,6 +36,9 @@ export function NavMain({
     }[]
   }[]
 }) {
+  const [activeItem, setActiveItem] = React.useState<string | null>(null)
+  const [activeSubItem, setActiveSubItem] = React.useState<string | null>(null)
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Menu de opções</SidebarGroupLabel>
@@ -50,7 +54,11 @@ export function NavMain({
               <CollapsibleTrigger asChild>
                 <SidebarMenuButton
                   tooltip={item.title}
-                  isActive={item.isActive}
+                  isActive={activeItem === item.title && !activeSubItem}
+                  onClick={() => {
+                    setActiveItem(item.title)
+                    setActiveSubItem(null)
+                  }}
                 >
                   {item.icon && <item.icon />}
                   <span>{item.title}</span>
@@ -61,7 +69,14 @@ export function NavMain({
                 <SidebarMenuSub>
                   {item.items?.map((subItem) => (
                     <SidebarMenuSubItem key={subItem.title}>
-                      <SidebarMenuSubButton asChild isActive={subItem.isActive}>
+                      <SidebarMenuSubButton
+                        asChild
+                        isActive={activeSubItem === subItem.title}
+                        onClick={() => {
+                          setActiveItem(item.title)
+                          setActiveSubItem(subItem.title)
+                        }}
+                      >
                         <Link to={subItem.url}>
                           {subItem.icon && <subItem.icon />}
                           <span>{subItem.title}</span>
