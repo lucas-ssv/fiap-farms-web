@@ -8,13 +8,9 @@ import type { WatchProductions } from '@/domain/usecases/production'
 import type { WatchSales } from '@/domain/usecases/sale'
 import {
   DataProductsTable,
-  ExpensesTypeChart,
-  GoalsChart,
   PopularProductsChart,
   ProductProfitChart,
   SectionCards,
-  SellEvolutionChart,
-  StockDistribuitionCategoryChart,
 } from '@/presentation/components'
 import { Loader2Icon } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -98,14 +94,6 @@ export function Dashboard({
         <PopularProductsChart products={products} />
       </div>
       <DataProductsTable productions={productions} />
-      <div className="grid lg:grid-cols-2 gap-4 px-4 lg:px-6 mt-4">
-        <SellEvolutionChart />
-        <GoalsChart />
-      </div>
-      <div className="grid lg:grid-cols-[1fr_2fr] gap-4 px-4 lg:px-6 mt-4">
-        <ExpensesTypeChart />
-        <StockDistribuitionCategoryChart />
-      </div>
     </main>
   )
 }
