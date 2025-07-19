@@ -11,10 +11,11 @@ import {
   ExpensesTypeChart,
   PopularProductsChart,
   ProductProfitChart,
-  SectionCards,
 } from '@/presentation/components'
 import { Loader2Icon } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
+
+const RemoteSectionCards = lazy(() => import('remote_app/SectionCards'))
 
 type Props = {
   watchProducts: WatchProducts
@@ -89,7 +90,15 @@ export function Dashboard({
 
   return (
     <main>
-      <SectionCards sales={sales} products={products} goals={goals} />
+      <Suspense
+        fallback={
+          <div className="flex flex-col items-center justify-center h-full">
+            <Loader2Icon className="animate-spin" />
+          </div>
+        }
+      >
+        <RemoteSectionCards sales={sales} products={products} goals={goals} />
+      </Suspense>
       <div className="grid lg:grid-cols-[2fr_1fr] gap-4 px-6 mt-4">
         <ProductProfitChart products={products} sales={sales} />
         <PopularProductsChart products={products} />
