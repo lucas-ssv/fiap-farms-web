@@ -1,0 +1,95 @@
+'use client'
+
+import { ChevronRight, type LucideIcon } from 'lucide-react'
+import * as React from 'react'
+
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/presentation/components/ui/collapsible'
+import {
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+} from '@/presentation/components/ui/sidebar'
+import { Link } from 'react-router'
+
+export function NavMain({
+  items,
+}: {
+  items: {
+    title: string
+    url: string
+    icon?: LucideIcon
+    isActive?: boolean
+    items?: {
+      title: string
+      url: string
+      icon?: LucideIcon
+      isActive?: boolean
+    }[]
+  }[]
+}) {
+  const [activeItem, setActiveItem] = React.useState<string | null>(null)
+  const [activeSubItem, setActiveSubItem] = React.useState<string | null>(null)
+
+  return (
+    <SidebarGroup>
+      <SidebarGroupLabel>Menu de opções</SidebarGroupLabel>
+      <SidebarMenu>
+        {items.map((item) => (
+          <Collapsible
+            key={item.title}
+            asChild
+            defaultOpen={item.isActive}
+            className="group/collapsible"
+          >
+            <SidebarMenuItem>
+              <CollapsibleTrigger asChild>
+                <SidebarMenuButton
+                  tooltip={item.title}
+                  isActive={activeItem === item.title && !activeSubItem}
+                  onClick={() => {
+                    setActiveItem(item.title)
+                    setActiveSubItem(null)
+                  }}
+                >
+                  {item.icon && <item.icon />}
+                  <span>{item.title}</span>
+                  <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                </SidebarMenuButton>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <SidebarMenuSub>
+                  {item.items?.map((subItem) => (
+                    <SidebarMenuSubItem key={subItem.title}>
+                      <SidebarMenuSubButton
+                        asChild
+                        isActive={activeSubItem === subItem.title}
+                        onClick={() => {
+                          setActiveItem(item.title)
+                          setActiveSubItem(subItem.title)
+                        }}
+                      >
+                        <Link to={subItem.url}>
+                          {subItem.icon && <subItem.icon />}
+                          <span>{subItem.title}</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  ))}
+                </SidebarMenuSub>
+              </CollapsibleContent>
+            </SidebarMenuItem>
+          </Collapsible>
+        ))}
+      </SidebarMenu>
+    </SidebarGroup>
+  )
+}

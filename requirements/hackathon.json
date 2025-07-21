@@ -1,0 +1,125 @@
+{
+  "products": [
+    {
+      "id": "1",
+      "name": "Tomato",
+      "price": 0.99,
+      "cost": 0.5,
+      "categoryId": "1",
+      "stock": 150,
+      "minStock": 50,
+      "maxStock": 300,
+      "unit": "kg",
+      "description": "Fresh organic tomatoes sourced from local farms.",
+      "image": "https://example.com/images/tomato.jpg",
+      "createdAt": "2023-01-01T10:00:00Z",
+      "updatedAt": "2023-10-01T12:00:00Z"
+    }
+  ],
+  "categories": [
+    {
+      "id": "1",
+      "name": "Vegetable",
+      "description": "Fresh and organic vegetables.",
+      "image": "https://example.com/images/vegetable.jpg",
+      "createdAt": "2023-01-01T10:00:00Z",
+      "updatedAt": "2023-10-01T12:00:00Z"
+    }
+  ],
+  "sales": [
+    {
+      "id": "1",
+      "productId": "1",
+      "customerId": "1",
+      "userId": "1",
+      "quantity": 10,
+      "saleDate": "2023-10-01",
+      "totalPrice": 9.9,
+      "unitPrice": 0.99,
+      "discount": 0.0,
+      "status": "pending",
+      "paymentMethod": "Credit Card",
+      "createdAt": "2023-01-01T10:00:00Z",
+      "updatedAt": "2023-10-01T12:00:00Z"
+    }
+  ],
+  "alerts": [
+    {
+      "id": "1",
+      "type": "low_stock",
+      "productId": "1",
+      "message": "Tomato stock is below minimum threshold.",
+      "date": "2023-10-03",
+      "read": false
+    }
+  ],
+  "customers": [
+    {
+      "id": "1",
+      "name": "John Doe",
+      "email": "johndue@email.com",
+      "phone": "123-456-7890",
+      "postalCode": "12345",
+      "city": "Springfield",
+      "state": "IL",
+      "neighborhood": "Downtown",
+      "address": "123 Main St",
+      "addressNumber": 101,
+      "addressComplement": "Apt 4B",
+      "createdAt": "2023-01-01T10:00:00Z",
+      "updatedAt": "2023-10-01T12:00:00Z"
+    }
+  ],
+  "productions": [
+    {
+      "id": "1",
+      "productId": "1",
+      "status": "in_production",
+      "quantityProduced": 200,
+      "unit": "kg",
+      "startDate": "2023-09-01",
+      "harvestDate": "2023-09-30",
+      "createdAt": "2023-01-01T10:00:00Z",
+      "updatedAt": "2023-10-01T12:00:00Z"
+    }
+  ],
+  "stock_movements": [
+    {
+      "id": "1",
+      "productId": "1",
+      "userId": "1",
+      "type": "input",
+      "quantity": 50,
+      "date": "2023-10-02",
+      "reason": "Harvested batch",
+      "createdAt": "2023-01-01T10:00:00Z",
+      "updatedAt": "2023-10-01T12:00:00Z"
+    }
+  ],
+  "goals": [
+    {
+      "id": "1",
+      "productId": "1",
+      "description": "Aim to increase sales of tomatoes by 20% in the next quarter.",
+      "type": "sales",
+      "status": "active",
+      "targetValue": 1200,
+      "currentValue": 600,
+      "startDate": "2023-10-01",
+      "deadline": "2023-12-31",
+      "createdAt": "2023-01-01T10:00:00Z",
+      "updatedAt": "2023-10-01T12:00:00Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "1",
+      "username": "seller1",
+      "password": "securepassword",
+      "role": "seller",
+      "email": "seller1@email.com",
+      "createdAt": "2023-01-01T10:00:00Z",
+      "updatedAt": "2023-10-01T12:00:00Z"
+    }
+  ]
+}
