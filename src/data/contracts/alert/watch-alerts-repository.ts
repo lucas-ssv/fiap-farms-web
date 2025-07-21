@@ -2,6 +2,7 @@ import type { AlertModel } from '@/domain/models/alert'
 
 export interface WatchAlertsRepository {
   watchAll: (
+    userId: string,
     onChange: WatchAlertsRepository.Params
   ) => WatchAlertsRepository.Result
 }

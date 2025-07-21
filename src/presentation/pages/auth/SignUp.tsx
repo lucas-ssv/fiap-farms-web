@@ -99,9 +99,6 @@ export function SignUp({ addAccount }: Props) {
               Login
             </Button>
           </div>
-          <div className="flex justify-center md:hidden">
-            <img src={logo} alt="Logo FIAP Farms" />
-          </div>
           <div className="flex-1 flex items-center justify-center">
             <div className="w-[350px]">
               <h1 className="text-center text-2xl font-bold dark:text-white text-custom-black">

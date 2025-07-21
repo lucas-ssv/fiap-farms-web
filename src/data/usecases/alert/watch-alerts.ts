@@ -8,7 +8,7 @@ export class WatchAlertsImpl implements WatchAlerts {
     this.watchAlertsRepository = watchAlertsRepository
   }
 
-  execute(onChange: WatchAlerts.Params): WatchAlerts.Result {
-    return this.watchAlertsRepository.watchAll(onChange)
+  execute(userId: string, onChange: WatchAlerts.Params): WatchAlerts.Result {
+    return this.watchAlertsRepository.watchAll(userId, onChange)
   }
 }

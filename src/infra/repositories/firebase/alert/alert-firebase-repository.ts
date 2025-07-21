@@ -7,6 +7,7 @@ import {
   query,
   Timestamp,
   updateDoc,
+  where,
 } from 'firebase/firestore'
 import { db } from '@/main/config/firebase'
 import { alertConverter } from './converters'
@@ -32,9 +33,13 @@ export class AlertFirebaseRepository
   }
 
   watchAll(
+    userId: string,
     onChange: WatchAlertsRepository.Params
   ): WatchAlertsRepository.Result {
-    const q = query(collection(db, 'alerts').withConverter(alertConverter))
+    const q = query(
+      collection(db, 'alerts').withConverter(alertConverter),
+      where('userId', '==', userId)
+    )
 
     const unsubscribe = onSnapshot(q, async (querySnapshot) => {
       const alerts: AlertModel[] = []
