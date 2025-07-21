@@ -1,7 +1,7 @@
 import type { AlertModel } from '@/domain/models/alert'
 
 export interface WatchAlerts {
-  execute: (onChange: WatchAlerts.Params) => WatchAlerts.Result
+  execute: (userId: string, onChange: WatchAlerts.Params) => WatchAlerts.Result
 }
 
 export namespace WatchAlerts {

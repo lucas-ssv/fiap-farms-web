@@ -24,6 +24,7 @@ import type { UpdateAlert, WatchAlerts } from '@/domain/usecases/alert'
 import { Fragment, useEffect, useState } from 'react'
 import type { AlertModel } from '@/domain/models/alert'
 import { toast } from 'sonner'
+import { useAuth } from '@/presentation/contexts'
 
 type Props = {
   logout: Logout
@@ -32,6 +33,7 @@ type Props = {
 }
 
 export function AppLayout({ logout, watchAlerts, updateAlert }: Props) {
+  const { user } = useAuth()
   const [alerts, setAlerts] = useState<AlertModel[]>([])
   const [unreadAlerts, setUnreadAlerts] = useState(0)
 
@@ -49,7 +51,9 @@ export function AppLayout({ logout, watchAlerts, updateAlert }: Props) {
   }
 
   useEffect(() => {
-    const unsubscribe = watchAlerts.execute((alerts) => {
+    if (!user?.id) return
+
+    const unsubscribe = watchAlerts.execute(user.id, (alerts) => {
       setAlerts(alerts)
       const unreadAlerts = alerts.filter((alert) => !alert.read)
       if (unreadAlerts.length > 0) {
@@ -64,7 +68,7 @@ export function AppLayout({ logout, watchAlerts, updateAlert }: Props) {
     })
 
     return () => unsubscribe()
-  }, [watchAlerts])
+  }, [watchAlerts, user?.id])
 
   const location = useLocation()
   const pathSegments = location.pathname.split('/').filter(Boolean)
